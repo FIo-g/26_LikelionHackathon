@@ -1,0 +1,59 @@
+{
+  "private": true,
+  "name": "adaptive-sleep-planner",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Adaptive Sleep Planner",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "playwright test --project=chromium",
+    "test:visual": "playwright test --project=visual",
+    "db:schema": "tsx scripts/prepare-prisma-schema.mjs",
+    "verify:migrations": "tsx scripts/verify-migrations.ts",
+    "verify:auth-schema": "tsx scripts/verify-auth-schema.ts"
+  },
+  "engines": {
+    "node": ">=22.12 <25"
+  },
+  "dependencies": {
+    "@better-auth/prisma-adapter": "1.7.1",
+    "@prisma/adapter-pg": "7.9.1",
+    "@prisma/client": "7.9.1",
+    "better-auth": "1.7.1",
+    "clsx": "2.1.1",
+    "dotenv": "17.4.2",
+    "lucide-react": "1.32.0",
+    "next": "16.3.1",
+    "pg": "8.23.0",
+    "prisma": "7.9.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.5",
+    "@types/node": "26.2.0",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@typescript-eslint/eslint-plugin": "8.67.0",
+    "@typescript-eslint/parser": "8.67.0",
+    "@vitejs/plugin-react": "6.0.5",
+    "eslint": "10.8.1",
+    "eslint-config-next": "16.3.1",
+    "jsdom": "30.0.1",
+    "tsx": "4.23.12",
+    "typescript": "7.0.2",
+    "vite-tsconfig-paths": "6.1.1",
+    "vitest": "4.1.11"
+  }
+}
