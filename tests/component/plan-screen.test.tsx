@@ -1,5 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+const router = vi.hoisted(() => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  refresh: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => router,
+}));
 
 import { CalendarConnectionCard } from "@/modules/planner/ui/calendar-connection-card";
 import { PlanMobileContent, PlanScreen } from "@/modules/planner/ui/plan-screen";

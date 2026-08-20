@@ -26,7 +26,9 @@ const isAvailable = (value: number | null): value is number => value !== null;
 
 export const weightedAvailableScore = (values: Readonly<{ [key in keyof ReadinessWeights]: number | null }>): number | null => {
   const items = Object.entries(values) as ReadonlyArray<[keyof ReadinessWeights, number | null]>;
-  const observed = items.filter((entry): entry is [keyof ReadinessWeights, number] => isAvailable(entry[1]);
+  const observed = items.filter(
+    (entry): entry is [keyof ReadinessWeights, number] => isAvailable(entry[1]),
+  );
 
   if (observed.length === 0) {
     return null;

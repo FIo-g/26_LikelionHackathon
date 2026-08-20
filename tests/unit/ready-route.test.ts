@@ -1,12 +1,17 @@
 import { expect, it, vi } from "vitest";
 
-const probeDatabaseReadiness = vi.fn<() => Promise<boolean>>();
-vi.mock("@/shared/db/readiness", () => ({ probeDatabaseReadiness }));
+const mocks = vi.hoisted(() => ({
+  probeDatabaseReadiness: vi.fn<() => Promise<boolean>>(),
+  push: vi.fn(),
+  replace: vi.fn(),
+  refresh: vi.fn(),
+}));
+vi.mock("@/shared/db/readiness", () => ({ probeDatabaseReadiness: mocks.probeDatabaseReadiness }));
 
 import { GET } from "@/app/api/ready/route";
 
 it("returns only a generic ready status when the database probe succeeds", async () => {
-  probeDatabaseReadiness.mockResolvedValueOnce(true);
+  mocks.probeDatabaseReadiness.mockResolvedValueOnce(true);
 
   const response = await GET();
 
@@ -16,7 +21,7 @@ it("returns only a generic ready status when the database probe succeeds", async
 });
 
 it("fails closed without database details when the probe is unavailable", async () => {
-  probeDatabaseReadiness.mockResolvedValueOnce(false);
+  mocks.probeDatabaseReadiness.mockResolvedValueOnce(false);
 
   const response = await GET();
 

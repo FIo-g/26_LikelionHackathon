@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config";
-import viteTsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  resolve: { tsconfigPaths: true },
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
@@ -11,5 +11,4 @@ export default defineConfig({
       reporter: ["text"],
     },
   },
-  plugins: [viteTsconfigPaths()],
 });
