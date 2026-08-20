@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const actions = vi.hoisted(() => ({
@@ -13,9 +13,25 @@ vi.mock("@/app/(app)/care/actions", () => ({
 import { BreathingGuide } from "@/modules/care/ui/breathing-guide";
 import { WhiteNoisePlayer } from "@/modules/care/ui/white-noise-player";
 
-afterEach(() => { vi.restoreAllMocks(); actions.start.mockReset(); actions.complete.mockReset(); });
+afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); actions.start.mockReset(); actions.complete.mockReset(); });
 
 describe("Care tool lifecycle", () => {
+  it("derives breathing progress from monotonic elapsed time instead of interval callbacks", async () => {
+    vi.useFakeTimers();
+    let now = 1_000;
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    actions.start.mockResolvedValue({ ok: true, sessionId: "breathing-monotonic" });
+    render(<BreathingGuide localDate="2026-08-19" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "시작" }));
+    await act(async () => { await Promise.resolve(); });
+    now = 6_500;
+    act(() => { vi.advanceTimersByTime(1_000); });
+
+    expect(screen.getByRole("progressbar", { name: "호흡 가이드 진행" })).toHaveAttribute("aria-valuenow", "5");
+    vi.useRealTimers();
+  });
+
   it("clears a stopped breathing session so restart creates a new session", async () => {
     actions.start.mockResolvedValueOnce({ ok: true, sessionId: "session-1" }).mockResolvedValueOnce({ ok: true, sessionId: "session-2" });
     render(<BreathingGuide localDate="2026-08-19" />);

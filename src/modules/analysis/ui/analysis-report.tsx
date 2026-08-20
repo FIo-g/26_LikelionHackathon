@@ -29,7 +29,7 @@ export const AnalysisReport = ({
       <p>{report.body}</p>
       <ul>{report.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>
       {narration?.retryAvailable ? (
-        <form action={retryAction}>
+        <form action={retryAction} aria-busy={retryPending}>
           <input name="narrationId" type="hidden" value={narration.id} />
           <button disabled={retryPending} type="submit">{retryPending ? "다시 준비 중" : "리포트 다시 시도"}</button>
           {retryState.status !== "idle" ? <p aria-live="polite" role={retryState.status === "error" ? "alert" : undefined}>{retryState.message}</p> : null}

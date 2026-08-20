@@ -46,6 +46,11 @@ export const ScheduleConfirmationDialog = ({
       (first ?? dialogRef.current)?.focus();
     };
     const trapFocus = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !pending) {
+        event.preventDefault();
+        onCancel();
+        return;
+      }
       if (event.key !== "Tab") return;
       const dialog = dialogRef.current;
       if (!dialog) return;
@@ -74,7 +79,7 @@ export const ScheduleConfirmationDialog = ({
       document.removeEventListener("keydown", trapFocus);
       if (initiatingElement?.isConnected) initiatingElement.focus();
     };
-  }, []);
+  }, [onCancel, pending]);
 
   return (
   <div className={styles.dialogBackdrop} role="presentation">

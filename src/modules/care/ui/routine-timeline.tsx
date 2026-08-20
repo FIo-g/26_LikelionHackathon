@@ -15,7 +15,7 @@ export const RoutineTimeline = ({ localDate, timezone, planDayId, routineRevisio
       <p className={styles.eyebrow}>NIGHT ROUTINE</p><h2 id="routine-title">오늘의 준비</h2>
       {steps.length === 0 ? <p>수면 목표를 완료하면 준비 순서를 보여드려요.</p> : <ol>
         {steps.map((step) => <li className={styles[`step_${step.status}`]} key={step.key}>
-          <span aria-hidden="true">{step.status === "done" ? "✓" : step.status === "current" ? "●" : "○"}</span>
+          <span><span aria-hidden="true">{step.status === "done" ? "✓" : step.status === "current" ? "●" : "○"}</span><span className={styles.statusText}>{step.status === "done" ? "완료" : step.status === "current" ? "현재" : "예정"}</span></span>
           <div><strong>{step.label}</strong><small><time data-testid="routine-time" data-timezone={timezone} dateTime={step.scheduledAt.toISOString()}>{formatTime(step.scheduledAt, timezone)}</time></small></div>
           <button disabled={pending} onClick={() => startTransition(async () => {
             if (!routineRevisionKey) { setMessage("현재 수면 목표에서만 루틴을 변경할 수 있어요."); return; }

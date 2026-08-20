@@ -15,6 +15,7 @@ describe("CareScreen", () => {
     expect(screen.getByText("백색소음")).toBeInTheDocument();
     expect(screen.getByText("ASMR·수면 가이드")).toBeInTheDocument();
     expect(screen.getByTestId("routine-time")).toHaveAttribute("data-timezone", "America/New_York");
+    expect(screen.getByText("현재", { selector: "span" })).toBeVisible();
   });
 
   it("keeps a goal-derived routine actionable without an accepted plan", () => {

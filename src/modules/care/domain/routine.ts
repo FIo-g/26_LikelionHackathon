@@ -18,7 +18,7 @@ export const routineFromPlanDay = (planDay: PlanDayTarget): readonly RoutineDefi
   { key: "meal-cutoff", label: "저녁 식사 마무리", scheduledAt: new Date(planDay.mealCutoffAt) },
   { key: "phone-wind-down", label: "폰 정리", scheduledAt: new Date(planDay.windDownAt) },
   { key: "target-bed", label: "잠자리", scheduledAt: new Date(planDay.targetBedAt) },
-];
+].sort((left, right) => left.scheduledAt.getTime() - right.scheduledAt.getTime());
 
 export const deriveRoutineTimeline = (
   steps: readonly RoutineDefinition[],

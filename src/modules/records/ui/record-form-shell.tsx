@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { safeReturnTo } from "@/shared/auth/entry-path";
@@ -116,6 +116,8 @@ export const RecordFormShell = ({
   submitStep = "confirm",
 }: ShellProps) => {
   const router = useRouter();
+  const instanceId = useId().replaceAll(":", "");
+  const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState<FormValues>(initialValues);
   const [step, setCurrentStep] = useState(initialStep);
   const [idempotencyKey, setIdempotencyKey] = useState<string>(createIdempotencyKey);
@@ -195,6 +197,29 @@ export const RecordFormShell = ({
 
   const renderFieldErrors = state?.status === "error" ? state.fieldErrors : null;
 
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    form.querySelectorAll<HTMLElement>("[data-record-error-linked='true']").forEach((field) => {
+      field.removeAttribute("aria-invalid");
+      field.removeAttribute("aria-describedby");
+      field.removeAttribute("data-record-error-linked");
+    });
+    if (!renderFieldErrors) return;
+    for (const [name, messages] of Object.entries(renderFieldErrors)) {
+      if (name === "_form" || messages.length === 0) continue;
+      const candidate = form.elements.namedItem(name);
+      const fields = candidate instanceof HTMLElement
+        ? [candidate]
+        : Array.from((candidate ?? []) as unknown as ArrayLike<Element>).filter((item): item is HTMLElement => item instanceof HTMLElement);
+      for (const field of fields) {
+        field.setAttribute("aria-invalid", "true");
+        field.setAttribute("aria-describedby", `${instanceId}-${name}-error`);
+        field.setAttribute("data-record-error-linked", "true");
+      }
+    }
+  }, [instanceId, renderFieldErrors]);
+
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -206,7 +231,7 @@ export const RecordFormShell = ({
   };
 
   return (
-    <form action={formAction} onSubmit={submit}>
+    <form action={formAction} aria-busy={isSubmitting} onSubmit={submit} ref={formRef}>
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
       {children({ values, step, idempotencyKey, setValue, setStep, isSubmitting })}
       {step === submitStep ? (
@@ -214,13 +239,12 @@ export const RecordFormShell = ({
           {submitButtonLabel}
         </button>
       ) : null}
-      {renderFieldErrors ? (
-        <ul>
-          {Object.values(renderFieldErrors).flat().map((message, index) => (
-            <li key={`${index}-${message}`}>{message}</li>
-          ))}
-        </ul>
-      ) : null}
+      <div aria-live="polite" role="status">
+        {state?.status === "success" ? <p>저장되었습니다.</p> : null}
+        {renderFieldErrors ? <ul>{Object.entries(renderFieldErrors).flatMap(([name, messages]) => messages.map((message, index) => (
+          <li id={name === "_form" ? undefined : `${instanceId}-${name}-error`} key={`${name}-${index}-${message}`}>{message}</li>
+        )))}</ul> : null}
+      </div>
     </form>
   );
 };

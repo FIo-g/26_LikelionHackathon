@@ -11,10 +11,10 @@ export const BottomSheet = ({ triggerLabel, children }: Readonly<{ triggerLabel:
   const headingRef = useRef<HTMLHeadingElement>(null);
   const headingId = useId();
 
-  const restoreTriggerFocus = () => { setOpen(false); queueMicrotask(() => triggerRef.current?.focus()); };
+  const restoreTriggerFocus = () => { setOpen(false); triggerRef.current?.focus(); };
   const close = () => {
     const dialog = dialogRef.current;
-    if (dialog?.open && typeof dialog.close === "function") dialog.close();
+    if (dialog?.open && typeof dialog.close === "function") { dialog.close(); restoreTriggerFocus(); }
     else { dialog?.removeAttribute("open"); restoreTriggerFocus(); }
   };
 
@@ -40,5 +40,5 @@ export const BottomSheet = ({ triggerLabel, children }: Readonly<{ triggerLabel:
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   };
 
-  return <><button aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)} ref={triggerRef} type="button">{triggerLabel}</button><dialog aria-labelledby={headingId} className="bottomSheet" onCancel={(event) => { event.preventDefault(); close(); }} onClose={restoreTriggerFocus} onKeyDown={trapFocus} ref={dialogRef}><div><div><h2 id={headingId} ref={headingRef} tabIndex={-1}>{triggerLabel}</h2><button aria-label="닫기" onClick={close} type="button">닫기</button></div>{children}</div></dialog></>;
+  return <><button aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)} ref={triggerRef} type="button">{triggerLabel}</button><dialog aria-labelledby={headingId} className="bottomSheet" onCancel={(event) => { event.preventDefault(); close(); }} onKeyDown={trapFocus} ref={dialogRef}><div><div><h2 id={headingId} ref={headingRef} tabIndex={-1}>{triggerLabel}</h2><button aria-label="닫기" onClick={close} type="button">닫기</button></div>{children}</div></dialog></>;
 };

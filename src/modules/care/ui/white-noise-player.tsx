@@ -9,6 +9,7 @@ type AudioGraph = { context: AudioContext; source: AudioBufferSourceNode; gain: 
 export const WhiteNoisePlayer = ({ localDate }: { localDate: string }) => {
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
   const [starting, setStarting] = useState(false);
   const [deadlineAt, setDeadlineAt] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -48,6 +49,7 @@ export const WhiteNoisePlayer = ({ localDate }: { localDate: string }) => {
     const finishedSessionId = sessionId.current;
     if (!finishedSessionId || completing.current) return;
     sessionId.current = null;
+    setHasSession(false);
     completing.current = true;
     activeStartedAt.current = null;
     activeElapsedMs.current = 900_000;
@@ -145,6 +147,7 @@ export const WhiteNoisePlayer = ({ localDate }: { localDate: string }) => {
       source.start();
       const startedAt = performance.now();
       sessionId.current = result.sessionId;
+      setHasSession(true);
       activeElapsedMs.current = 0;
       activeStartedAt.current = startedAt;
       setDeadlineAt(startedAt + 900_000);
@@ -164,6 +167,7 @@ export const WhiteNoisePlayer = ({ localDate }: { localDate: string }) => {
     if (startInFlight.current) return;
     setRunning(false);
     sessionId.current = null;
+    setHasSession(false);
     completing.current = false;
     activeStartedAt.current = null;
     activeElapsedMs.current = 0;
@@ -172,5 +176,5 @@ export const WhiteNoisePlayer = ({ localDate }: { localDate: string }) => {
     cleanup();
   };
 
-  return <article className={styles.toolCard} aria-busy={starting} data-testid="white-noise-player" data-deadline-at={deadlineAt ?? ""}><h3>백색소음</h3><p>최대 15분 · {elapsed}/900초</p><div><button disabled={starting} onClick={() => { if (running) { void pause(); return; } if (sessionId.current) { void resume(); return; } void start(); }} type="button">{starting ? "시작 중" : running ? "일시정지" : sessionId.current ? "이어하기" : "시작"}</button><button disabled={starting} onClick={stop} type="button">멈추기</button></div>{message ? <p role="alert">{message}</p> : null}</article>;
+  return <article className={styles.toolCard} aria-busy={starting} data-testid="white-noise-player" data-deadline-at={deadlineAt ?? ""}><h3>백색소음</h3><div aria-label="백색소음 진행" aria-live="polite" aria-valuemax={900} aria-valuemin={0} aria-valuenow={elapsed} role="progressbar">최대 15분 · {elapsed}/900초</div><div><button disabled={starting} onClick={() => { if (running) { void pause(); return; } if (hasSession) { void resume(); return; } void start(); }} type="button">{starting ? "시작 중" : running ? "일시정지" : hasSession ? "이어하기" : "시작"}</button><button disabled={starting} onClick={stop} type="button">멈추기</button></div>{message ? <p role="alert">{message}</p> : null}</article>;
 };

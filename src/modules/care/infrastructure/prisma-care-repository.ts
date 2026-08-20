@@ -1,8 +1,6 @@
-import type { PlanDayTarget, PlannerGoal } from "@/modules/planner/domain/types";
+import type { PlannerGoal } from "@/modules/planner/domain/types";
 import type { TransactionClient } from "@/shared/db/transaction";
 import type { UserScope } from "@/shared/domain/contracts";
-import type { CareToolKey } from "../domain/tool-catalog";
-import type { RoutineStepKey } from "../domain/routine";
 import type { CarePlanDay, CareRepository } from "../application/ports";
 
 type CareClient = {
@@ -35,8 +33,8 @@ const mapPlanDay = (row: Record<string, unknown>): CarePlanDay => ({
 export const createPrismaCareRepository = (db: TransactionClient, scope: UserScope): CareRepository => {
   const client = db as TransactionClient & CareClient;
   return {
-    findActivePlanDay: async (localDate) => {
-      const row = await client.planDay.findFirst({ where: { userId: scope.userId, localDate, status: "active" } });
+    findActivePlanDay: async (query) => {
+      const row = await client.planDay.findFirst({ where: { userId: query.userId, localDate: query.localDate, timezone: query.timezone, status: "active" } });
       return row ? mapPlanDay(row) : null;
     },
     findGoal: async () => {

@@ -46,3 +46,16 @@ test("keeps care tool controls usable with reduced motion", async ({ page }) => 
   await page.keyboard.press("Enter");
   await expect(page.getByRole("button", { name: "멈추기" }).first()).toBeVisible();
 });
+
+for (const width of [641, 767, 768]) {
+  test(`keeps protected navigation and the plan primary CTA reachable at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.request.post("/__e2e/setup?seedPlan=1");
+    await page.goto("/plan");
+
+    for (const label of ["Today", "Record", "Plan", "Analyze", "Care", "Account"]) {
+      await expect(page.getByRole("link", { name: label }).filter({ visible: true })).toHaveCount(1);
+    }
+    await expect(page.getByRole("button", { name: "주요 일정 추가" })).toBeVisible();
+  });
+}

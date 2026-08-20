@@ -40,7 +40,7 @@ export const CaffeineProfile = ({ model }: { model: CaffeineProfileViewModel }) 
       <p className={styles.signalValue}>{model.signal === null ? "기록 필요" : `${model.signal}점`}</p>
       <p>기록된 시간과 양에서 보이는 패턴만 미리 살펴봅니다.</p>
       {model.whatIfEnabled ? (
-        <form action={formAction} className={styles.whatIfForm}>
+        <form action={formAction} aria-busy={pending} className={styles.whatIfForm}>
           <label>
             카페인 양 (mg)
             <input defaultValue="100" max="1000" min="0" name="caffeineMg" required type="number" />
@@ -50,7 +50,7 @@ export const CaffeineProfile = ({ model }: { model: CaffeineProfileViewModel }) 
             <input name="consumedAt" required type="datetime-local" />
           </label>
           <button disabled={pending} type="submit">{pending ? "계산 중" : "기록 전 미리보기"}</button>
-          {state.status === "error" ? <p className={styles.errorMessage} role="alert">{state.message}</p> : null}
+          {state.status === "error" ? <p aria-live="polite" className={styles.errorMessage} role="status">{state.message}</p> : null}
           {state.status === "success" ? (
             <div className={styles.previewResult} aria-live="polite">
               <strong>기록 저장 전 영향 미리보기</strong>

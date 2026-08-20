@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { OnboardingIncompleteError, UnauthorizedError } from "@/shared/auth/errors";
 import { requireUserScope } from "@/shared/auth/require-user-scope";
+import { AppShell } from "@/shared/ui/app-shell/app-shell";
 
 export default async function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
   try {
@@ -16,9 +17,5 @@ export default async function AppLayout({ children }: Readonly<{ children: React
     throw error;
   }
 
-  return (
-    <main>
-      {children}
-    </main>
-  );
+  return <AppShell>{children}</AppShell>;
 }

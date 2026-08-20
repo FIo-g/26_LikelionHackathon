@@ -3,11 +3,11 @@ import type { PlanDayTarget } from "@/modules/planner/domain/types";
 import { getPrismaClient } from "@/shared/db/prisma";
 import type { TransactionClient } from "@/shared/db/transaction";
 import type { Clock, UserScope } from "@/shared/domain/contracts";
-import { wakeLocalDate } from "@/shared/time/local-date";
 import { systemClock } from "@/shared/time/system-clock";
 import { deriveRoutineTimeline, routineFromPlanDay, type RoutineStepViewModel } from "../domain/routine";
 import { createPrismaCareRepository } from "../infrastructure/prisma-care-repository";
 import { goalRoutineRevisionKey, planDayRoutineRevisionKey, type CareRepository } from "./ports";
+import { resolveCarePlanDay } from "./care-date";
 
 export type CareViewModel = Readonly<{
   localDate: string;
@@ -25,10 +25,14 @@ export const getCareViewModel = async (
 ): Promise<CareViewModel> => {
   const clock = dependencies.clock ?? systemClock;
   const repository = dependencies.repository ?? createPrismaCareRepository((dependencies.getPrisma ?? getPrismaClient)(), scope);
-  const localDate = wakeLocalDate(clock.now(), scope.timezone);
-  const activePlanDay = await repository.findActivePlanDay(localDate);
+  const now = clock.now();
+  const resolved = await resolveCarePlanDay(scope, repository, now);
+  const localDate = resolved.localDate;
+  const activePlanDay = resolved.planDay;
   const goal = activePlanDay ? null : await repository.findGoal();
-  const planDay = activePlanDay ?? (goal ? generateGoalPlanTargets(goal, scope.timezone, clock.now(), 1)[0] ?? null : null);
+  const planDay = activePlanDay ?? (goal
+    ? generateGoalPlanTargets(goal, scope.timezone, now, 2).find((day) => new Date(day.targetWakeAt) > now) ?? null
+    : null);
   const routineRevisionKey = activePlanDay ? planDayRoutineRevisionKey(activePlanDay.id) : goal ? goalRoutineRevisionKey(goal) : null;
   const completed = routineRevisionKey ? await repository.listCompletions(localDate, routineRevisionKey) : new Set<string>();
 
@@ -39,6 +43,6 @@ export const getCareViewModel = async (
     routineRevisionKey,
     planDay,
     inputState: planDay ? "complete" : "needs-input",
-    routineSteps: planDay ? deriveRoutineTimeline(routineFromPlanDay(planDay), completed, clock.now()) : [],
+    routineSteps: planDay ? deriveRoutineTimeline(routineFromPlanDay(planDay), completed, now) : [],
   };
 };
