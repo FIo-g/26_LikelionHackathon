@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { safeReturnTo } from "@/shared/auth/entry-path";
@@ -40,6 +40,7 @@ type ShellProps = Readonly<{
 
 const DRAFT_VERSION = 1;
 const DRAFT_TTL_MS = 30 * 60 * 1000;
+const EMPTY_FORM_VALUES: FormValues = {};
 
 export const recordDraftKey = (pathname: string) => `record-draft:${pathname}`;
 
@@ -111,7 +112,7 @@ export const RecordFormShell = ({
   children,
   successRedirectPath,
   submitButtonLabel = "저장",
-  initialValues = {},
+  initialValues = EMPTY_FORM_VALUES,
   initialStep = "confirm",
   submitStep = "confirm",
 }: ShellProps) => {
@@ -227,7 +228,9 @@ export const RecordFormShell = ({
       formData.set("idempotencyKey", idempotencyKey);
     }
 
-    void formAction(formData);
+    startTransition(() => {
+      void formAction(formData);
+    });
   };
 
   return (

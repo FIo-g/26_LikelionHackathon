@@ -59,6 +59,7 @@ type TxDb = TransactionClient & {
 const toStringValue = (value: unknown): string => String(value);
 const toDateValue = (value: unknown): Date => value instanceof Date ? value : new Date(String(value));
 const asTx = (db: TransactionClient): TxDb => db as TxDb;
+const dailyLogLocalDateInclude = { dailyLog: { select: { localDate: true } } };
 
 const recordTypeValues = [
   "sleep",
@@ -480,6 +481,7 @@ const createByType = async (
           consumedAt: input.consumedAt,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("caffeine", row);
     }
@@ -494,6 +496,7 @@ const createByType = async (
           consumedAt: input.consumedAt,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("alcohol", row);
     }
@@ -508,6 +511,7 @@ const createByType = async (
           notes: input.notes,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("meal", row);
     }
@@ -524,6 +528,7 @@ const createByType = async (
           averageHeartRate: input.averageHeartRate,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("exercise", row);
     }
@@ -563,14 +568,13 @@ const createByType = async (
 const updateByType = async (
   db: TxDb,
   scope: UserScope,
-  type: RecordType,
   id: string,
   input: UpdateRecordInput,
   localDate: string,
 ): Promise<RecordEntity> => {
   const dailyLogId = await resolveDailyLogId(db, scope, localDate, input.timezone);
 
-  switch (type) {
+  switch (input.type) {
     case "sleep": {
       const row = await db.sleepSession.update({
         where: { id },
@@ -596,6 +600,7 @@ const updateByType = async (
           consumedAt: input.consumedAt,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("caffeine", row);
     }
@@ -609,6 +614,7 @@ const updateByType = async (
           consumedAt: input.consumedAt,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("alcohol", row);
     }
@@ -622,6 +628,7 @@ const updateByType = async (
           notes: input.notes,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("meal", row);
     }
@@ -637,6 +644,7 @@ const updateByType = async (
           averageHeartRate: input.averageHeartRate,
           timezone: input.timezone,
         },
+        include: dailyLogLocalDateInclude,
       });
       return mapToRecordEntity("exercise", row);
     }
@@ -698,6 +706,9 @@ export const createRecordRepository = (db: TransactionClient, scope: UserScope):
       if (!isRecordType(type)) {
         throw new Error("INVALID_RECORD_TYPE");
       }
+      if (type !== input.type) {
+        throw new Error("INVALID_RECORD_TYPE");
+      }
 
       const existing = await readByType(client, scope, type, id);
       if (!existing) {
@@ -705,7 +716,7 @@ export const createRecordRepository = (db: TransactionClient, scope: UserScope):
       }
 
       const localDate = deriveLocalDate(input);
-      return updateByType(client, scope, type, id, input, localDate);
+      return updateByType(client, scope, id, input, localDate);
     },
     delete: async (type, id) => {
       if (!isRecordType(type)) {

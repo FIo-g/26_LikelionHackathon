@@ -60,14 +60,14 @@ const isDateAfterClock = (value: Date, clock: Clock): boolean => (
   value.getTime() > (clock.now().getTime() + FIVE_MINUTE_TOLERANCE_MS)
 );
 
-const checkFutureDate = (clock: Clock, value: Date, path: readonly string[], context: z.RefinementCtx) => {
+const checkFutureDate = (clock: Clock, value: Date, path: PropertyKey[], context: z.RefinementCtx) => {
   if (isDateAfterClock(value, clock)) {
     context.addIssue({
       code: z.ZodIssueCode.too_big,
       path,
       maximum: clock.now().getTime() + FIVE_MINUTE_TOLERANCE_MS,
       inclusive: true,
-      type: "date",
+      origin: "date",
       message: "Date must not be more than 5 minutes in the future",
     });
   }
@@ -98,7 +98,7 @@ const durationSchema = (clock: Clock) => z.object({
       path: ["endedAt"],
       maximum: MAX_SESSION_MINUTES,
       inclusive: true,
-      type: "number",
+      origin: "number",
       message: "Duration must not exceed 1440 minutes",
     });
   }
@@ -168,7 +168,7 @@ const exerciseSchema = (clock: Clock) => z.object({
       path: ["endedAt"],
       maximum: MAX_SESSION_MINUTES,
       inclusive: true,
-      type: "number",
+      origin: "number",
       message: "Duration must not exceed 1440 minutes",
     });
   }

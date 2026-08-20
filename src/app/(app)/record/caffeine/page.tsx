@@ -1,7 +1,32 @@
 import { requireUserScope } from "@/shared/auth/require-user-scope";
 import { CaffeineFlow } from "@/modules/records/ui/caffeine-flow";
 
-export default async function CaffeinePage() {
+type SearchParams = Record<string, string | string[] | undefined>;
+
+type CaffeinePageProps = Readonly<{
+  searchParams: Promise<SearchParams> | SearchParams;
+}>;
+
+const firstParam = (value: string | string[] | undefined): string | undefined => (
+  Array.isArray(value) ? value[0] : value
+);
+
+export default async function CaffeinePage({ searchParams }: CaffeinePageProps) {
   const { timezone } = await requireUserScope();
-  return <CaffeineFlow timezone={timezone} />;
+  const query = await searchParams;
+
+  return (
+    <CaffeineFlow
+      timezone={timezone}
+      step={firstParam(query.step)}
+      initialValues={{
+        recordId: firstParam(query.recordId),
+        brand: firstParam(query.brand),
+        product: firstParam(query.product),
+        caffeineMg: firstParam(query.caffeineMg),
+        consumedAt: firstParam(query.consumedAt),
+        consumedAtDisambiguation: firstParam(query.consumedAtDisambiguation),
+      }}
+    />
+  );
 }

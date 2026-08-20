@@ -15,7 +15,7 @@ import { CaffeineFlow } from "@/modules/records/ui/caffeine-flow";
 import { AlcoholFlow } from "@/modules/records/ui/alcohol-flow";
 import { MealHealthFlow } from "@/modules/records/ui/meal-health-form";
 import { SleepPhoneFlow } from "@/modules/records/ui/sleep-phone-form";
-import { RecordFormShell } from "@/modules/records/ui/record-form-shell";
+import { RecordFormShell, recordDraftKey, writeRecordDraft } from "@/modules/records/ui/record-form-shell";
 import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 
 describe("intake flows", () => {
@@ -53,6 +53,37 @@ describe("intake flows", () => {
     expect(linkedErrors).toHaveLength(1);
     expect(linkedErrors[0]).toHaveTextContent("한 개 이상 선택해 주세요.");
     expect(linkedErrors[0]).toHaveTextContent("삭제할 수 없는 기록이 포함되어 있습니다.");
+  });
+
+  it("restores a saved draft once when initial values are omitted", async () => {
+    const pathname = "/record/stable-defaults";
+    writeRecordDraft(pathname, {
+      step: "confirm",
+      values: { title: "저장된 일정" },
+      idempotencyKey: "stable-draft-id",
+      expiresAt: Date.now() + 60_000,
+    });
+    const getItem = vi.spyOn(Storage.prototype, "getItem");
+
+    render(
+      <RecordFormShell
+        pathname={pathname}
+        action={async () => ({ status: "success", recordId: "stable-defaults-record" })}
+      >
+        {({ values, setValue }) => (
+          <label>
+            제목
+            <input name="title" value={values.title ?? ""} onChange={(event) => setValue("title", event.target.value)} />
+          </label>
+        )}
+      </RecordFormShell>,
+    );
+
+    await waitFor(() => expect(screen.getByLabelText("제목")).toHaveValue("저장된 일정"));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const draftReads = getItem.mock.calls.filter(([key]) => key === recordDraftKey(pathname));
+    expect(draftReads).toHaveLength(1);
   });
 
   it("uses the stored non-UTC timezone for datetime and local-date defaults near midnight", () => {

@@ -33,6 +33,20 @@ describe("release gate workflows", () => {
     expect(ci).toContain("npm run test:visual");
     expect(visual).toContain('context.request.delete("/__e2e/cleanup"');
     expect(fixtures).toContain('context.request.delete("/__e2e/cleanup"');
+    expect(fixtures).not.toContain("response.status() !== 401");
+    expect(fixtures).toContain("expect(response.ok()).toBe(true)");
+  });
+
+  it("runs the pinned production smoke suite against the exact deployed preview URL", async () => {
+    const release = await readFile(".github/workflows/release-preview.yml", "utf8");
+
+    expect(release).toContain("id: deploy_preview");
+    expect(release).toContain("npm exec -- vercel deploy --prebuilt --yes");
+    expect(release).toContain("npm exec -- playwright install --with-deps chromium");
+    expect(release).toContain(
+      "npm exec -- playwright test --config playwright.remote.config.ts --project preview-smoke",
+    );
+    expect(release).toContain('BASE_URL: ${{ steps.deploy_preview.outputs.url }}');
   });
 
   it("generates the auth schema with database-backed rate limiting enabled", async () => {

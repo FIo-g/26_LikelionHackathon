@@ -11,14 +11,7 @@ export default async function OnboardingLayout({ children }: Readonly<{ children
 
   const prisma = getPrismaClient();
   if (userId) {
-    const profile = await (prisma as {
-      userProfile?: {
-        findUnique: (args: {
-          where: { userId: string };
-          select: { onboardingCompletedAt: true };
-        }) => Promise<{ onboardingCompletedAt: Date | null } | null>;
-      };
-    }).userProfile?.findUnique({
+    const profile = await prisma.userProfile.findUnique({
       where: { userId },
       select: { onboardingCompletedAt: true },
     });

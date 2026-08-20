@@ -9,7 +9,7 @@ export const ExplainabilityCard = ({ evidence }: { evidence: readonly EvidenceVi
     </div>
     {evidence.length === 0 ? <p className={styles.emptyState}>표시할 근거를 준비하고 있어요.</p> : (
       <ul className={styles.evidenceList}>
-        {evidence.map((item) => <li key={`${item.factor}-${item.label}`}><strong>{item.label}</strong><span>{item.direction === "positive" ? "좋은 흐름" : "살펴볼 흐름"}</span></li>)}
+        {evidence.map((item) => <li key={`${item.code}-${item.label}`}><strong>{item.label}</strong><span>{item.direction === "positive" ? "좋은 흐름" : "살펴볼 흐름"}</span></li>)}
       </ul>
     )}
   </section>

@@ -12,7 +12,7 @@
 .metricCard strong, .priorityDetail strong { display: block; margin: 15px 0 8px; font-size: 24px; }
 .status_ready { color: #207657; font-size: 13px; font-weight: 700; }
 .status_stale { color: #8b6615; font-size: 13px; font-weight: 700; }
-.status_insufficient, .status_error { color: #6b7280; font-size: 13px; font-weight: 700; }
+.status_insufficient, .status_error { color: #687189; font-size: 13px; font-weight: 700; }
 .reportSection p { color: #59627e; line-height: 1.6; }
 .reportSection li { margin: 8px 0; }
 .disclaimer { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e4e8f5; font-size: 13px; }

@@ -44,7 +44,6 @@ const sleepGoalInputSchema = z.object({
   targetBedTime: clockTime,
   targetWakeTime: clockTime,
 }).strict().refine((value) => value.targetBedTime !== value.targetWakeTime, {
-  code: "custom",
   path: ["targetWakeTime"],
   message: "targetBedTime and targetWakeTime must differ",
 });
@@ -55,7 +54,6 @@ export const sleepGoalSchema = sleepGoalInputSchema
     targetDurationMinutes: calculateSleepDurationMinutes(value),
   }))
   .refine((value) => value.targetDurationMinutes >= 120 && value.targetDurationMinutes <= 960, {
-    code: "custom",
     path: ["targetDurationMinutes"],
     message: "targetDurationMinutes must be 120-960",
   });

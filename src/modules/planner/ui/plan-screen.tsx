@@ -20,7 +20,7 @@ export const PlanDesktopContent = ({ viewModel }: { viewModel: PlanViewModel }) 
 
 export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) => (
   <>
-    <MajorEventForm />
+    <MajorEventForm formId="mobile-major-event-form" titleId="mobile-major-event-title" />
     <NearbyDayAdvice days={viewModel.days} timezone={viewModel.timezone} />
     {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} timezone={viewModel.timezone} /> : null}
     {!viewModel.advice && viewModel.dismissedAdvice ? <p className={styles.dismissedNotice} role="status">제안을 닫았습니다.</p> : null}

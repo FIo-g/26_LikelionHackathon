@@ -5,7 +5,11 @@ import { createRecordService } from "@/modules/records/application/record-servic
 import type { UserScope } from "@/shared/domain/contracts";
 import type { TransactionClient } from "@/shared/db/transaction";
 import { createMutationReceiptRepository } from "@/modules/records/infrastructure/prisma-mutation-receipt-repository";
-import type { RecordRepository } from "@/modules/records/application/ports";
+import type {
+  MutationReceiptCommand,
+  MutationReceiptRepository,
+  RecordRepository,
+} from "@/modules/records/application/ports";
 
 type DailyLogRow = {
   id: string;
@@ -706,10 +710,14 @@ describe("record service", () => {
       }],
       affectedLocalDates: ["2026-08-19"],
     };
-    const outerResolve = vi.fn(async () => {
+    const outerResolve = vi.fn(async (_command: MutationReceiptCommand) => {
       expect(transactionSettled).toBe(true);
       return winner;
     });
+    const outerReceiptRepository: MutationReceiptRepository = {
+      execute: vi.fn(),
+      resolve: async <T>(command: MutationReceiptCommand) => outerResolve(command) as Promise<T>,
+    };
     const outerClient = {
       $transaction: async <T>(callback: (tx: TransactionClient) => Promise<T>): Promise<T> => {
         try {
@@ -727,7 +735,7 @@ describe("record service", () => {
       mutationReceiptRepositoryFactory: (db, scope, receiptClock) => (
         db === txClient
           ? createMutationReceiptRepository(db, scope, receiptClock)
-          : { execute: vi.fn(), resolve: outerResolve }
+          : outerReceiptRepository
       ),
     });
 

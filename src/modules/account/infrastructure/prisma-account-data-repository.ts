@@ -5,7 +5,6 @@ import { analysisResultSchemaEnvelope } from "@/modules/analysis/domain/schemas"
 import { narrationOutputSchema } from "@/modules/narration/domain/narration-schema";
 import { planDayTargetSchema, storedGeneratedAdviceInputSchema } from "@/modules/planner/domain/schemas";
 import type { ScheduleAdviceEntity, SleepPlanEntity } from "@/modules/planner/domain/types";
-import type { VersionedPayload } from "@/shared/domain/contracts";
 import { versionedPayloadSchema } from "@/shared/validation/versioned-json";
 import type { AccountDataExportRepository } from "../application/export-user-data";
 import {
@@ -85,8 +84,8 @@ const mapRecords = (rows: Readonly<{
   ...rows.wellness.map((row) => record("wellness", row, { fatigueLevel: integer(row.fatigueLevel), stressLevel: integer(row.stressLevel), timezone: string(row.timezone) }, row.localDate)),
 ];
 
-const snapshotSchema = versionedPayloadSchema({ days: z.array(planDayTargetSchema) }) as z.ZodType<VersionedPayload<{ days: readonly import("@/modules/planner/domain/types").PlanDayTarget[] }>>;
-const narrationOutputEnvelopeSchema = versionedPayloadSchema(narrationOutputSchema);
+const snapshotSchema = versionedPayloadSchema({ days: z.array(planDayTargetSchema) });
+const narrationOutputEnvelopeSchema = versionedPayloadSchema(narrationOutputSchema.shape);
 
 const mapAdvice = (row: Row): ScheduleAdviceEntity => {
   const input = parse(storedGeneratedAdviceInputSchema, {

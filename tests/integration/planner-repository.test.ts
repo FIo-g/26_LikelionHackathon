@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { GeneratedAdviceInput, PlanDayTarget } from "@/modules/planner/application/ports";
 import { createPrismaPlannerRepository } from "@/modules/planner/infrastructure/prisma-planner-repository";
 import { createPlannerInputHash } from "@/modules/planner/domain/generate-schedule-proposal";
+import type { TransactionClient } from "@/shared/db/transaction";
 
 type AdviceRow = GeneratedAdviceInput & {
   id: string;
@@ -169,7 +170,7 @@ const createMockPlannerDb = () => {
         return row;
       },
     },
-    $transaction: async <T>(callback: (transaction: typeof db) => Promise<T>): Promise<T> => callback(db),
+    $transaction: async <T>(callback: (transaction: unknown) => Promise<T>): Promise<T> => callback(db),
   };
 
   return { db, state };
@@ -178,7 +179,7 @@ const createMockPlannerDb = () => {
 describe("prisma planner repository", () => {
   it("reads a legacy reroute advice that predates canonical plan identity fields", async () => {
     const fixture = createMockPlannerDb();
-    const repository = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
     fixture.state.advice.push({
       ...createLegacyRerouteAdviceInput(),
       id: "advice-legacy",
@@ -196,15 +197,15 @@ describe("prisma planner repository", () => {
 
   it("still rejects a new reroute write without canonical plan identity fields", async () => {
     const fixture = createMockPlannerDb();
-    const repository = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
 
     await expect(repository.saveGeneratedAdvice(createLegacyRerouteAdviceInput())).rejects.toThrow();
   });
 
   it("does not expose or mutate another user's generated advice", async () => {
     const fixture = createMockPlannerDb();
-    const alice = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
-    const bob = createPrismaPlannerRepository(fixture.db as never, { userId: "bob", timezone: "Asia/Seoul" });
+    const alice = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
+    const bob = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "bob", timezone: "Asia/Seoul" });
 
     const { adviceId } = await alice.saveGeneratedAdvice(createAdviceInput());
 
@@ -216,7 +217,7 @@ describe("prisma planner repository", () => {
 
   it("accepts scoped generated advice into one active plan and revision", async () => {
     const fixture = createMockPlannerDb();
-    const repository = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
     const { adviceId } = await repository.saveGeneratedAdvice(createAdviceInput());
 
     const result = await repository.acceptAdvice({

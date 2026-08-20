@@ -10,3 +10,6 @@ export type AccountActionState = Readonly<{
 }>;
 
 export const accountActionIdle: AccountActionState = { status: "idle", values: {}, fieldErrors: {} };
+
+export type DeleteAccountActionState = Readonly<{ status: "idle" | "error"; error: string | null }>;
+export const deleteAccountActionIdle: DeleteAccountActionState = { status: "idle", error: null };

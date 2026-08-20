@@ -9,9 +9,9 @@ declare global {
 
 const globalThisWithPrisma = globalThis as typeof globalThis & { __prisma?: PrismaClient };
 
-const logConfig = process.env.NODE_ENV === "development"
-  ? { log: ["warn", "error"] as const }
-  : { log: ["error"] as const };
+const logConfig: Array<"warn" | "error"> = process.env.NODE_ENV === "development"
+  ? ["warn", "error"]
+  : ["error"];
 
 export const createPrismaClient = (databaseUrl: string): PrismaClient => {
   const provider = providerForUrl(databaseUrl);
@@ -20,7 +20,7 @@ export const createPrismaClient = (databaseUrl: string): PrismaClient => {
     : new PrismaBetterSqlite3({ url: databaseUrl });
 
   return new PrismaClient({
-    ...logConfig,
+    log: logConfig,
     adapter,
   });
 };

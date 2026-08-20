@@ -41,4 +41,22 @@ describe("PrismaNarrationRepository", () => {
     narration.findFirst.mockResolvedValueOnce({ id: "narration-1", facts, retryCount: 2 });
     expect(await repository.retry("narration-1")).toBeNull();
   });
+
+  it("rejects corrupt persisted facts and output instead of exposing them as domain values", async () => {
+    const narration = {
+      create: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn()
+        .mockResolvedValueOnce({ id: "narration-1", facts: { algorithmVersion: "tampered" }, retryCount: 0 })
+        .mockResolvedValueOnce({ id: "narration-1", facts, retryCount: 0, status: "ready", output: { schemaVersion: 1, headline: "" } }),
+      updateMany: vi.fn(),
+    };
+    const repository = createPrismaNarrationRepository(
+      { narration } as unknown as Parameters<typeof createPrismaNarrationRepository>[0],
+      scope,
+    );
+
+    await expect(repository.retry("narration-1")).rejects.toMatchObject({ code: "INVALID_JSON_VALUE" });
+    await expect(repository.findForAnalysisSnapshot("snapshot-1")).rejects.toMatchObject({ code: "INVALID_JSON_VALUE" });
+  });
 });

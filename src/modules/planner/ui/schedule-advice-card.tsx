@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { acceptScheduleAdviceAction, dismissScheduleAdviceAction } from "@/app/(app)/plan/actions";
 import type { ScheduleAdviceViewModel } from "../application/get-plan-view-model";
@@ -11,6 +12,7 @@ import styles from "./plan.module.css";
 const confidenceLabel: Record<ScheduleAdviceViewModel["proposal"]["confidence"], string> = { low: "낮음", medium: "보통", high: "높음" };
 
 export const ScheduleAdviceCard = ({ advice, timezone }: { advice: ScheduleAdviceViewModel; timezone: string }) => {
+  const router = useRouter();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -18,6 +20,8 @@ export const ScheduleAdviceCard = ({ advice, timezone }: { advice: ScheduleAdvic
     try {
       setError(null);
       await acceptScheduleAdviceAction({ adviceId: advice.id, idempotencyKey: crypto.randomUUID() });
+      setConfirmationOpen(false);
+      router.refresh();
     } catch {
       setError("변경 내용을 반영하지 못했습니다. 다시 시도해 주세요.");
     }

@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { CalendarConnectionCard } from "@/modules/planner/ui/calendar-connection-card";
-import { PlanMobileContent, PlanScreen } from "@/modules/planner/ui/plan-screen";
+import { PlanDesktopContent, PlanMobileContent, PlanScreen } from "@/modules/planner/ui/plan-screen";
 import type { PlanViewModel } from "@/modules/planner/application/get-plan-view-model";
 
 const viewModel: PlanViewModel = {
@@ -23,6 +23,7 @@ const viewModel: PlanViewModel = {
   events: [{ id: "event-1", type: "travel", startsAt: "2026-08-22T00:00:00.000Z" }],
   advice: {
     id: "advice-1",
+    timezone: "America/New_York",
     triggerType: "event",
     status: "generated",
     headline: "아침 비행에 맞춰 기상 시간을 조정해요",
@@ -77,7 +78,7 @@ describe("Plan screen", () => {
   });
 
   it("renders direct event entry and generated advice controls", () => {
-    render(<PlanScreen viewModel={viewModel} />);
+    render(<PlanDesktopContent viewModel={viewModel} />);
 
     expect(screen.getByRole("button", { name: "주요 일정 추가" })).toBeVisible();
     expect(screen.getByRole("button", { name: "계획에 반영" })).toBeVisible();
@@ -90,6 +91,14 @@ describe("Plan screen", () => {
 
     expect(screen.getByText("취침 10:00")).toBeVisible();
     expect(screen.getByText("기상 18:00")).toBeVisible();
+  });
+
+  it("keeps responsive major-event form landmarks uniquely addressable", () => {
+    const { container } = render(<PlanScreen viewModel={viewModel} />);
+
+    expect(container.querySelectorAll("#major-event-form")).toHaveLength(1);
+    expect(container.querySelectorAll("#major-event-title")).toHaveLength(1);
+    expect(container.querySelector("#mobile-major-event-form")).toHaveAccessibleName("주요 일정 추가");
   });
 
   it("uses nearby advice instead of desktop calendar and strip in the mobile presentation", () => {

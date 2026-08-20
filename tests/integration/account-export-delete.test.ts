@@ -3,7 +3,7 @@ import { createTestPrismaClient } from "../support/prisma-client";
 import { createDeleteUserAccount } from "@/modules/account/application/delete-user-account";
 import { createExportUserData } from "@/modules/account/application/export-user-data";
 import { requireRecentAuthentication } from "@/modules/account/application/require-recent-authentication";
-import { ReauthenticationError } from "@/modules/account/domain/export-schema";
+import { CorruptStoredPayloadError, ReauthenticationError } from "@/modules/account/domain/export-schema";
 import { createPrismaAccountDataRepository } from "@/modules/account/infrastructure/prisma-account-data-repository";
 
 const ACCOUNT_TEST_DATABASE_URL_ENV = "ADAPTIVE_SLEEP_ACCOUNT_TEST_DATABASE_URL";
@@ -68,7 +68,7 @@ const seed = async (scope: typeof alice | typeof bob) => {
   await prisma.connection.create({ data: { userId: scope.userId, selected: "manual", mode: "manual", availability: "available", state: "complete" } });
   const dailyLog = await prisma.dailyLog.create({ data: { userId: scope.userId, localDate: "2026-08-20", timezone: scope.timezone } });
   await prisma.sleepSession.create({ data: { userId: scope.userId, dailyLogId: dailyLog.id, sleepDate: "2026-08-20", startedAt: new Date("2026-08-19T14:00:00.000Z"), endedAt: new Date("2026-08-19T22:00:00.000Z"), morningFatigue: 2, timezone: scope.timezone } });
-  await prisma.recordRevision.create({ data: { userId: scope.userId, entityType: "sleep", entityId: `${scope.userId}-sleep`, operation: "create", before: null, after: { schemaVersion: 1, record: { id: `${scope.userId}-sleep`, userId: scope.userId, type: "sleep", localDate: "2026-08-20", fields: { startedAt: "2026-08-19T14:00:00.000Z", endedAt: "2026-08-19T22:00:00.000Z", morningFatigue: 2, timezone: scope.timezone } } }, changedAt: now } });
+  await prisma.recordRevision.create({ data: { userId: scope.userId, entityType: "sleep", entityId: `${scope.userId}-sleep`, operation: "create", after: { schemaVersion: 1, record: { id: `${scope.userId}-sleep`, userId: scope.userId, type: "sleep", localDate: "2026-08-20", fields: { startedAt: "2026-08-19T14:00:00.000Z", endedAt: "2026-08-19T22:00:00.000Z", morningFatigue: 2, timezone: scope.timezone } } }, changedAt: now } });
   await prisma.routineCompletion.create({ data: { userId: scope.userId, localDate: "2026-08-20", planDayId: null, routineRevisionKey: "goal:revision", stepKey: "wind-down", completedAt: now } });
   await prisma.careToolSession.create({ data: { userId: scope.userId, localDate: "2026-08-20", toolKey: "breathing", startedAt: now, plannedDurationSeconds: 180 } });
   await prisma.account.create({ data: { id: `${scope.userId}-account`, userId: scope.userId, accountId: scope.userId, providerId: "credential", password: "not-exported", createdAt: now, updatedAt: now } });
@@ -96,6 +96,51 @@ describeSqlite("account export and atomic deletion", () => {
     expect(exported).toMatchObject({ schemaVersion: 1, identity: { email: emailFor(alice.userId) }, records: [{ type: "sleep" }] });
     expect(Object.keys(exported)).not.toEqual(expect.arrayContaining(["user", "accounts", "sessions", "verifications", "rateLimits"]));
     expect(keys).not.toEqual(expect.arrayContaining(["password", "accessToken", "refreshToken", "idToken", "sessionToken", "verificationToken", "secret", "value", "token"]));
+  });
+
+  it("rejects a corrupt persisted narration payload", async () => {
+    const snapshot = await prisma.analysisSnapshot.create({
+      data: {
+        userId: alice.userId,
+        localDate: "2026-08-20",
+        timezone: alice.timezone,
+        status: "current",
+        result: {
+          schemaVersion: 1,
+          baselineSnapshotId: "baseline-for-corrupt-narration-test",
+          analysisResult: {
+            readiness: null,
+            confidence: "insufficient",
+            metrics: {
+              sleepRhythmStability: null,
+              phoneWindDown: null,
+              caffeineSignal: null,
+              sleepGoalAttainment: null,
+            },
+            dataBasis: {
+              periodStart: "2026-08-20",
+              periodEnd: "2026-08-20",
+              sampleCount: 0,
+              excludedCount: 0,
+              missingFields: [],
+              completenessByCategory: { sleep: 0, phone: 0, meal: 0, exercise: 0, caffeine: 0, alcohol: 0, wellness: 0 },
+              sourceDistribution: { manual: 0 },
+              computedAt: now.toISOString(),
+              algorithmVersion: "provisional-v1",
+              confidence: "insufficient",
+            },
+            evidence: [],
+            missingFields: [],
+          },
+        },
+        currentKey: `${alice.userId}:corrupt-export`,
+      },
+    });
+    await prisma.narration.create({
+      data: { userId: alice.userId, analysisSnapshotId: snapshot.id, provider: "openai", inputHash: "corrupt-export", facts: {}, output: { schemaVersion: 1, headline: "" }, status: "ready" },
+    });
+
+    await expect(createExportUserData(createPrismaAccountDataRepository(prisma), clock)(alice)).rejects.toBeInstanceOf(CorruptStoredPayloadError);
   });
 
   it("requires a valid password verification after the five-minute freshness window", async () => {

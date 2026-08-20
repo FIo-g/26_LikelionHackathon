@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 import { AnalysisReport } from "@/modules/analysis/ui/analysis-report";
 import { CaffeineProfile } from "@/modules/analysis/ui/caffeine-profile";
