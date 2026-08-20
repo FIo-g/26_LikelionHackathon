@@ -7,6 +7,9 @@ import { submitConnectAction } from "@/app/(onboarding)/onboarding/connect/actio
 import { submitSleepGoalAction } from "@/app/(onboarding)/onboarding/sleep-goal/actions";
 import { submitHabitsAction } from "@/app/(onboarding)/onboarding/habits/actions";
 import { submitProfileAction } from "@/app/(onboarding)/onboarding/profile/actions";
+import { onboardingTimezoneOptions } from "@/app/(onboarding)/onboarding/profile/page";
+import ConnectPage from "@/app/(onboarding)/onboarding/connect/page";
+import { completeOnboarding } from "@/modules/onboarding/application/complete-onboarding";
 
 vi.mock("@/shared/auth/require-session-user", () => ({
   requireSessionUserId: vi.fn().mockResolvedValue("onboarding-action-user"),
@@ -22,6 +25,16 @@ vi.mock("@/modules/onboarding/application/save-habits-step", () => ({
 }));
 vi.mock("@/modules/onboarding/application/complete-onboarding", () => ({
   completeOnboarding: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("@/modules/onboarding/infrastructure/prisma-onboarding-repository", () => ({
+  createOnboardingRepository: vi.fn(() => ({
+    getProgress: vi.fn().mockResolvedValue({
+      connect: null,
+      sleepGoal: null,
+      habits: null,
+      profile: null,
+    }),
+  })),
 }));
 
 describe("Onboarding UI", () => {
@@ -54,9 +67,31 @@ describe("Onboarding UI", () => {
   ])("accepts FormData as the first direct form-action argument for %s", async (_name, action, values) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) formData.set(key, value);
+    formData.set("$ACTION_ID_test", "ignored-by-validation");
 
     await expect((action as (input: FormData) => Promise<unknown>)(formData))
       .rejects.toThrow("NEXT_REDIRECT");
   });
-});
 
+  it("includes Korea in the selectable onboarding timezones", () => {
+    expect(onboardingTimezoneOptions).toContain("Asia/Seoul");
+  });
+
+  it("does not offer a next-step link that skips saving the connection", async () => {
+    render(await ConnectPage());
+
+    expect(screen.getByRole("button", { name: "연결하기" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "다음" })).not.toBeInTheDocument();
+  });
+
+  it("returns an incomplete onboarding flow to the saved connection step", async () => {
+    vi.mocked(completeOnboarding).mockRejectedValueOnce(new Error("INCOMPLETE_ONBOARDING"));
+    const formData = new FormData();
+    formData.set("nickname", "tester");
+    formData.set("timezone", "Asia/Seoul");
+
+    await expect(submitProfileAction(formData)).rejects.toMatchObject({
+      digest: expect.stringContaining("/onboarding/connect"),
+    });
+  });
+});

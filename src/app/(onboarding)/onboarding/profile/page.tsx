@@ -5,7 +5,7 @@ import { requireSessionUserId } from "@/shared/auth/require-session-user";
 import styles from "@/modules/onboarding/ui/onboarding.module.css";
 import { submitProfileAction } from "./actions";
 
-const timezoneOptions = Array.from(new Set(Intl.supportedValuesOf("timeZone").slice(0, 16)));
+export const onboardingTimezoneOptions = Intl.supportedValuesOf("timeZone");
 
 export default async function ProfilePage() {
   const userId = await requireSessionUserId();
@@ -35,7 +35,7 @@ export default async function ProfilePage() {
           <label className={styles.field}>
             타임존
             <select name="timezone" required defaultValue={defaultTimezone}>
-              {timezoneOptions.map((timezone) => (
+              {onboardingTimezoneOptions.map((timezone) => (
                 <option key={timezone} value={timezone}>{timezone}</option>
               ))}
             </select>
@@ -51,4 +51,3 @@ export default async function ProfilePage() {
     </main>
   );
 }
-

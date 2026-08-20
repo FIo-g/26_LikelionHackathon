@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { OnboardingProgress } from "@/modules/onboarding/ui/onboarding-progress";
 import { DeviceConnectOption } from "@/modules/onboarding/ui/device-connect-option";
 import styles from "@/modules/onboarding/ui/onboarding.module.css";
@@ -25,12 +24,7 @@ export default async function ConnectPage() {
           <input type="hidden" name="selected" value={progress.connect?.selected ?? "manual"} />
           <button type="submit" className={styles.cta}>연결하기</button>
         </form>
-
-        <p className={styles.nav}>
-          <Link href="/onboarding/sleep-goal">다음</Link>
-        </p>
       </section>
     </main>
   );
 }
-
