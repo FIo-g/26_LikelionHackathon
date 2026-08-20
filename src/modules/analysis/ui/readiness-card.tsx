@@ -33,9 +33,10 @@ const Score = ({ value, label }: Readonly<{ value: number; label: string }>) => 
 );
 
 export const ReadinessCard = ({ viewModel }: ReadinessCardProps) => {
-  const scoreText = viewModel.data?.score === null || !Number.isFinite(viewModel.data.score)
+  const score = viewModel.data?.score;
+  const scoreText = score === null || score === undefined || !Number.isFinite(score)
     ? "점수 산출 불가"
-    : `${viewModel.data.score}점`;
+    : `${score}점`;
   const hasNumericScore = viewModel.data !== null && viewModel.data.score !== null && Number.isFinite(viewModel.data.score);
 
   return (

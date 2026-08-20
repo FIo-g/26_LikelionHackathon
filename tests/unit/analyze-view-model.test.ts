@@ -23,13 +23,30 @@ const result = {
 describe("getAnalyzeViewModel", () => {
   it("builds immutable metrics, trend, and template report from the current stored analysis facts", async () => {
     createAnalysisRepository.mockReturnValue({
-      findCurrent: async () => ({ ok: true, value: { id: "snapshot-1", localDate: "2026-08-19", timezone: "Asia/Seoul", status: "current", result, generatedAt: new Date(), supersededAt: null } }),
+      findCurrent: async () => ({ ok: true, value: { id: "snapshot-1", localDate: "2026-08-19", timezone: "Asia/Seoul", status: "current", baselineSnapshotId: "baseline-1", result, generatedAt: new Date(), supersededAt: null } }),
       findLastSuccessful: async () => null,
+      findCurrentBaseline: async () => null,
       loadWindow: async () => ({ localDate: "2026-08-19", timezone: "Asia/Seoul", goal: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 }, computedAt: "2026-08-19T09:00:00.000Z", days: [{ localDate: "2026-08-19", sleepMinutes: 450, bedMinuteOfDay: 1380, wakeMinuteOfDay: 420, caffeine: [], alcoholServings: 0, lastPhoneUseAt: null, phoneDurationMinutes: 0, exerciseMinutes: 0, lastMealAt: null, fatigueLevel: 2, stressLevel: 2 }] }),
+      supersedeCurrentBaseline: async () => undefined,
+      saveCurrentBaseline: async () => ({
+        id: "baseline-1",
+        timezone: "Asia/Seoul",
+        status: "current",
+        result: {
+          baselineSleepMinutes: 450,
+          baselineBedMinuteOfDay: 1380,
+          baselineWakeMinuteOfDay: 420,
+          sampleCount: 10,
+          excludedCount: 1,
+          confidence: "medium",
+        },
+        generatedAt: new Date("2026-08-19T09:00:00.000Z"),
+        supersededAt: null,
+      }),
       supersedeCurrent: async () => undefined, saveCurrent: async () => ({ snapshotId: "noop" }),
     });
 
-    const model = await getAnalyzeViewModel({ userId: "u-1", timezone: "Asia/Seoul" }, { clock: { now: () => new Date("2026-08-19T09:00:00.000Z") }, getPrisma: () => ({}) });
+    const model = await getAnalyzeViewModel({ userId: "u-1", timezone: "Asia/Seoul" }, { clock: { now: () => new Date("2026-08-19T09:00:00.000Z") }, getPrisma: () => ({}) as never });
 
     expect(model.state).toBe("ready");
     expect(model.metrics).toEqual(expect.arrayContaining([expect.objectContaining({ key: "caffeine-signal", value: 55 })]));

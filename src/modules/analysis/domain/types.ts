@@ -1,4 +1,5 @@
 import type { ConfidenceLevel, Evidence } from "@/shared/domain/contracts";
+export type { Evidence } from "@/shared/domain/contracts";
 
 export type DirectCategory =
   | "sleep"
@@ -9,12 +10,15 @@ export type DirectCategory =
   | "alcohol"
   | "wellness";
 
-export type ReadinessComponent =
-  | "sleepDuration"
-  | "regularity"
-  | "caffeine"
-  | "phone"
-  | "mealExercise";
+export const READINESS_FIELD_ORDER = [
+  "sleepDuration",
+  "regularity",
+  "caffeine",
+  "phone",
+  "mealExercise",
+] as const;
+
+export type ReadinessComponent = typeof READINESS_FIELD_ORDER[number];
 
 export type SleepGoal = Readonly<{
   targetBedTime: string;
@@ -37,6 +41,7 @@ export type NormalizedDailyRecords = Readonly<{
   lastPhoneUseAt: string | null;
   phoneDurationMinutes: number | null;
   exerciseMinutes: number | null;
+  lastExerciseAt?: string | null;
   lastMealAt: string | null;
   fatigueLevel: number | null;
   stressLevel: number | null;
@@ -73,6 +78,17 @@ export type BaselineResult = Readonly<{
   sampleCount: number;
   excludedCount: number;
   confidence: ConfidenceLevel;
+}>;
+
+export type BaselineEnvelope = Readonly<{
+  schemaVersion: 1;
+  baseline: BaselineResult;
+}>;
+
+export type AnalysisEnvelope = Readonly<{
+  schemaVersion: 1;
+  baselineSnapshotId: string;
+  analysisResult: AnalysisResult;
 }>;
 
 export type ReadinessResult = Readonly<{

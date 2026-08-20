@@ -1,5 +1,5 @@
-import type { ReadinessResult, ReadinessWeights } from "./types";
-import { READINESS_WEIGHTS } from "./types";
+import type { ReadinessComponent, ReadinessResult, ReadinessWeights } from "./types";
+import { READINESS_FIELD_ORDER, READINESS_WEIGHTS } from "./types";
 
 const clamp = (value: number): number => {
   const rounded = Math.round(value);
@@ -47,30 +47,11 @@ export const calculateReadiness = (input: {
   phone: number | null;
   mealExercise: number | null;
 }): ReadinessResult => {
-  const { sleepDuration, regularity, caffeine, phone, mealExercise } = input;
-  const missingFields = [] as Array<keyof typeof input>;
+  const missingFields: ReadinessComponent[] = READINESS_FIELD_ORDER.filter(
+    (field) => input[field] === null,
+  );
 
-  if (sleepDuration === null) {
-    missingFields.push("sleepDuration");
-  }
-
-  if (regularity === null) {
-    missingFields.push("regularity");
-  }
-
-  if (caffeine === null) {
-    missingFields.push("caffeine");
-  }
-
-  if (phone === null) {
-    missingFields.push("phone");
-  }
-
-  if (mealExercise === null) {
-    missingFields.push("mealExercise");
-  }
-
-  if (sleepDuration === null || regularity === null) {
+  if (input.sleepDuration === null) {
     return {
       score: null,
       missingFields,
@@ -78,11 +59,11 @@ export const calculateReadiness = (input: {
   }
 
   const score = weightedAvailableScore({
-    sleepDuration: toPercent(sleepDuration),
-    regularity: toPercent(regularity),
-    caffeine: toPercent(caffeine),
-    phone: toPercent(phone),
-    mealExercise: toPercent(mealExercise),
+    sleepDuration: toPercent(input.sleepDuration),
+    regularity: toPercent(input.regularity),
+    caffeine: toPercent(input.caffeine),
+    phone: toPercent(input.phone),
+    mealExercise: toPercent(input.mealExercise),
   });
 
   return {

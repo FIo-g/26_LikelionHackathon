@@ -8,7 +8,7 @@ import type {
 import styles from "./today.module.css";
 
 type RecordStatusSummaryProps = Readonly<{
-  viewModel: RegionViewModel<RecordSummaryItem[]>;
+  viewModel: RegionViewModel<readonly RecordSummaryItem[]>;
 }>;
 
 const stateClassName: Record<DisplayState, string> = {

@@ -7,7 +7,7 @@ import type {
 import styles from "./today.module.css";
 
 type PreparationTimelineProps = Readonly<{
-  viewModel: RegionViewModel<PreparationStepViewModel[]>;
+  viewModel: RegionViewModel<readonly PreparationStepViewModel[]>;
   hasRerouteAdvice?: boolean;
 }>;
 

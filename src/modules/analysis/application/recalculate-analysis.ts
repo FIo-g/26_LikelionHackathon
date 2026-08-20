@@ -1,4 +1,5 @@
 import { calculateAnalysis } from "@/modules/analysis/domain/provisional-v1";
+import { calculateBaseline } from "@/modules/analysis/domain/calculate-baseline";
 import { createAnalysisImpactRows } from "@/modules/analysis/infrastructure/prisma-analysis-repository";
 import type { Clock } from "@/shared/domain/contracts";
 import { wakeLocalDate } from "@/shared/time/local-date";
@@ -6,14 +7,18 @@ import { hashCanonicalJson } from "@/shared/validation/canonical-json";
 import { buildAnalysisNarrationFacts } from "@/modules/narration/domain/types";
 import type { NarrationRepository } from "@/modules/narration/application/ports";
 import type { NarrationRequest } from "@/modules/narration/application/generate-narration";
+import { Temporal } from "@js-temporal/polyfill";
 import type { AnalysisRepository } from "./ports";
 
-const LOCAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
 const assertLocalDate = (localDate: string): void => {
-  if (!LOCAL_DATE_RE.test(localDate)) {
-    throw new Error("INVALID_LOCAL_DATE");
+  try {
+    if (Temporal.PlainDate.from(localDate).toString() === localDate) {
+      return;
+    }
+  } catch {
+    // Fall through to the stable application error below.
   }
+  throw new Error("INVALID_LOCAL_DATE");
 };
 
 const normalizeDates = (dates: readonly string[]): string[] => {
@@ -45,11 +50,22 @@ export const recalculateAnalysis = async (
 
   for (const localDate of uniqueDates) {
     const input = await analysisRepository.loadWindow(localDate, 14);
+    const baseline = calculateBaseline(input);
+    await analysisRepository.supersedeCurrentBaseline(now);
+    const baselineEntity = await analysisRepository.saveCurrentBaseline(baseline);
+    if (!baselineEntity.id) {
+      throw new Error("INVALID_BASELINE_SNAPSHOT_ID");
+    }
     const result = calculateAnalysis(input);
     const impactFactors = createAnalysisImpactRows(input);
 
     await analysisRepository.supersedeCurrent(localDate, now);
-    const snapshot = await analysisRepository.saveCurrent(localDate, result, impactFactors);
+    const snapshot = await analysisRepository.saveCurrent(
+      localDate,
+      baselineEntity.id,
+      result,
+      impactFactors,
+    );
     const facts = buildAnalysisNarrationFacts(snapshot.snapshotId, result);
     const isCurrentSnapshot = localDate === wakeLocalDate(clock.now(), input.timezone);
     const pendingNarration = narrationRepository && isCurrentSnapshot

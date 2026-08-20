@@ -2,6 +2,43 @@ import { describe, expect, it } from "vitest";
 
 import { assertJsonSize, parseVersionedJson } from "@/shared/validation/versioned-json";
 import { JsonContractError } from "@/shared/validation/errors";
+import {
+  analysisResultSchemaEnvelope,
+  baselineResultSchemaEnvelope,
+} from "@/modules/analysis/domain/schemas";
+
+const analysisResult = {
+  readiness: 76,
+  confidence: "medium" as const,
+  metrics: {
+    sleepRhythmStability: 60,
+    phoneWindDown: 70,
+    caffeineSignal: 80,
+    sleepGoalAttainment: 75,
+  },
+  dataBasis: {
+    periodStart: "2026-08-07",
+    periodEnd: "2026-08-20",
+    sampleCount: 14,
+    excludedCount: 0,
+    missingFields: [],
+    completenessByCategory: {
+      sleep: 1,
+      phone: 1,
+      meal: 1,
+      exercise: 1,
+      caffeine: 1,
+      alcohol: 1,
+      wellness: 1,
+    },
+    sourceDistribution: { manual: 1 },
+    computedAt: "2026-08-20T00:00:00.000Z",
+    algorithmVersion: "provisional-v1" as const,
+    confidence: "medium" as const,
+  },
+  evidence: [],
+  missingFields: ["regularity", "caffeine"] as const,
+};
 
 describe("versioned-json", () => {
   it("rejects invalid JSON", () => {
@@ -15,6 +52,7 @@ describe("versioned-json", () => {
 
   it("rejects oversized payload", () => {
     expect(() => assertJsonSize({ schemaVersion: 1, text: "x".repeat(70_000) })).toThrow("JSON_TOO_LARGE");
+    expect(() => parseVersionedJson(JSON.stringify({ schemaVersion: 1, text: "x".repeat(70_000) }))).toThrow("JSON_TOO_LARGE");
   });
 
   it("parses a versioned payload", () => {
@@ -22,5 +60,36 @@ describe("versioned-json", () => {
       schemaVersion: 1,
       text: "ok",
     });
+  });
+
+  it("validates baseline and analysis envelopes with one schema version", () => {
+    expect(baselineResultSchemaEnvelope.parse({
+      schemaVersion: 1,
+      baseline: {
+        baselineSleepMinutes: 480,
+        baselineBedMinuteOfDay: 1380,
+        baselineWakeMinuteOfDay: 420,
+        sampleCount: 7,
+        excludedCount: 0,
+        confidence: "medium",
+      },
+    }).baseline.sampleCount).toBe(7);
+
+    expect(analysisResultSchemaEnvelope.parse({
+      schemaVersion: 1,
+      baselineSnapshotId: "baseline-1",
+      analysisResult,
+    }).baselineSnapshotId).toBe("baseline-1");
+  });
+
+  it("rejects readiness missing fields outside semantic order", () => {
+    expect(() => analysisResultSchemaEnvelope.parse({
+      schemaVersion: 1,
+      baselineSnapshotId: "baseline-1",
+      analysisResult: {
+        ...analysisResult,
+        missingFields: ["caffeine", "regularity"],
+      },
+    })).toThrow("missingFields must follow readiness field order");
   });
 });

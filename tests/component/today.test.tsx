@@ -6,6 +6,7 @@ import type { TodayViewModel } from "@/modules/analysis/application/get-today-vi
 
 const nowReadyModel: TodayViewModel = {
   localDate: "2026-08-20",
+  hasRerouteAdvice: false,
   readiness: {
     state: "ready",
     data: {
@@ -91,6 +92,22 @@ const noScoreModel: TodayViewModel = {
   },
 };
 
+const corruptModel: TodayViewModel = {
+  ...nowReadyModel,
+  readiness: {
+    state: "error",
+    data: null,
+    message: "분석 데이터가 손상되어 다시 계산해야 합니다",
+    action: { label: "재계산", href: "/record" },
+  },
+  dataStatus: {
+    state: "error",
+    data: null,
+    message: "분석 데이터가 손상되어 다시 계산해야 합니다",
+    action: { label: "재계산", href: "/record" },
+  },
+};
+
 describe("TodayScreen", () => {
   it("shows stale readiness while keeping record summary", () => {
     render(<TodayScreen viewModel={staleReadinessModel} />);
@@ -121,5 +138,12 @@ describe("TodayScreen", () => {
     if (caffeineItem) {
       expect(within(caffeineItem).getByRole("link", { name: "수정하기" })).toHaveAttribute("href", "/record/caffeine?step=brand");
     }
+  });
+
+  it("renders corrupt analysis as an actionable error", () => {
+    render(<TodayScreen viewModel={corruptModel} />);
+
+    expect(screen.getAllByText("분석 데이터가 손상되어 다시 계산해야 합니다").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "재계산" })[0]).toHaveAttribute("href", "/record");
   });
 });

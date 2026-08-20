@@ -2,17 +2,24 @@ import { calculateBaseline } from "./calculate-baseline";
 import { calculateConfidence } from "./calculate-confidence";
 import { calculateReadiness } from "./calculate-readiness";
 import { calculateCaffeineRemainingAtBed } from "./caffeine-decay";
+import { Temporal } from "@js-temporal/polyfill";
 import type {
   AnalysisResult,
+  DirectCategory,
   NormalizedAnalysisInput,
   NormalizedDailyRecords,
   ReadinessResult,
 } from "./types";
 
-const LOCAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const BASELINE_WINDOW_MIN = 3;
 
-const isValidLocalDate = (value: string): boolean => LOCAL_DATE_RE.test(value);
+const isValidLocalDate = (value: string): boolean => {
+  try {
+    return Temporal.PlainDate.from(value).toString() === value;
+  } catch {
+    return false;
+  }
+};
 
 const clamp = (value: number, min = 0, max = 100): number => {
   return Math.max(min, Math.min(max, Math.round(value)));
@@ -104,10 +111,10 @@ const directCategoryCoverage = (days: readonly NormalizedDailyRecords[]) => {
   };
 };
 
-const missingDirectCategories = (days: readonly NormalizedDailyRecords[]): ReadonlyArray<string> => {
+const missingDirectCategories = (days: readonly NormalizedDailyRecords[]): ReadonlyArray<DirectCategory> => {
   return Object.entries(directCategoryCoverage(days))
     .filter((entry) => entry[1] === 0)
-    .map(([category]) => category)
+    .map(([category]) => category as DirectCategory)
     .sort();
 };
 
@@ -140,7 +147,7 @@ const buildDataBasis = (
 const buildReadinessMissingEvidence = (
   readiness: ReadinessResult,
 ): AnalysisResult["evidence"] => {
-  const evidence: AnalysisResult["evidence"] = [];
+  const evidence: Array<AnalysisResult["evidence"][number]> = [];
 
   if (readiness.missingFields.includes("sleepDuration")) {
     evidence.push({
@@ -208,7 +215,7 @@ const buildEvidence = (
     sleepGoalAttainment: number | null;
   },
 ): AnalysisResult["evidence"] => {
-  const evidence: AnalysisResult["evidence"] = [];
+  const evidence: Array<AnalysisResult["evidence"][number]> = [];
 
   if (sampleCount < BASELINE_WINDOW_MIN || baselineConfidence === "insufficient") {
     evidence.push({
@@ -379,8 +386,12 @@ const computeMealExerciseSignal = (rows: readonly NormalizedDailyRecords[], time
       }
     }
 
-    if (row.exerciseMinutes !== null) {
-      result.push(row.exerciseMinutes >= 120 ? 100 : 0);
+    if (row.lastExerciseAt) {
+      const exerciseMinute = parseMinuteByTimezone(timezone, row.lastExerciseAt);
+      if (exerciseMinute !== null) {
+        const minutesToBed = forwardMinutes(exerciseMinute, row.bedMinuteOfDay ?? targetBed);
+        result.push(minutesToBed >= 120 ? 100 : 0);
+      }
     }
 
     return result;
@@ -455,6 +466,6 @@ export const calculateAnalysis = (input: NormalizedAnalysisInput): AnalysisResul
     },
     dataBasis,
     evidence,
-    missingFields: [...readiness.missingFields].sort(),
+    missingFields: readiness.missingFields,
   };
 };
