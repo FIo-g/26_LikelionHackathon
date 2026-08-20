@@ -68,7 +68,7 @@ BETTER_AUTH_SECRET=<at-least-32-random-bytes>
 BETTER_AUTH_URL=https://<exact-preview-or-production-origin>
 AUTH_RATE_LIMIT_ENABLED=true
 OPENAI_API_KEY=<server-only-key>
-OPENAI_MODEL=gpt-5.6-terra
+OPENAI_MODEL=gpt-5.6-luna
 ```
 
 Do not run migrations from a Vercel request, Vercel build, or runtime environment. Keep `MIGRATION_DATABASE_URL` only in the separately approved `guarded database migration` workflow/secret context (see `.env.migration.example` and `docs/operations.md`), then run `prisma migrate deploy` there before release promotion. The `preview release` workflow validates runtime values without logging them, builds, deploys, and passes the exact HTTPS `.vercel.app` URL returned by Vercel to the remote-only production smoke project. Before production, verify the database provider snapshot, deploy compatible application code, and use forward corrective migrations rather than destructive rollback.

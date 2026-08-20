@@ -4,7 +4,7 @@ import { narrationOutputSchema } from "../domain/narration-schema";
 import { buildNarrationInput, NarrationProviderError, type NarrationFacts, type NarrationOutput } from "../domain/types";
 import type { NarrationProvider } from "../application/ports";
 
-const ALLOWED_MODEL = "gpt-5.6-terra" as const;
+const ALLOWED_MODEL = "gpt-5.6-luna" as const;
 
 export type NarrationEnvironment = Readonly<{ apiKey: string; model: typeof ALLOWED_MODEL }>;
 

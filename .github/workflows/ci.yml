@@ -3,7 +3,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, code-review]
 
 permissions:
   contents: read
@@ -13,7 +13,7 @@ env:
   BETTER_AUTH_URL: http://127.0.0.1:3000
   AUTH_RATE_LIMIT_ENABLED: "true"
   OPENAI_API_KEY: test-key
-  OPENAI_MODEL: gpt-5.6-terra
+  OPENAI_MODEL: gpt-5.6-luna
 
 jobs:
   quality:

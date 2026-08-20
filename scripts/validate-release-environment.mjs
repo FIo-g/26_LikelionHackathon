@@ -35,7 +35,7 @@ export const assertReleaseEnvironment = (environment = process.env) => {
     }
   }
   if (environment.AUTH_RATE_LIMIT_ENABLED !== "true") invalid.push("AUTH_RATE_LIMIT_ENABLED");
-  if (environment.OPENAI_MODEL !== "gpt-5.6-terra") invalid.push("OPENAI_MODEL");
+  if (environment.OPENAI_MODEL !== "gpt-5.6-luna") invalid.push("OPENAI_MODEL");
   if (invalid.length) {
     throw new Error(`RELEASE_ENVIRONMENT_INVALID:${[...new Set(invalid)].sort().join(",")}`);
   }
