@@ -90,9 +90,9 @@
   .metricCard .status_stale,
   .metricCard .status_insufficient,
   .metricCard .status_error { display: none; }
-  .metricGrid > [data-metric-key="sleep-rhythm"], .metricGrid > [data-metric-key="phone-wind-down"] { display: none; }
-  .metricGrid > [data-metric-key="caffeine-signal"] { display: block; order: 2; }
-  .metricGrid > [data-metric-key="sleep-goal"] { display: block; order: 1; }
+  .primaryLayout .metricGrid > [data-metric-key="sleep-rhythm"], .primaryLayout .metricGrid > [data-metric-key="phone-wind-down"] { display: none; }
+  .primaryLayout .metricGrid > [data-metric-key="caffeine-signal"] { display: block; order: 2; }
+  .primaryLayout .metricGrid > [data-metric-key="sleep-goal"] { display: block; order: 1; }
   .metricDesktopLabel { display: none; }
   .metricMobileLabel { display: inline; }
   .desktopReportEyebrow { display: none; }
@@ -137,7 +137,6 @@
   .mobileDetails { display: block; max-width: none; margin: 16px 24px 0; border: 1px solid #e2d6e9; border-radius: 18px; background: white; }
   .mobileDetails summary { padding: 18px; cursor: pointer; color: #5f346f; font-weight: 800; }
   .mobileDetails > * { margin: 0 14px 14px; }
-  .mobileDetails .priorityDetail { display: block; }
   .whatIfForm { grid-template-columns: 1fr; }
   .dataBasisList { grid-template-columns: 1fr; }
 }
