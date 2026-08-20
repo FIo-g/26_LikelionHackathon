@@ -95,4 +95,20 @@ describe("calculateSleepImpact", () => {
       targetBedMinuteOfDay,
     })).toEqual({ exposed: true, unexposed: false });
   });
+
+  it.each([
+    ["phone", { lastPhoneUseAt: "2026-08-20T13:00:00.000Z" }, { lastPhoneUseAt: "2026-08-20T12:59:00.000Z" }],
+    ["meal", { lastMealAt: "2026-08-20T11:00:00.000Z" }, { lastMealAt: "2026-08-20T10:59:00.000Z" }],
+    ["exercise", { lastExerciseAt: "2026-08-20T12:00:00.000Z", exerciseMinutes: 30 }, { lastExerciseAt: "2026-08-20T11:59:00.000Z", exerciseMinutes: 30 }],
+  ] as const)("includes the exact %s cutoff and excludes the adjacent outside minute", (factor, atCutoff, outsideCutoff) => {
+    const classification = (overrides: Partial<NormalizedDailyRecords>) => classifySleepImpactRow({
+      factor,
+      row: row(overrides),
+      timezone: "Asia/Seoul",
+      targetBedMinuteOfDay: 1380,
+    });
+
+    expect(classification(atCutoff)).toEqual({ exposed: true, unexposed: false });
+    expect(classification(outsideCutoff)).toEqual({ exposed: false, unexposed: true });
+  });
 });

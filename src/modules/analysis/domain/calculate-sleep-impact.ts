@@ -104,7 +104,7 @@ export const classifySleepImpactRow = (input: Readonly<{
     : factor === "meal"
       ? MEAL_THRESHOLD_MINUTES
       : EXERCISE_THRESHOLD_MINUTES;
-  return classifyObserved(distance < threshold);
+  return classifyObserved(distance <= threshold);
 };
 
 const mean = (values: readonly number[]): number => {
