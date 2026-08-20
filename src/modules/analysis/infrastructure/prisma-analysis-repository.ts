@@ -389,6 +389,7 @@ const loadWindowFromDb = async (
       select: {
         startedAt: true,
         endedAt: true,
+        dailyLog: { select: { localDate: true } },
         updatedAt: true,
       },
     }),

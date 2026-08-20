@@ -1,8 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
 import { recalculateAnalysis } from "@/modules/analysis/application/recalculate-analysis";
 import type { AnalysisRepository } from "@/modules/analysis/application/ports";
 import type { AnalysisResult, NormalizedAnalysisInput, SleepGoal } from "@/modules/analysis/domain/types";
+import { createAnalysisRepository } from "@/modules/analysis/infrastructure/prisma-analysis-repository";
+import { createTestPrismaClient } from "../support/prisma-client";
 
 vi.mock("@/modules/analysis/domain/provisional-v1", () => ({
   calculateAnalysis: vi.fn(() => ({
@@ -124,5 +126,56 @@ describe("analysis recalculation", () => {
     expect(repository.rows[0].status).toBe("superseded");
     expect(repository.rows[1].status).toBe("current");
     expect(repository.rows[0].snapshotId).not.toBe(repository.rows[1].snapshotId);
+  });
+});
+
+const sqliteUrl = process.env.DATABASE_URL?.startsWith("file:") ? process.env.DATABASE_URL : null;
+const describeSqlite = sqliteUrl ? describe : describe.skip;
+const prisma = createTestPrismaClient(sqliteUrl ?? "file:./prisma/unused-analysis-recalculation.sqlite");
+const exerciseUserId = "analysis-exercise-user";
+
+describeSqlite("persisted analysis input", () => {
+  afterAll(async () => {
+    await prisma.user.deleteMany({ where: { id: exerciseUserId } });
+    await prisma.$disconnect();
+  });
+
+  it("includes persisted exercise duration in the matching analysis day", async () => {
+    await prisma.user.deleteMany({ where: { id: exerciseUserId } });
+    await prisma.user.create({ data: { id: exerciseUserId } });
+    await prisma.sleepGoal.create({
+      data: {
+        userId: exerciseUserId,
+        targetBedTime: "23:00",
+        targetWakeTime: "07:00",
+        targetDurationMinutes: 480,
+      },
+    });
+    const dailyLog = await prisma.dailyLog.create({
+      data: {
+        userId: exerciseUserId,
+        localDate: "2026-08-20",
+        timezone: "Asia/Seoul",
+      },
+    });
+    await prisma.exerciseEntry.create({
+      data: {
+        userId: exerciseUserId,
+        dailyLogId: dailyLog.id,
+        exerciseType: "run",
+        intensity: "moderate",
+        startedAt: new Date("2026-08-20T09:00:00.000Z"),
+        endedAt: new Date("2026-08-20T09:45:00.000Z"),
+        timezone: "Asia/Seoul",
+      },
+    });
+
+    const repository = createAnalysisRepository(prisma as never, {
+      userId: exerciseUserId,
+      timezone: "Asia/Seoul",
+    });
+    const input = await repository.loadWindow("2026-08-20", 14);
+
+    expect(input.days.find((day) => day.localDate === "2026-08-20")?.exerciseMinutes).toBe(45);
   });
 });
