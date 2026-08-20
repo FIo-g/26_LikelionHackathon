@@ -3,9 +3,9 @@ import type { PrismaClient } from "@/generated/prisma/client";
 
 import { analysisResultSchemaEnvelope } from "@/modules/analysis/domain/schemas";
 import { narrationOutputSchema } from "@/modules/narration/domain/narration-schema";
-import { generatedAdviceInputSchema, planDayTargetSchema } from "@/modules/planner/domain/schemas";
+import { planDayTargetSchema, storedGeneratedAdviceInputSchema } from "@/modules/planner/domain/schemas";
 import type { ScheduleAdviceEntity, SleepPlanEntity } from "@/modules/planner/domain/types";
-import type { UserScope, VersionedPayload } from "@/shared/domain/contracts";
+import type { VersionedPayload } from "@/shared/domain/contracts";
 import { versionedPayloadSchema } from "@/shared/validation/versioned-json";
 import type { AccountDataExportRepository } from "../application/export-user-data";
 import {
@@ -89,7 +89,7 @@ const snapshotSchema = versionedPayloadSchema({ days: z.array(planDayTargetSchem
 const narrationOutputEnvelopeSchema = versionedPayloadSchema(narrationOutputSchema);
 
 const mapAdvice = (row: Row): ScheduleAdviceEntity => {
-  const input = parse(generatedAdviceInputSchema, {
+  const input = parse(storedGeneratedAdviceInputSchema, {
     eventId: row.eventId ?? null,
     planId: row.planId ?? null,
     triggerType: row.triggerType,

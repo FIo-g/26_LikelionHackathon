@@ -59,7 +59,7 @@ export const specialEventInputSchema = z.object({
   timezone: timezoneSchema,
 }).strict() as z.ZodType<SpecialEventInput>;
 
-const inputSnapshotSchema = versionedPayloadSchema({
+const createInputSnapshotSchema = (allowLegacyReroute: boolean) => versionedPayloadSchema({
   timezone: timezoneSchema,
   goal: z.object({
     targetBedTime: timeSchema,
@@ -93,12 +93,13 @@ const inputSnapshotSchema = versionedPayloadSchema({
   const rerouteIdentityParts = [value.planActiveKey, value.planRevisionId, value.triggerInstant, value.activeDays];
   const hasAnyRerouteIdentity = rerouteIdentityParts.some((part) => part !== undefined);
   const hasCompleteRerouteIdentity = rerouteIdentityParts.every((part) => part !== undefined);
-  if ((hasPlan && !hasCompleteRerouteIdentity) || (hasEvent && hasAnyRerouteIdentity)) {
+  const invalidPlanIdentity = hasPlan && (allowLegacyReroute ? hasAnyRerouteIdentity && !hasCompleteRerouteIdentity : !hasCompleteRerouteIdentity);
+  if (invalidPlanIdentity || (hasEvent && hasAnyRerouteIdentity)) {
     context.addIssue({ code: z.ZodIssueCode.custom, message: "Reroute snapshot must include active plan identity and days" });
   }
 }) as z.ZodType<PlannerInputSnapshot>;
 
-export const generatedAdviceInputSchema = z.object({
+const createGeneratedAdviceInputSchema = (inputSnapshotSchema: z.ZodType<PlannerInputSnapshot>) => z.object({
   eventId: z.string().min(1).nullable(),
   planId: z.string().min(1).nullable(),
   triggerType: z.enum(["event", "reroute"]),
@@ -125,6 +126,9 @@ export const generatedAdviceInputSchema = z.object({
     context.addIssue({ code: z.ZodIssueCode.custom, message: "Advice trigger and immutable target must agree" });
   }
 }) as z.ZodType<GeneratedAdviceInput>;
+
+export const generatedAdviceInputSchema = createGeneratedAdviceInputSchema(createInputSnapshotSchema(false));
+export const storedGeneratedAdviceInputSchema = createGeneratedAdviceInputSchema(createInputSnapshotSchema(true));
 
 export const acceptedAdviceInputSchema = z.object({
   adviceId: z.string().min(1),

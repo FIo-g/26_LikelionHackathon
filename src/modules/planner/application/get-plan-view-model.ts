@@ -5,7 +5,7 @@ import type { PlannerRepository } from "./ports";
 
 export type ScheduleAdviceViewModel = Readonly<{
   id: string;
-  timezone?: string;
+  timezone: string;
   triggerType: "event" | "reroute";
   status: "generated" | "accepted" | "dismissed" | "superseded" | "failed";
   headline: string;

@@ -59,6 +59,51 @@ const createAdviceInput = (): GeneratedAdviceInput => {
   };
 };
 
+const createLegacyRerouteAdviceInput = (): GeneratedAdviceInput => {
+  const inputSnapshot: GeneratedAdviceInput["inputSnapshot"] = {
+    schemaVersion: 1,
+    timezone: "Asia/Seoul",
+    goal: {
+      targetBedTime: "23:00",
+      targetWakeTime: "07:00",
+      targetDurationMinutes: 480,
+    },
+    baselineId: null,
+    event: null,
+    planId: "plan-legacy",
+    triggerRecordId: "caffeine-legacy",
+    rerouteRecords: [{
+      id: "caffeine-legacy",
+      type: "caffeine",
+      input: {
+        type: "caffeine",
+        brand: "테스트",
+        product: "커피",
+        caffeineMg: 120,
+        consumedAt: "2026-09-11T12:30:00.000Z",
+        timezone: "Asia/Seoul",
+      },
+    }],
+  };
+
+  return {
+    eventId: null,
+    planId: "plan-legacy",
+    triggerType: "reroute",
+    inputHash: createPlannerInputHash(inputSnapshot),
+    inputSnapshot,
+    proposal: {
+      adjustmentStartsOn: day.localDate,
+      eventWakeAt: day.targetWakeAt,
+      days: [day],
+      conflicts: [],
+      confidence: "low",
+      evidence: [],
+      algorithmVersion: "provisional-v1",
+    },
+  };
+};
+
 const createMockPlannerDb = () => {
   const state = {
     advice: [] as AdviceRow[],
@@ -131,6 +176,31 @@ const createMockPlannerDb = () => {
 };
 
 describe("prisma planner repository", () => {
+  it("reads a legacy reroute advice that predates canonical plan identity fields", async () => {
+    const fixture = createMockPlannerDb();
+    const repository = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
+    fixture.state.advice.push({
+      ...createLegacyRerouteAdviceInput(),
+      id: "advice-legacy",
+      userId: "alice",
+      status: "generated",
+      generatedAt: new Date("2026-08-20T00:00:00.000Z"),
+    });
+
+    await expect(repository.findAdvice("advice-legacy")).resolves.toMatchObject({
+      id: "advice-legacy",
+      triggerType: "reroute",
+      inputSnapshot: { planId: "plan-legacy", triggerRecordId: "caffeine-legacy" },
+    });
+  });
+
+  it("still rejects a new reroute write without canonical plan identity fields", async () => {
+    const fixture = createMockPlannerDb();
+    const repository = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
+
+    await expect(repository.saveGeneratedAdvice(createLegacyRerouteAdviceInput())).rejects.toThrow();
+  });
+
   it("does not expose or mutate another user's generated advice", async () => {
     const fixture = createMockPlannerDb();
     const alice = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });

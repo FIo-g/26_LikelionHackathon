@@ -13,9 +13,15 @@ const hasMetricMismatch = (text: string, facts: NarrationFacts): boolean => fact
   const expected = metric.value === null ? null : normalizeNumericToken(String(metric.value));
   const labels = NARRATION_METRIC_LABELS[metric.id] ?? [metric.id];
   return labels.some((label) => {
-    const pairedValue = new RegExp(`${escapeRegExp(label)}[^\\d.!?\\n]{0,24}(\\d+(?:\\.\\d+)?)`, "gi");
-    return [...text.matchAll(pairedValue)].some((match) => (
-      expected === null || normalizeNumericToken(match[1]) !== expected
+    const escapedLabel = escapeRegExp(label);
+    const valueAfterLabel = new RegExp(`${escapedLabel}[^\\d.!?\\n]{0,24}(\\d+(?:\\.\\d+)?)`, "gi");
+    const valueBeforeLabel = new RegExp(`(\\d+(?:\\.\\d+)?)[^\\d.!?\\n]{0,24}${escapedLabel}`, "gi");
+    const pairedValues = [
+      ...[...text.matchAll(valueAfterLabel)].map((match) => match[1]),
+      ...[...text.matchAll(valueBeforeLabel)].map((match) => match[1]),
+    ];
+    return pairedValues.some((value) => (
+      expected === null || normalizeNumericToken(value) !== expected
     ));
   });
 });

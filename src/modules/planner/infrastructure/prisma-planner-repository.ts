@@ -9,6 +9,7 @@ import {
   planDayTargetSchema,
   scheduleProposalSchema,
   specialEventInputSchema,
+  storedGeneratedAdviceInputSchema,
 } from "../domain/schemas";
 import type { PlanDayEntity, ScheduleAdviceEntity, SleepPlanEntity } from "../domain/types";
 import type { PlannerRepository } from "../application/ports";
@@ -55,7 +56,7 @@ const toStringValue = (value: unknown): string => String(value);
 const toInstant = (value: unknown): string => (value instanceof Date ? value : new Date(String(value))).toISOString();
 
 const mapAdvice = (row: DbPayload): ScheduleAdviceEntity => {
-  const input = generatedAdviceInputSchema.parse({
+  const input = storedGeneratedAdviceInputSchema.parse({
     eventId: row.eventId ?? null,
     planId: row.planId ?? null,
     triggerType: row.triggerType,

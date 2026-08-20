@@ -52,7 +52,7 @@ export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) =>
       <MetricGrid metrics={viewModel.metrics} />
       <AnalysisReport narration={viewModel.narration} report={viewModel.report} />
     </div>
-    {viewModel.scheduleAdvice ? <ScheduleAdviceCard advice={viewModel.scheduleAdvice} /> : null}
+    {viewModel.scheduleAdvice ? <ScheduleAdviceCard advice={viewModel.scheduleAdvice} timezone={viewModel.scheduleAdvice.timezone} /> : null}
     <div className={styles.desktopDetails}>
       <SleepTrendChart trend={viewModel.trend} />
       <CaffeineProfile model={viewModel.caffeineProfile} />

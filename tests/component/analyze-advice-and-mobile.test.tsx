@@ -1,11 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { AnalyzeScreen } from "@/modules/analysis/ui/analysis-report";
 import type { AnalyzeViewModel } from "@/modules/analysis/application/get-analyze-view-model";
+import { ScheduleAdviceCard } from "@/modules/planner/ui/schedule-advice-card";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
 }));
+
+type ScheduleAdviceCardProps = ComponentProps<typeof ScheduleAdviceCard>;
+type ScheduleAdviceCardTimezone = Pick<ScheduleAdviceCardProps, "timezone">;
+const scheduleAdviceCardRequiresTimezone: ScheduleAdviceCardTimezone extends Required<ScheduleAdviceCardTimezone> ? true : false = true;
 
 const viewModel = {
   state: "ready",
@@ -28,7 +34,7 @@ const viewModel = {
   report: { status: "template-fallback", headline: "최근 수면 패턴", body: "본문", bullets: [] },
   scheduleAdvice: {
     id: "reroute-advice",
-    timezone: "Asia/Seoul",
+    timezone: "America/New_York",
     triggerType: "reroute",
     status: "generated",
     headline: "카페인 기록에 맞춰 수면 시간을 조정해요",
@@ -57,7 +63,9 @@ describe("AnalyzeScreen advice and mobile details", () => {
   it("renders reroute advice through the established confirmation dialog and retains the mobile disclosure", () => {
     render(<AnalyzeScreen viewModel={viewModel} />);
 
+    expect(scheduleAdviceCardRequiresTimezone).toBe(true);
     expect(screen.getByText("기록된 활동에 맞춰 이후 계획을 조정해요")).toBeInTheDocument();
+    expect(screen.getByText(/2026\. 8\. 22\. 19:15/)).toBeInTheDocument();
     expect(screen.getByText("전체 지표·근거 보기")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "계획에 반영" }));
