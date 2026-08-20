@@ -1,35 +1,7 @@
 import { requireUserScope } from "@/shared/auth/require-user-scope";
 import { AlcoholFlow } from "@/modules/records/ui/alcohol-flow";
 
-type SearchValue = string | string[] | undefined;
-type RecordPageProps = { searchParams?: Promise<Record<string, SearchValue>> };
-
-const toStringValue = (value: SearchValue): string => {
-  if (Array.isArray(value)) {
-    return value[0] ?? "";
-  }
-
-  return value ?? "";
-};
-
-export default async function AlcoholPage({
-  searchParams,
-}: RecordPageProps) {
-  const params = (await searchParams) ?? {};
+export default async function AlcoholPage() {
   const { timezone } = await requireUserScope();
-
-  const step = toStringValue(params.step);
-  const initialValues = {
-    alcoholType: toStringValue(params.alcoholType),
-    servings: toStringValue(params.servings),
-    consumedAt: toStringValue(params.consumedAt),
-  };
-
-  return (
-    <AlcoholFlow
-      timezone={timezone}
-      step={step}
-      initialValues={initialValues}
-    />
-  );
+  return <AlcoholFlow timezone={timezone} />;
 }

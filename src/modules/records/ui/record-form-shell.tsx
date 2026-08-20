@@ -6,33 +6,42 @@ import { useRouter } from "next/navigation";
 import { safeReturnTo } from "@/shared/auth/entry-path";
 import type { RecordActionState } from "@/modules/records/application/record-service";
 
-type DraftPayload = Readonly<{
-  version: 1;
-  expiresAt: number;
-  idempotencyKey: string;
-  values: Readonly<Record<string, string>>;
+type FormValues = Record<string, string>;
+
+export type RecordDraft = Readonly<{
+  step: string;
+  values: Readonly<FormValues>;
+  idempotencyKey?: string;
+  expiresAt?: number;
 }>;
 
-type FormValues = Record<string, string>;
+type StoredRecordDraft = Readonly<{
+  schemaVersion: 1;
+  draft: RecordDraft & { idempotencyKey: string; expiresAt: number };
+}>;
 
 type ShellProps = Readonly<{
   pathname: string;
   action: (formData: FormData) => Promise<RecordActionState>;
   children: (render: {
     values: FormValues;
+    step: string;
     idempotencyKey: string;
     setValue: (name: string, value: string) => void;
+    setStep: (step: string) => void;
     isSubmitting: boolean;
   }) => React.ReactNode;
   successRedirectPath?: string;
   submitButtonLabel?: string;
   initialValues?: FormValues;
+  initialStep?: string;
+  submitStep?: string;
 }>;
 
 const DRAFT_VERSION = 1;
 const DRAFT_TTL_MS = 30 * 60 * 1000;
 
-const toDraftKey = (pathname: string) => `record-form-draft:v${DRAFT_VERSION}:${pathname}`;
+export const recordDraftKey = (pathname: string) => `record-draft:${pathname}`;
 
 const nowMs = (): number => Date.now();
 
@@ -44,54 +53,56 @@ const createIdempotencyKey = (): string => {
   return `id-${Math.random().toString(36).slice(2)}-${nowMs()}`;
 };
 
-const readDraft = (pathname: string): DraftPayload | null => {
+export const writeRecordDraft = (pathname: string, draft: RecordDraft): void => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const stored: StoredRecordDraft = {
+    schemaVersion: DRAFT_VERSION,
+    draft: {
+      ...draft,
+      idempotencyKey: draft.idempotencyKey ?? createIdempotencyKey(),
+      expiresAt: draft.expiresAt ?? nowMs() + DRAFT_TTL_MS,
+    },
+  };
+  window.sessionStorage.setItem(recordDraftKey(pathname), JSON.stringify(stored));
+};
+
+export const readRecordDraft = (pathname: string): StoredRecordDraft["draft"] | null => {
   if (typeof window === "undefined") {
     return null;
   }
 
   try {
-    const raw = window.sessionStorage.getItem(toDraftKey(pathname));
+    const raw = window.sessionStorage.getItem(recordDraftKey(pathname));
     if (!raw) {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as DraftPayload;
-    if (parsed.version !== DRAFT_VERSION || parsed.expiresAt <= nowMs()) {
-      window.sessionStorage.removeItem(toDraftKey(pathname));
+    const stored = JSON.parse(raw) as StoredRecordDraft;
+    if (stored.schemaVersion !== DRAFT_VERSION || stored.draft.expiresAt <= nowMs()) {
+      window.sessionStorage.removeItem(recordDraftKey(pathname));
       return null;
     }
 
-    return parsed;
+    return stored.draft;
   } catch {
     return null;
   }
 };
 
-const writeDraft = (pathname: string, draft: DraftPayload): void => {
-  if (typeof window === "undefined") {
-    return;
+export const clearRecordDraft = (pathname: string): void => {
+  if (typeof window !== "undefined") {
+    window.sessionStorage.removeItem(recordDraftKey(pathname));
   }
-
-  window.sessionStorage.setItem(toDraftKey(pathname), JSON.stringify(draft));
-};
-
-const clearDraft = (pathname: string): void => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.sessionStorage.removeItem(toDraftKey(pathname));
 };
 
 const mapFormValues = (formData: FormData): FormValues => {
   const values = Object.fromEntries(formData.entries()) as Record<string, string | File>;
-  const normalized: FormValues = {};
-
-  for (const [key, value] of Object.entries(values)) {
-    normalized[key] = String(value);
-  }
-
-  return normalized;
+  return Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [key, String(value)]),
+  );
 };
 
 export const RecordFormShell = ({
@@ -101,35 +112,46 @@ export const RecordFormShell = ({
   successRedirectPath,
   submitButtonLabel = "저장",
   initialValues = {},
+  initialStep = "confirm",
+  submitStep = "confirm",
 }: ShellProps) => {
   const router = useRouter();
   const [values, setValues] = useState<FormValues>(initialValues);
+  const [step, setCurrentStep] = useState(initialStep);
   const [idempotencyKey, setIdempotencyKey] = useState<string>(createIdempotencyKey);
-  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+
+  const persist = (nextStep: string, nextValues: FormValues, nextIdempotencyKey = idempotencyKey) => {
+    writeRecordDraft(pathname, {
+      step: nextStep,
+      values: nextValues,
+      idempotencyKey: nextIdempotencyKey,
+    });
+  };
 
   const [state, formAction, isSubmitting] = useActionState<RecordActionState | null, FormData>(
-    async (_prev, formData) => {
-      const nextValues = mapFormValues(formData);
-      const nextDraft: DraftPayload = {
-        version: DRAFT_VERSION,
-        idempotencyKey: nextValues.idempotencyKey ?? idempotencyKey,
-        expiresAt: nowMs() + DRAFT_TTL_MS,
-        values: nextValues,
-      };
-      writeDraft(pathname, nextDraft);
+    async (_previous, formData) => {
+      const nextValues = { ...values, ...mapFormValues(formData) };
+      persist(step, nextValues);
       const result = await action(formData);
 
       if (result.status === "success") {
-        clearDraft(pathname);
-        const freshKey = createIdempotencyKey();
-        setIdempotencyKey(freshKey);
+        clearRecordDraft(pathname);
+        setIdempotencyKey(createIdempotencyKey());
         setValues(initialValues);
-        setHasAttemptedSubmit(false);
+        setCurrentStep(initialStep);
         if (successRedirectPath) {
           router.push(successRedirectPath);
         }
       } else {
-        setHasAttemptedSubmit(true);
+        const fromForm = result.fieldErrors?._form ?? [];
+        if (fromForm.some((value) => value.toLowerCase().includes("unauthorized"))) {
+          const returnTo = encodeURIComponent(safeReturnTo(window.location.pathname));
+          router.push(`/sign-in?returnTo=${returnTo}`);
+        } else {
+          const nextId = createIdempotencyKey();
+          setIdempotencyKey(nextId);
+          persist(step, nextValues, nextId);
+        }
       }
 
       return result;
@@ -138,54 +160,42 @@ export const RecordFormShell = ({
   );
 
   useEffect(() => {
-    const saved = readDraft(pathname);
+    const saved = readRecordDraft(pathname);
     if (!saved) {
       return;
     }
 
-    setValues({ ...saved.values });
-    setIdempotencyKey(saved.idempotencyKey);
-    setHasAttemptedSubmit(false);
-  }, [pathname]);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) {
+        return;
+      }
+      setValues({ ...initialValues, ...saved.values });
+      setCurrentStep(saved.step || initialStep);
+      setIdempotencyKey(saved.idempotencyKey);
+    });
 
-  useEffect(() => {
-    if (!state || state.status !== "error") {
-      return;
-    }
-
-    const fromForm = state.fieldErrors?._form ?? [];
-    if (fromForm.some((value) => value.toLowerCase().includes("unauthorized") || value.includes("Unauthorized"))) {
-      const returnTo = encodeURIComponent(safeReturnTo(window.location.pathname + window.location.search));
-      window.location.href = `/sign-in?returnTo=${returnTo}`;
-      return;
-    }
-
-    const nextId = hasAttemptedSubmit ? createIdempotencyKey() : idempotencyKey;
-    setIdempotencyKey(nextId);
-  }, [idempotencyKey, hasAttemptedSubmit, state]);
+    return () => {
+      cancelled = true;
+    };
+  }, [initialStep, initialValues, pathname]);
 
   const setValue = (name: string, value: string): void => {
     setValues((current) => {
       const next = { ...current, [name]: value };
-      const nextDraft: DraftPayload = {
-        version: DRAFT_VERSION,
-        idempotencyKey,
-        expiresAt: nowMs() + DRAFT_TTL_MS,
-        values: next,
-      };
-      writeDraft(pathname, nextDraft);
+      persist(step, next);
       return next;
     });
-
-    if (hasAttemptedSubmit) {
-      setHasAttemptedSubmit(false);
-      setIdempotencyKey(createIdempotencyKey());
-    }
   };
 
-  const renderFieldErrors = (state?.status === "error") ? state.fieldErrors : null;
+  const setStep = (nextStep: string): void => {
+    setCurrentStep(nextStep);
+    persist(nextStep, values);
+  };
 
-  const preventPasswordLeak = (event: FormEvent<HTMLFormElement>) => {
+  const renderFieldErrors = state?.status === "error" ? state.fieldErrors : null;
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     if (!formData.get("idempotencyKey")) {
@@ -196,21 +206,18 @@ export const RecordFormShell = ({
   };
 
   return (
-    <form action={formAction} onSubmit={preventPasswordLeak}>
+    <form action={formAction} onSubmit={submit}>
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
-      {children({
-        values,
-        idempotencyKey,
-        setValue,
-        isSubmitting,
-      })}
-      <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting ? "true" : "false"}>
-        {submitButtonLabel}
-      </button>
+      {children({ values, step, idempotencyKey, setValue, setStep, isSubmitting })}
+      {step === submitStep ? (
+        <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting ? "true" : "false"}>
+          {submitButtonLabel}
+        </button>
+      ) : null}
       {renderFieldErrors ? (
         <ul>
-          {Object.values(renderFieldErrors).flat().map((message) => (
-            <li key={`${message}-${Math.random()}`}>{message}</li>
+          {Object.values(renderFieldErrors).flat().map((message, index) => (
+            <li key={`${index}-${message}`}>{message}</li>
           ))}
         </ul>
       ) : null}

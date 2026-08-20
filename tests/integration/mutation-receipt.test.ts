@@ -193,4 +193,37 @@ describe("mutation receipt repository", () => {
     const second = await receipts.execute(command, async () => ({ step: 2 }));
     expect(second).toEqual({ step: 2 });
   });
+
+  it("does not read a winner through a PostgreSQL transaction aborted by P2002", async () => {
+    let transactionAborted = false;
+    const findUnique = vi.fn(async () => {
+      if (transactionAborted) {
+        throw new Error("POSTGRES_TRANSACTION_ABORTED");
+      }
+      return null;
+    });
+    const db = {
+      mutationReceipt: {
+        deleteMany: async () => ({ count: 0 }),
+        create: async () => {
+          transactionAborted = true;
+          throw { code: "P2002" };
+        },
+        findUnique,
+        update: async () => ({}),
+      },
+    };
+    const receipts = createMutationReceiptRepository(
+      db as never,
+      { userId: "u-1", timezone: "Asia/Seoul" },
+      { now: () => new Date("2026-08-20T00:00:00.000Z") },
+    );
+
+    await expect(receipts.execute({
+      operation: "record.create",
+      idempotencyKey: "racing-key",
+      requestHash: "hash-racing",
+    }, async () => ({ ok: true }))).rejects.toThrow("MUTATION_RECEIPT_RACE");
+    expect(findUnique).toHaveBeenCalledOnce();
+  });
 });

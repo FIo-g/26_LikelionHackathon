@@ -27,6 +27,8 @@ export default async function RecordHubPage() {
               inputMode={category.inputMode}
               summary={category.summary}
               href={category.href}
+              records={category.records}
+              editDraft={category.editDraft}
             />
           </section>
         ))}

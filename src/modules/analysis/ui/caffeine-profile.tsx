@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, type MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import { previewCaffeineWhatIfAction, type CaffeineWhatIfActionState } from "@/app/(app)/analyze/actions";
+import { writeRecordDraft } from "@/modules/records/ui/record-form-shell";
 import type { CaffeineProfileViewModel } from "../application/get-analyze-view-model";
 import styles from "./analyze.module.css";
 
@@ -10,6 +11,25 @@ const initialState: CaffeineWhatIfActionState = { status: "idle" };
 
 export const CaffeineProfile = ({ model }: { model: CaffeineProfileViewModel }) => {
   const [state, formAction, pending] = useActionState(previewCaffeineWhatIfAction, initialState);
+  const router = useRouter();
+
+  const recordActualValues = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget.closest("form");
+    if (!form || state.status !== "success") return;
+
+    const data = new FormData(form);
+    writeRecordDraft(state.actualRecordHref, {
+      step: "confirm",
+      values: {
+        brand: "직접 입력",
+        product: "카페인",
+        caffeineMg: String(data.get("caffeineMg") ?? ""),
+        consumedAt: String(data.get("consumedAt") ?? ""),
+      },
+    });
+    router.push(state.actualRecordHref);
+  };
 
   return (
     <section aria-labelledby="caffeine-title" className={styles.caffeineSection}>
@@ -36,7 +56,7 @@ export const CaffeineProfile = ({ model }: { model: CaffeineProfileViewModel }) 
               <strong>기록 저장 전 영향 미리보기</strong>
               <p>준비도 {state.beforeReadiness ?? "기록 필요"}점에서 {state.afterReadiness ?? "기록 필요"}점</p>
               <p>변화: {state.delta === null ? "계산 불가" : `${state.delta}점`}</p>
-              <Link href={state.actualRecordHref}>실제 기록으로 추가</Link>
+              <a href={state.actualRecordHref} onClick={recordActualValues}>실제 기록으로 추가</a>
             </div>
           ) : null}
         </form>

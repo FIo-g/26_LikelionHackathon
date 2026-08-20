@@ -28,6 +28,16 @@ export type MutationReceiptCommand = Readonly<{
 
 export interface MutationReceiptRepository {
   execute<T>(command: MutationReceiptCommand, work: () => Promise<T>): Promise<T>;
+  resolve?<T>(command: MutationReceiptCommand): Promise<T>;
+}
+
+export class MutationReceiptRaceError extends Error {
+  readonly code = "MUTATION_RECEIPT_RACE";
+
+  constructor() {
+    super("MUTATION_RECEIPT_RACE");
+    this.name = "MutationReceiptRaceError";
+  }
 }
 
 export type CreateRecordRepository = (db: TransactionClient, scope: UserScope) => RecordRepository;

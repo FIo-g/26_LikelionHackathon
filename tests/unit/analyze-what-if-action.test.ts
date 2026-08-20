@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   requireUserScope: vi.fn(),
   createAnalysisRepository: vi.fn(),
   previewCaffeineWhatIf: vi.fn(),
+  getPrismaClient: vi.fn(() => ({ database: "test" })),
 }));
 
 vi.mock("@/shared/auth/require-user-scope", () => ({ requireUserScope: mocks.requireUserScope }));
@@ -14,6 +15,7 @@ vi.mock("@/modules/analysis/infrastructure/prisma-analysis-repository", () => ({
 vi.mock("@/modules/planner/application/preview-what-if", () => ({
   previewCaffeineWhatIf: mocks.previewCaffeineWhatIf,
 }));
+vi.mock("@/shared/db/prisma", () => ({ getPrismaClient: mocks.getPrismaClient }));
 
 import { previewCaffeineWhatIfAction } from "@/app/(app)/analyze/actions";
 
@@ -45,8 +47,9 @@ describe("previewCaffeineWhatIfAction", () => {
         consumedAt: parseUnambiguousLocalEventTime(consumedAt, "America/New_York"),
       },
     );
-    expect(state).toMatchObject({ status: "success" });
-    expect(state.status === "success" && new URL(`http://local${state.actualRecordHref}`).searchParams.get("consumedAt")).toBe(consumedAt);
+    expect(state).toMatchObject({ status: "success", actualRecordHref: "/record/caffeine" });
+    expect(JSON.stringify(state)).not.toContain(consumedAt);
+    expect(JSON.stringify(state)).not.toContain("125");
     expect(mocks.createAnalysisRepository).toHaveBeenCalledOnce();
   });
 

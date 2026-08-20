@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseCreateRecordInput, parseUpdateRecordInput } from "@/modules/records/domain/schemas";
 import { createRecordService } from "@/modules/records/application/record-service";
 import type { UserScope } from "@/shared/domain/contracts";
+import type { TransactionClient } from "@/shared/db/transaction";
 
 type DailyLogRow = {
   id: string;
@@ -90,7 +91,7 @@ type MockState = {
 
 type Fixtures = {
   state: MockState;
-  getPrisma: () => { $transaction: <T>(callback: (tx: any) => Promise<T>) => Promise<T> };
+  getPrisma: () => { $transaction: <T>(callback: (tx: TransactionClient) => Promise<T>) => Promise<T> };
 };
 
 type DbHooks = {
@@ -154,7 +155,7 @@ const createMockPrisma = (hooks: DbHooks = {}): Fixtures => {
     state.dailyLogs.find((row) => row.id === dailyLogId)
   );
 
-  const withTransaction = async <T>(callback: (tx: any) => Promise<T>): Promise<T> => {
+  const withTransaction = async <T>(callback: (tx: TransactionClient) => Promise<T>): Promise<T> => {
     const before = clone();
     try {
       const tx = {
@@ -444,7 +445,7 @@ const createMockPrisma = (hooks: DbHooks = {}): Fixtures => {
         },
       };
 
-      return callback(tx);
+      return await callback(tx as unknown as TransactionClient);
     } catch (error) {
       Object.assign(state, before);
       throw error;
@@ -638,5 +639,55 @@ describe("record service", () => {
     expect(fixtures.state.mealEntries).toHaveLength(1);
     expect(fixtures.state.recordRevisions).toHaveLength(1);
     expect(fixtures.state.mutationReceipts).toHaveLength(1);
+  });
+
+  it("recalculates rolling windows for both dates after a moved record", async () => {
+    const fixtures = createMockPrisma();
+    const service = createRecordService(toScope("alice"), {
+      clock,
+      getPrisma: fixtures.getPrisma,
+    });
+    const created = await service.create({
+      idempotencyKey: "move-create",
+      input: parseCreateRecordInput(clock, {
+        ...caffeineInput,
+        consumedAt: new Date("2026-08-10T07:00:00.000Z"),
+      }),
+    });
+
+    const moved = await service.update({
+      idempotencyKey: "move-update",
+      recordId: created.recordId,
+      input: parseUpdateRecordInput(clock, {
+        ...caffeineInput,
+        consumedAt: new Date("2026-08-19T07:00:00.000Z"),
+      }),
+    });
+
+    expect(moved.affectedLocalDates).toEqual(expect.arrayContaining([
+      "2026-08-10",
+      "2026-08-19",
+    ]));
+  });
+
+  it("conflicts when one idempotency key is reused with a different normalized body", async () => {
+    const fixtures = createMockPrisma();
+    const service = createRecordService(toScope("alice"), {
+      clock,
+      getPrisma: fixtures.getPrisma,
+    });
+
+    await service.create({
+      idempotencyKey: "same-create-key",
+      input: caffeineInput,
+    });
+
+    await expect(service.create({
+      idempotencyKey: "same-create-key",
+      input: parseCreateRecordInput(clock, {
+        ...caffeineInput,
+        consumedAt: new Date("2026-08-19T08:00:00.000Z"),
+      }),
+    })).rejects.toThrow("IDEMPOTENCY_CONFLICT");
   });
 });

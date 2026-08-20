@@ -6,15 +6,15 @@ test("protects record hub without session", async ({ page }) => {
 });
 
 test("protects every intake flow without session", async ({ page }) => {
-  await page.goto("/record/caffeine?step=brand");
+  await page.goto("/record/caffeine");
   await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
 
-  await page.goto("/record/alcohol?step=type");
+  await page.goto("/record/alcohol");
   await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
 
-  await page.goto("/record/meal-health?step=meal");
+  await page.goto("/record/meal-health");
   await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
 
-  await page.goto("/record/sleep-phone?step=sleep");
+  await page.goto("/record/sleep-phone");
   await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
 });

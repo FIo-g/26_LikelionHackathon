@@ -5,10 +5,8 @@ import { z } from "zod";
 
 import {
   buildRecordTypeSchema,
-  createRecordInputSchema,
   parseCreateRecordInput,
   parseUpdateRecordInput,
-  updateRecordInputSchema,
 } from "@/modules/records/domain/schemas";
 import { createAnalysisRepository } from "@/modules/analysis/infrastructure/prisma-analysis-repository";
 import {
@@ -19,6 +17,11 @@ import {
 } from "@/modules/records/application/record-service";
 import { requireUserScope } from "@/shared/auth/require-user-scope";
 import type { Clock, UserScope } from "@/shared/domain/contracts";
+import {
+  parseRecordWallTime,
+  type LocalRecordTime,
+  type WallTimeDisambiguation,
+} from "@/shared/time/zoned-date-time";
 
 const numericFields = new Set([
   "morningFatigue",
@@ -76,21 +79,10 @@ const actionError = (
     key,
     typeof value === "string" ? value : "",
   ])) as Record<string, string>,
-  fieldErrors,
+  fieldErrors: Object.fromEntries(
+    Object.entries(fieldErrors).map(([field, messages]) => [field, [...messages]]),
+  ),
 });
-
-const createActionSchema = (clock: Clock) => (
-  createRecordInputSchema(clock).and(z.object({
-    idempotencyKey: z.string().uuid(),
-  }))
-);
-
-const updateActionSchema = (clock: Clock) => (
-  updateRecordInputSchema(clock).and(z.object({
-    idempotencyKey: z.string().uuid(),
-    recordId: z.string().min(1),
-  }))
-);
 
 const deleteActionSchema = z.object({
   idempotencyKey: z.string().uuid(),
@@ -100,6 +92,46 @@ const deleteActionSchema = z.object({
 
 const idempotencyKeySchema = z.string().uuid();
 
+const recordIdSchema = z.string().min(1);
+
+const wallTimeFields = [
+  "startedAt",
+  "endedAt",
+  "consumedAt",
+  "eatenAt",
+  "lastUseAt",
+] as const;
+
+const isWallTimeDisambiguation = (value: unknown): value is WallTimeDisambiguation => (
+  value === "earlier" || value === "later"
+);
+
+const normalizeRecordWallTimes = (
+  input: Record<string, unknown>,
+  timezone: string,
+): Record<string, unknown> => {
+  const normalized: Record<string, unknown> = { ...input, timezone };
+
+  for (const field of wallTimeFields) {
+    const value = normalized[field];
+    if (typeof value !== "string") {
+      continue;
+    }
+
+    const disambiguationValue = normalized[`${field}Disambiguation`];
+    const localTime: LocalRecordTime = {
+      value,
+      ...(isWallTimeDisambiguation(disambiguationValue)
+        ? { disambiguation: disambiguationValue }
+        : {}),
+    };
+    normalized[field] = parseRecordWallTime(localTime, timezone);
+    delete normalized[`${field}Disambiguation`];
+  }
+
+  return normalized;
+};
+
 const normalizeBatchInput = (input: unknown): Record<string, unknown> => {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw new Error("INVALID_BATCH_ITEM");
@@ -108,7 +140,11 @@ const normalizeBatchInput = (input: unknown): Record<string, unknown> => {
   return normalizePayload(input as Record<string, unknown>);
 };
 
-const parseBatchItems = (clock: Clock, rawItems: readonly unknown[]): SaveRecordBatchCommand["items"] => {
+const parseBatchItems = (
+  clock: Clock,
+  timezone: string,
+  rawItems: readonly unknown[],
+): SaveRecordBatchCommand["items"] => {
   const items = rawItems.map((raw, index) => {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
       throw new Error(`INVALID_BATCH_ITEM_${index}`);
@@ -122,13 +158,14 @@ const parseBatchItems = (clock: Clock, rawItems: readonly unknown[]): SaveRecord
       throw new Error(`INVALID_CLIENT_KEY_${index}`);
     }
 
-    const inputShape = normalizeBatchInput({
-      ...normalized,
-      clientKey: undefined,
-      recordId: undefined,
-    });
+    const inputShape = { ...normalized };
+    delete inputShape.clientKey;
+    delete inputShape.recordId;
 
-    const input = parseCreateRecordInput(clock, inputShape);
+    const input = parseCreateRecordInput(
+      clock,
+      normalizeRecordWallTimes(normalizeBatchInput(inputShape), timezone),
+    );
 
     return {
       clientKey,
@@ -151,17 +188,22 @@ const toServiceScope = async (): Promise<UserScope> => requireUserScope();
 export async function createRecordAction(formData: FormData): Promise<RecordActionState> {
   const scope = await toServiceScope();
   const values = valuesFromForm(formData);
-  const parsed = createActionSchema(actionClock).safeParse(values);
+  const parsedKey = idempotencyKeySchema.safeParse(values.idempotencyKey);
 
-  if (!parsed.success) {
-    return actionError(formData, parsed.error.flatten().fieldErrors);
+  if (!parsedKey.success) {
+    return actionError(formData, { idempotencyKey: ["Invalid idempotencyKey"] });
   }
 
   try {
-    const { idempotencyKey, ...rest } = parsed.data;
+    const rest = { ...values };
+    delete rest.idempotencyKey;
+    const input = parseCreateRecordInput(
+      actionClock,
+      normalizeRecordWallTimes(rest, scope.timezone),
+    );
     const result = await recordService(scope).create({
-      idempotencyKey,
-      input: parseCreateRecordInput(actionClock, rest),
+      idempotencyKey: parsedKey.data,
+      input,
     });
 
     revalidateRecordViews();
@@ -179,18 +221,28 @@ export async function createRecordAction(formData: FormData): Promise<RecordActi
 export async function updateRecordAction(formData: FormData): Promise<RecordActionState> {
   const scope = await toServiceScope();
   const values = valuesFromForm(formData);
-  const parsed = updateActionSchema(actionClock).safeParse(values);
+  const parsedKey = idempotencyKeySchema.safeParse(values.idempotencyKey);
+  const parsedRecordId = recordIdSchema.safeParse(values.recordId);
 
-  if (!parsed.success) {
-    return actionError(formData, parsed.error.flatten().fieldErrors);
+  if (!parsedKey.success || !parsedRecordId.success) {
+    return actionError(formData, {
+      ...(!parsedKey.success ? { idempotencyKey: ["Invalid idempotencyKey"] } : {}),
+      ...(!parsedRecordId.success ? { recordId: ["Invalid recordId"] } : {}),
+    });
   }
 
   try {
-    const { idempotencyKey, recordId, ...rest } = parsed.data;
+    const rest = { ...values };
+    delete rest.idempotencyKey;
+    delete rest.recordId;
+    const input = parseUpdateRecordInput(
+      actionClock,
+      normalizeRecordWallTimes(rest, scope.timezone),
+    );
     const result = await recordService(scope).update({
-      idempotencyKey,
-      recordId,
-      input: parseUpdateRecordInput(actionClock, rest),
+      idempotencyKey: parsedKey.data,
+      recordId: parsedRecordId.data,
+      input,
     });
 
     revalidateRecordViews();
@@ -240,7 +292,8 @@ export async function saveRecordBatchAction(formData: FormData): Promise<RecordA
   const idempotencyKey = values.idempotencyKey;
   const rawItems = values.items;
 
-  if (!idempotencyKeySchema.safeParse(idempotencyKey).success) {
+  const parsedKey = idempotencyKeySchema.safeParse(idempotencyKey);
+  if (!parsedKey.success) {
     return actionError(formData, { idempotencyKey: ["Invalid idempotencyKey"] });
   }
 
@@ -260,9 +313,9 @@ export async function saveRecordBatchAction(formData: FormData): Promise<RecordA
   }
 
   try {
-    const items = parseBatchItems(actionClock, parsedItems);
+    const items = parseBatchItems(actionClock, scope.timezone, parsedItems);
     const result = await recordService(scope).saveBatch({
-      idempotencyKey,
+      idempotencyKey: parsedKey.data,
       items,
     });
 
@@ -291,7 +344,8 @@ export async function deleteRecordBatchAction(formData: FormData): Promise<Recor
     }),
   );
 
-  if (!idempotencyKeySchema.safeParse(idempotencyKey).success) {
+  const parsedKey = idempotencyKeySchema.safeParse(idempotencyKey);
+  if (!parsedKey.success) {
     return actionError(formData, { idempotencyKey: ["Invalid idempotencyKey"] });
   }
 
@@ -308,12 +362,12 @@ export async function deleteRecordBatchAction(formData: FormData): Promise<Recor
 
   const parsed = deleteBatchSchema.safeParse(parsedItems);
   if (!parsed.success) {
-    return actionError(formData, parsed.error.flatten().fieldErrors as Record<string, readonly string[]>);
+    return actionError(formData, { items: parsed.error.issues.map((issue) => issue.message) });
   }
 
   try {
     const result = await recordService(scope).deleteBatch({
-      idempotencyKey,
+      idempotencyKey: parsedKey.data,
       items: parsed.data as DeleteRecordBatchCommand["items"],
     });
 
