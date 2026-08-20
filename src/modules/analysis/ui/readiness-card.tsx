@@ -41,7 +41,7 @@ export const ReadinessCard = ({ viewModel }: ReadinessCardProps) => {
 
   return (
     <section className={`${styles.regionCard} ${stateClassName[viewModel.state]}`} aria-live="polite">
-      <h2 className={styles.regionTitle}>오늘 준비도</h2>
+      <h2 className={styles.regionTitle}>오늘의 수면 준비도</h2>
       <p className={styles.regionBadge}>{stateLabel[viewModel.state]}</p>
 
       {viewModel.data === null ? (

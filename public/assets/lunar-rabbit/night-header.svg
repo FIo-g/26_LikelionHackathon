@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="390" height="154" viewBox="0 0 390 154" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Mobile night header" clip-path="url(#clip0_0_4)">
+<rect width="390" height="154" fill="#301B44"/>
+<ellipse id="Header glow" cx="342" cy="17" rx="112" ry="91" fill="#704480"/>
+<circle id="Star 1" cx="19" cy="19" r="1" fill="white"/>
+<circle id="Star 2" cx="93" cy="43" r="1" fill="white"/>
+<circle id="Star 3" cx="177.5" cy="17.5" r="1.5" fill="white"/>
+<circle id="Star 4" cx="255" cy="36" r="1" fill="white"/>
+<circle id="Star 5" cx="345.5" cy="19.5" r="1.5" fill="white"/>
+<circle id="Star 6" cx="315" cy="107" r="1" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_0_4">
+<rect width="390" height="154" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 
 const focusableSelector = "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
-export const BottomSheet = ({ triggerLabel, children }: Readonly<{ triggerLabel: string; children: ReactNode }>) => {
+export const BottomSheet = ({ triggerLabel, triggerVisualLabel, children }: Readonly<{ triggerLabel: string; triggerVisualLabel?: ReactNode; children: ReactNode }>) => {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -40,5 +40,5 @@ export const BottomSheet = ({ triggerLabel, children }: Readonly<{ triggerLabel:
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   };
 
-  return <><button aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)} ref={triggerRef} type="button">{triggerLabel}</button><dialog aria-labelledby={headingId} className="bottomSheet" onCancel={(event) => { event.preventDefault(); close(); }} onKeyDown={trapFocus} ref={dialogRef}><div><div><h2 id={headingId} ref={headingRef} tabIndex={-1}>{triggerLabel}</h2><button aria-label="닫기" onClick={close} type="button">닫기</button></div>{children}</div></dialog></>;
+  return <><button aria-haspopup="dialog" aria-expanded={open} aria-label={triggerLabel} onClick={() => setOpen(true)} ref={triggerRef} type="button">{triggerVisualLabel ?? triggerLabel}</button><dialog aria-labelledby={headingId} className="bottomSheet" onCancel={(event) => { event.preventDefault(); close(); }} onKeyDown={trapFocus} ref={dialogRef}><div><div><h2 id={headingId} ref={headingRef} tabIndex={-1}>{triggerLabel}</h2><button aria-label="닫기" onClick={close} type="button">닫기</button></div>{children}</div></dialog></>;
 };

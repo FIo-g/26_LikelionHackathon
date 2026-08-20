@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState } from "react";
 import { ScheduleAdviceCard } from "@/modules/planner/ui/schedule-advice-card";
 import { retryNarrationAction, type NarrationRetryActionState } from "@/app/(app)/analyze/actions";
@@ -9,6 +10,7 @@ import { DataBasisPanel } from "./data-basis-panel";
 import { ExplainabilityCard } from "./explainability-card";
 import { MetricGrid } from "./metric-grid";
 import { SleepTrendChart } from "./sleep-trend-chart";
+import { FigmaMobileHeader } from "@/shared/ui/figma-mobile-header";
 import styles from "./analyze.module.css";
 
 const initialRetryState: NarrationRetryActionState = { status: "idle" };
@@ -24,9 +26,11 @@ export const AnalysisReport = ({
 
   return (
     <section aria-labelledby="analysis-report-title" className={styles.reportSection}>
-      <p className={styles.eyebrow}>분석 리포트</p>
+      <p className={`${styles.eyebrow} ${styles.desktopReportEyebrow}`}>분석 리포트</p>
+      <p aria-hidden="true" className={`${styles.eyebrow} ${styles.mobileReportEyebrow}`}>AI 분석 리포트</p>
       <h2 id="analysis-report-title">{report.headline}</h2>
       <p>{report.body}</p>
+      <span aria-hidden="true" className={styles.reportBasis}>계산 결과 기반</span>
       <ul>{report.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>
       {narration?.retryAvailable ? (
         <form action={retryAction} aria-busy={retryPending}>
@@ -41,7 +45,8 @@ export const AnalysisReport = ({
 };
 
 export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) => (
-  <main className={styles.page}>
+  <main data-lunar-screen="analyze" className={styles.page}>
+    <FigmaMobileHeader title="최근 14일 분석" subtitle="계산 결과와 AI 설명을 함께 확인해요." />
     <header className={styles.hero}>
       <p className={styles.eyebrow}>ANALYZE</p>
       <h1>분석</h1>
@@ -52,6 +57,11 @@ export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) =>
       <MetricGrid metrics={viewModel.metrics} />
       <AnalysisReport narration={viewModel.narration} report={viewModel.report} />
     </div>
+    <aside aria-hidden="true" className={styles.mobileExplainabilityVisual}>
+      <Image alt="" height={92} src="/assets/lunar-rabbit/rabbit-face.png" width={92} />
+      <strong>왜 이런 제안인가요?</strong>
+      <p>수면·카페인·휴대폰·식사·일정 기록을 계산하고, AI가 알기 쉽게 설명합니다.</p>
+    </aside>
     {viewModel.scheduleAdvice ? <ScheduleAdviceCard advice={viewModel.scheduleAdvice} timezone={viewModel.scheduleAdvice.timezone} /> : null}
     <div className={styles.desktopDetails}>
       <SleepTrendChart trend={viewModel.trend} />

@@ -21,6 +21,7 @@
 .navigationList { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .navigationList a { display: block; border-radius: 10px; padding: 10px 12px; color: inherit; font-weight: 700; text-decoration: none; }
 .navigationList a:hover, .navigationList a:focus-visible { background: #edf6f1; }
+.mobileLabel { display: none; }
 
 .content {
   min-width: 0;
@@ -50,4 +51,45 @@
   }
   .mobileNavigation .navigationList { display: grid; width: 100%; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; }
   .mobileNavigation .navigationList a { padding: 14px 2px; font-size: .72rem; text-align: center; }
+  .mobileNavigation .desktopLabel { display: inline; }
+  .mobileNavigation .mobileLabel { display: none; }
+
+  .page:has([data-lunar-screen]) .mobileNavigation {
+    min-height: 58px;
+    border-top-color: #e2d6e9;
+    background: rgba(255, 255, 255, .98);
+  }
+  .page:has([data-lunar-screen]) .mobileNavigation .navigationList a {
+    position: relative;
+    min-height: 58px;
+    box-sizing: border-box;
+    padding: 24px 2px 8px;
+    border-radius: 0;
+    color: #766982;
+    font-size: .72rem;
+    letter-spacing: -0.04em;
+    text-align: center;
+  }
+  .page:has([data-lunar-screen]) .mobileNavigation .navigationList a:hover,
+  .page:has([data-lunar-screen]) .mobileNavigation .navigationList a:focus-visible { background: #f7f1f9; }
+  .page:has([data-lunar-screen]) .mobileNavigation .desktopLabel { display: none; }
+  .page:has([data-lunar-screen]) .mobileNavigation .mobileLabel { display: inline; }
+  .page:has([data-lunar-screen="today"]) .mobileNavigation a[href="/today"],
+  .page:has([data-lunar-screen="plan"]) .mobileNavigation a[href="/plan"],
+  .page:has([data-lunar-screen="analyze"]) .mobileNavigation a[href="/analyze"],
+  .page:has([data-lunar-screen="account"]) .mobileNavigation a[href="/account"] { color: #5f346f; font-weight: 800; }
+  .page:has([data-lunar-screen="today"]) .mobileNavigation a[href="/today"]::before,
+  .page:has([data-lunar-screen="plan"]) .mobileNavigation a[href="/plan"]::before,
+  .page:has([data-lunar-screen="analyze"]) .mobileNavigation a[href="/analyze"]::before,
+  .page:has([data-lunar-screen="account"]) .mobileNavigation a[href="/account"]::before {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #5f346f;
+    content: "";
+    transform: translateX(-50%);
+  }
 }
