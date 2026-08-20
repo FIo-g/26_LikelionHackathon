@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
+import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
 
 type SleepPhoneStep = "sleep" | "phone" | "confirm";
 
@@ -31,7 +32,7 @@ type SleepPhoneFlowProps = Readonly<{
   initialValues?: RawValue;
 }>;
 
-const defaultNow = (): string => new Date().toISOString().slice(0, 16);
+const defaultNow = (timezone: string): string => formatRecordWallTime(new Date(), timezone);
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
 const normalizeStep = (step?: string): SleepPhoneStep => step === "phone" || step === "confirm" ? step : "sleep";
 
@@ -85,13 +86,13 @@ export const SleepPhoneFlow = ({
 }: SleepPhoneFlowProps) => {
   const initial = useMemo(() => ({
     timezone,
-    sleepStartedAt: safeText(initialValues.sleepStartedAt) || defaultNow(),
+    sleepStartedAt: safeText(initialValues.sleepStartedAt) || defaultNow(timezone),
     sleepStartedAtDisambiguation: safeText(initialValues.sleepStartedAtDisambiguation),
-    sleepEndedAt: safeText(initialValues.sleepEndedAt) || defaultNow(),
+    sleepEndedAt: safeText(initialValues.sleepEndedAt) || defaultNow(timezone),
     sleepEndedAtDisambiguation: safeText(initialValues.sleepEndedAtDisambiguation),
     morningFatigue: safeText(initialValues.morningFatigue) || "1",
     sleepRecordId: safeText(initialValues.sleepRecordId),
-    lastUseAt: safeText(initialValues.lastUseAt) || defaultNow(),
+    lastUseAt: safeText(initialValues.lastUseAt) || defaultNow(timezone),
     lastUseAtDisambiguation: safeText(initialValues.lastUseAtDisambiguation),
     durationMinutes: safeText(initialValues.durationMinutes) || "0",
     phoneRecordId: safeText(initialValues.phoneRecordId),

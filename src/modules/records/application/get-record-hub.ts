@@ -1,6 +1,6 @@
 import { getPrismaClient } from "@/shared/db/prisma";
 import type { UserScope } from "@/shared/domain/contracts";
-import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
+import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 import type { RecordType } from "../domain/types";
 
 export type EntryPresence = "empty" | "draft" | "completed" | "error";
@@ -94,10 +94,20 @@ const derivePresence = (count: number, requiredCount: number): EntryPresence => 
 };
 
 const text = (value: unknown): string => value === null || value === undefined ? "" : String(value);
-const wallTime = (value: unknown, timezone: string): string => formatRecordWallTime(
-  value instanceof Date ? value : new Date(String(value)),
-  timezone,
-);
+const editableWallTime = (
+  field: string,
+  value: unknown,
+  timezone: string,
+): Record<string, string> => {
+  const local = formatRecordWallTimeInput(
+    value instanceof Date ? value : new Date(String(value)),
+    timezone,
+  );
+  return {
+    [field]: local.value,
+    [`${field}Disambiguation`]: local.disambiguation ?? "",
+  };
+};
 
 const draftValues = (records: readonly LoadedRecord[], timezone: string): Record<string, string> => {
   const values: Record<string, string> = {};
@@ -110,7 +120,7 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
           brand: text(row.brand),
           product: text(row.product),
           caffeineMg: text(row.caffeineMg),
-          consumedAt: wallTime(row.consumedAt, timezone),
+          ...editableWallTime("consumedAt", row.consumedAt, timezone),
         });
         break;
       case "alcohol":
@@ -118,14 +128,14 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
           recordId: row.id,
           alcoholType: text(row.alcoholType),
           servings: text(row.servings),
-          consumedAt: wallTime(row.consumedAt, timezone),
+          ...editableWallTime("consumedAt", row.consumedAt, timezone),
         });
         break;
       case "meal":
         Object.assign(values, {
           mealRecordId: row.id,
           mealSize: text(row.size),
-          mealEatenAt: wallTime(row.eatenAt, timezone),
+          ...editableWallTime("mealEatenAt", row.eatenAt, timezone),
           mealNotes: text(row.notes),
         });
         break;
@@ -134,8 +144,8 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
           exerciseRecordId: row.id,
           exerciseType: text(row.exerciseType),
           exerciseIntensity: text(row.intensity),
-          exerciseStartedAt: wallTime(row.startedAt, timezone),
-          exerciseEndedAt: wallTime(row.endedAt, timezone),
+          ...editableWallTime("exerciseStartedAt", row.startedAt, timezone),
+          ...editableWallTime("exerciseEndedAt", row.endedAt, timezone),
           exerciseAverageHeartRate: text(row.averageHeartRate),
         });
         break;
@@ -150,15 +160,15 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
       case "sleep":
         Object.assign(values, {
           sleepRecordId: row.id,
-          sleepStartedAt: wallTime(row.startedAt, timezone),
-          sleepEndedAt: wallTime(row.endedAt, timezone),
+          ...editableWallTime("sleepStartedAt", row.startedAt, timezone),
+          ...editableWallTime("sleepEndedAt", row.endedAt, timezone),
           morningFatigue: text(row.morningFatigue),
         });
         break;
       case "phone-usage":
         Object.assign(values, {
           phoneRecordId: row.id,
-          lastUseAt: wallTime(row.lastUseAt, timezone),
+          ...editableWallTime("lastUseAt", row.lastUseAt, timezone),
           durationMinutes: text(row.durationMinutes),
         });
         break;

@@ -1,9 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { parseCreateRecordInput, parseUpdateRecordInput } from "@/modules/records/domain/schemas";
 import { createRecordService } from "@/modules/records/application/record-service";
 import type { UserScope } from "@/shared/domain/contracts";
 import type { TransactionClient } from "@/shared/db/transaction";
+import { createMutationReceiptRepository } from "@/modules/records/infrastructure/prisma-mutation-receipt-repository";
+import type { RecordRepository } from "@/modules/records/application/ports";
 
 type DailyLogRow = {
   id: string;
@@ -643,8 +645,9 @@ describe("record service", () => {
 
   it("recalculates rolling windows for both dates after a moved record", async () => {
     const fixtures = createMockPrisma();
+    const movedClock = { now: () => new Date("2026-08-31T00:00:00.000Z") };
     const service = createRecordService(toScope("alice"), {
-      clock,
+      clock: movedClock,
       getPrisma: fixtures.getPrisma,
     });
     const created = await service.create({
@@ -658,16 +661,84 @@ describe("record service", () => {
     const moved = await service.update({
       idempotencyKey: "move-update",
       recordId: created.recordId,
-      input: parseUpdateRecordInput(clock, {
+      input: parseUpdateRecordInput(movedClock, {
         ...caffeineInput,
-        consumedAt: new Date("2026-08-19T07:00:00.000Z"),
+        consumedAt: new Date("2026-08-23T07:00:00.000Z"),
       }),
     });
 
     expect(moved.affectedLocalDates).toEqual(expect.arrayContaining([
       "2026-08-10",
-      "2026-08-19",
+      "2026-08-11",
+      "2026-08-23",
+      "2026-08-24",
     ]));
+  });
+
+  it("resolves a P2002 winner only through a fresh outer client after rollback", async () => {
+    let transactionSettled = false;
+    let aborted = false;
+    let abortedReadAttempts = 0;
+    const txFindUnique = vi.fn(async () => {
+      if (aborted) {
+        abortedReadAttempts += 1;
+        throw new Error("POSTGRES_TRANSACTION_ABORTED");
+      }
+      return null;
+    });
+    const txClient = {
+      mutationReceipt: {
+        deleteMany: vi.fn(async () => ({ count: 0 })),
+        findUnique: txFindUnique,
+        create: vi.fn(async () => {
+          aborted = true;
+          throw { code: "P2002" };
+        }),
+        update: vi.fn(),
+      },
+    } as unknown as TransactionClient;
+    const winner = {
+      records: [{
+        clientKey: "record",
+        recordId: "winning-record",
+        recordType: "caffeine" as const,
+        localDate: "2026-08-19",
+      }],
+      affectedLocalDates: ["2026-08-19"],
+    };
+    const outerResolve = vi.fn(async () => {
+      expect(transactionSettled).toBe(true);
+      return winner;
+    });
+    const outerClient = {
+      $transaction: async <T>(callback: (tx: TransactionClient) => Promise<T>): Promise<T> => {
+        try {
+          return await callback(txClient);
+        } finally {
+          transactionSettled = true;
+        }
+      },
+    };
+    const dummyRecordRepository = {} as RecordRepository;
+    const service = createRecordService(toScope("alice"), {
+      clock,
+      getPrisma: () => outerClient,
+      recordRepositoryFactory: () => dummyRecordRepository,
+      mutationReceiptRepositoryFactory: (db, scope, receiptClock) => (
+        db === txClient
+          ? createMutationReceiptRepository(db, scope, receiptClock)
+          : { execute: vi.fn(), resolve: outerResolve }
+      ),
+    });
+
+    await expect(service.create({
+      idempotencyKey: "p2002-winner",
+      input: caffeineInput,
+    })).resolves.toMatchObject({ recordId: "winning-record" });
+
+    expect(txFindUnique).toHaveBeenCalledTimes(1);
+    expect(abortedReadAttempts).toBe(0);
+    expect(outerResolve).toHaveBeenCalledTimes(1);
   });
 
   it("conflicts when one idempotency key is reused with a different normalized body", async () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const router = vi.hoisted(() => ({
@@ -15,12 +15,73 @@ import { CaffeineFlow } from "@/modules/records/ui/caffeine-flow";
 import { AlcoholFlow } from "@/modules/records/ui/alcohol-flow";
 import { MealHealthFlow } from "@/modules/records/ui/meal-health-form";
 import { SleepPhoneFlow } from "@/modules/records/ui/sleep-phone-form";
+import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 
 describe("intake flows", () => {
   beforeEach(() => {
     window.sessionStorage.clear();
     window.history.replaceState({}, "", "/record");
     router.push.mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("uses the stored non-UTC timezone for datetime and local-date defaults near midnight", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-20T15:30:00.000Z"));
+
+    const caffeine = render(<CaffeineFlow timezone="Asia/Seoul" step="menu-and-amount" />);
+    expect(screen.getByLabelText("마신 시각")).toHaveValue("2026-08-21T00:30");
+    caffeine.unmount();
+
+    const alcohol = render(<AlcoholFlow timezone="Asia/Seoul" step="amount" />);
+    expect(screen.getByLabelText("마신 시각")).toHaveValue("2026-08-21T00:30");
+    alcohol.unmount();
+
+    const meal = render(<MealHealthFlow timezone="Asia/Seoul" step="meal" />);
+    expect(screen.getByLabelText("식사 시각")).toHaveValue("2026-08-21T00:30");
+    meal.unmount();
+
+    const wellness = render(<MealHealthFlow timezone="Asia/Seoul" step="exercise-and-wellness" />);
+    expect(screen.getByLabelText("컨디션 날짜")).toHaveValue("2026-08-21");
+    wellness.unmount();
+
+    render(<SleepPhoneFlow timezone="Asia/Seoul" step="sleep" />);
+    expect(screen.getByLabelText("수면 시작")).toHaveValue("2026-08-21T00:30");
+  });
+
+  it("keeps a fall-back edit on the same repeated-time occurrence in its submit payload", () => {
+    const editTime = formatRecordWallTimeInput(
+      new Date("2026-11-01T06:30:00.000Z"),
+      "America/New_York",
+    );
+    const view = render(
+      <CaffeineFlow
+        timezone="America/New_York"
+        step="menu-and-amount"
+        initialValues={{
+          recordId: "caffeine-1",
+          brand: "테스트",
+          product: "커피",
+          caffeineMg: "100",
+          consumedAt: editTime.value,
+          consumedAtDisambiguation: editTime.disambiguation,
+        }}
+      />,
+    );
+
+    expect(screen.getByLabelText("마신 시각")).toHaveValue("2026-11-01T01:30");
+    expect(screen.getByLabelText("반복 시각 선택")).toHaveValue("later");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+
+    const payload = view.container.querySelector<HTMLInputElement>('input[name="items"]');
+    expect(JSON.parse(payload?.value ?? "[]")[0]).toMatchObject({
+      recordId: "caffeine-1",
+      consumedAt: "2026-11-01T01:30",
+      consumedAtDisambiguation: "later",
+    });
   });
 
   it("renders caffeine brand step", () => {

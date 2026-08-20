@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
+import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
 
 type MealHealthStep = "meal" | "exercise-and-wellness" | "confirm";
 
@@ -38,8 +39,6 @@ type MealHealthFlowProps = Readonly<{
   initialValues?: RawValue;
 }>;
 
-const defaultNow = (): string => new Date().toISOString().slice(0, 16);
-const todayDate = (): string => new Date().toISOString().slice(0, 10);
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
 const normalizeStep = (step?: string): MealHealthStep => (
   step === "exercise-and-wellness" || step === "confirm" ? step : "meal"
@@ -111,26 +110,29 @@ export const MealHealthFlow = ({
   successRedirectPath = "/record",
   initialValues = {},
 }: MealHealthFlowProps) => {
-  const initial = useMemo(() => ({
-    timezone,
-    mealSize: safeText(initialValues.mealSize) || "medium",
-    mealEatenAt: safeText(initialValues.mealEatenAt) || defaultNow(),
-    mealEatenAtDisambiguation: safeText(initialValues.mealEatenAtDisambiguation),
-    mealNotes: safeText(initialValues.mealNotes),
-    mealRecordId: safeText(initialValues.mealRecordId),
-    exerciseType: safeText(initialValues.exerciseType) || "걷기",
-    exerciseIntensity: safeText(initialValues.exerciseIntensity) || "medium",
-    exerciseStartedAt: safeText(initialValues.exerciseStartedAt) || defaultNow(),
-    exerciseStartedAtDisambiguation: safeText(initialValues.exerciseStartedAtDisambiguation),
-    exerciseEndedAt: safeText(initialValues.exerciseEndedAt) || defaultNow(),
-    exerciseEndedAtDisambiguation: safeText(initialValues.exerciseEndedAtDisambiguation),
-    exerciseAverageHeartRate: safeText(initialValues.exerciseAverageHeartRate),
-    exerciseRecordId: safeText(initialValues.exerciseRecordId),
-    fatigueLevel: safeText(initialValues.fatigueLevel) || "1",
-    stressLevel: safeText(initialValues.stressLevel) || "1",
-    wellnessLocalDate: safeText(initialValues.wellnessLocalDate) || todayDate(),
-    wellnessRecordId: safeText(initialValues.wellnessRecordId),
-  }), [initialValues, timezone]);
+  const initial = useMemo(() => {
+    const localNow = formatRecordWallTime(new Date(), timezone);
+    return {
+      timezone,
+      mealSize: safeText(initialValues.mealSize) || "medium",
+      mealEatenAt: safeText(initialValues.mealEatenAt) || localNow,
+      mealEatenAtDisambiguation: safeText(initialValues.mealEatenAtDisambiguation),
+      mealNotes: safeText(initialValues.mealNotes),
+      mealRecordId: safeText(initialValues.mealRecordId),
+      exerciseType: safeText(initialValues.exerciseType) || "걷기",
+      exerciseIntensity: safeText(initialValues.exerciseIntensity) || "medium",
+      exerciseStartedAt: safeText(initialValues.exerciseStartedAt) || localNow,
+      exerciseStartedAtDisambiguation: safeText(initialValues.exerciseStartedAtDisambiguation),
+      exerciseEndedAt: safeText(initialValues.exerciseEndedAt) || localNow,
+      exerciseEndedAtDisambiguation: safeText(initialValues.exerciseEndedAtDisambiguation),
+      exerciseAverageHeartRate: safeText(initialValues.exerciseAverageHeartRate),
+      exerciseRecordId: safeText(initialValues.exerciseRecordId),
+      fatigueLevel: safeText(initialValues.fatigueLevel) || "1",
+      stressLevel: safeText(initialValues.stressLevel) || "1",
+      wellnessLocalDate: safeText(initialValues.wellnessLocalDate) || localNow.slice(0, 10),
+      wellnessRecordId: safeText(initialValues.wellnessRecordId),
+    };
+  }, [initialValues, timezone]);
 
   return (
     <RecordFormShell

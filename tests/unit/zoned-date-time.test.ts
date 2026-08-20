@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatRecordWallTime,
+  formatRecordWallTimeInput,
   parseRecordWallTime,
   parseZonedDateTime,
   possibleOffsetsForWallTime,
@@ -58,5 +59,15 @@ describe("zoned-date-time", () => {
 
     expect(parsed.toISOString()).toBe("2026-11-01T06:30:00.000Z");
     expect(formatRecordWallTime(parsed, "America/New_York")).toBe("2026-11-01T01:30");
+  });
+
+  it("preserves the later occurrence when formatting a repeated instant for editing", () => {
+    expect(formatRecordWallTimeInput(
+      new Date("2026-11-01T06:30:00.000Z"),
+      "America/New_York",
+    )).toEqual({
+      value: "2026-11-01T01:30",
+      disambiguation: "later",
+    });
   });
 });

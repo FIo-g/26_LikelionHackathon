@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
+import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
 
 type AlcoholStep = "type" | "amount" | "confirm";
 
@@ -24,7 +25,7 @@ type AlcoholFlowProps = Readonly<{
   };
 }>;
 
-const defaultNow = (): string => new Date().toISOString().slice(0, 16);
+const defaultNow = (timezone: string): string => formatRecordWallTime(new Date(), timezone);
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
 const normalizeStep = (step?: string): AlcoholStep => step === "amount" || step === "confirm" ? step : "type";
 
@@ -56,7 +57,7 @@ export const AlcoholFlow = ({
     recordId: safeText(initialValues.recordId),
     alcoholType: safeText(initialValues.alcoholType),
     servings: safeText(initialValues.servings),
-    consumedAt: safeText(initialValues.consumedAt) || defaultNow(),
+    consumedAt: safeText(initialValues.consumedAt) || defaultNow(timezone),
     consumedAtDisambiguation: safeText(initialValues.consumedAtDisambiguation),
   }), [
     initialValues.alcoholType,

@@ -221,3 +221,33 @@ export const formatRecordWallTime = (instant: Date, timezone: string): string =>
     throw new TimeInputError("INVALID_LOCAL_TIME");
   }
 };
+
+export const formatRecordWallTimeInput = (
+  instant: Date,
+  timezone: string,
+): LocalRecordTime => {
+  const value = formatRecordWallTime(instant, timezone);
+  const { localDate, localTime } = splitRecordWallTime(value);
+  const offsets = possibleOffsetsForWallTime({ localDate, localTime, timezone });
+
+  if (offsets.length <= 1) {
+    return { value };
+  }
+
+  const minuteEpoch = Math.floor(instant.getTime() / 60_000) * 60_000;
+  const occurrence = offsets.findIndex((choice) => parseZonedDateTime({
+    localDate,
+    localTime,
+    timezone,
+    offsetMinutes: choice.offsetMinutes,
+  }).getTime() === minuteEpoch);
+
+  if (occurrence < 0) {
+    throw new TimeInputError("INVALID_LOCAL_TIME");
+  }
+
+  return {
+    value,
+    disambiguation: occurrence === 0 ? "earlier" : "later",
+  };
+};
