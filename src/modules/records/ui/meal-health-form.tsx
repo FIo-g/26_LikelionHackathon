@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
-import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
+import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 
 type MealHealthStep = "meal" | "exercise-and-wellness" | "confirm";
 
@@ -111,25 +111,31 @@ export const MealHealthFlow = ({
   initialValues = {},
 }: MealHealthFlowProps) => {
   const initial = useMemo(() => {
-    const localNow = formatRecordWallTime(new Date(), timezone);
+    const localNow = formatRecordWallTimeInput(new Date(), timezone);
+    const mealEatenAt = safeText(initialValues.mealEatenAt);
+    const exerciseStartedAt = safeText(initialValues.exerciseStartedAt);
+    const exerciseEndedAt = safeText(initialValues.exerciseEndedAt);
     return {
       timezone,
       mealSize: safeText(initialValues.mealSize) || "medium",
-      mealEatenAt: safeText(initialValues.mealEatenAt) || localNow,
-      mealEatenAtDisambiguation: safeText(initialValues.mealEatenAtDisambiguation),
+      mealEatenAt: mealEatenAt || localNow.value,
+      mealEatenAtDisambiguation: safeText(initialValues.mealEatenAtDisambiguation)
+        || (mealEatenAt ? "" : localNow.disambiguation ?? ""),
       mealNotes: safeText(initialValues.mealNotes),
       mealRecordId: safeText(initialValues.mealRecordId),
       exerciseType: safeText(initialValues.exerciseType) || "걷기",
       exerciseIntensity: safeText(initialValues.exerciseIntensity) || "medium",
-      exerciseStartedAt: safeText(initialValues.exerciseStartedAt) || localNow,
-      exerciseStartedAtDisambiguation: safeText(initialValues.exerciseStartedAtDisambiguation),
-      exerciseEndedAt: safeText(initialValues.exerciseEndedAt) || localNow,
-      exerciseEndedAtDisambiguation: safeText(initialValues.exerciseEndedAtDisambiguation),
+      exerciseStartedAt: exerciseStartedAt || localNow.value,
+      exerciseStartedAtDisambiguation: safeText(initialValues.exerciseStartedAtDisambiguation)
+        || (exerciseStartedAt ? "" : localNow.disambiguation ?? ""),
+      exerciseEndedAt: exerciseEndedAt || localNow.value,
+      exerciseEndedAtDisambiguation: safeText(initialValues.exerciseEndedAtDisambiguation)
+        || (exerciseEndedAt ? "" : localNow.disambiguation ?? ""),
       exerciseAverageHeartRate: safeText(initialValues.exerciseAverageHeartRate),
       exerciseRecordId: safeText(initialValues.exerciseRecordId),
       fatigueLevel: safeText(initialValues.fatigueLevel) || "1",
       stressLevel: safeText(initialValues.stressLevel) || "1",
-      wellnessLocalDate: safeText(initialValues.wellnessLocalDate) || localNow.slice(0, 10),
+      wellnessLocalDate: safeText(initialValues.wellnessLocalDate) || localNow.value.slice(0, 10),
       wellnessRecordId: safeText(initialValues.wellnessRecordId),
     };
   }, [initialValues, timezone]);

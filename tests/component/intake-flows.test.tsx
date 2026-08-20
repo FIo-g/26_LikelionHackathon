@@ -84,6 +84,78 @@ describe("intake flows", () => {
     });
   });
 
+  it("submits untouched fall-back defaults with their derived occurrence on every intake surface", () => {
+    const cases = [
+      {
+        renderFlow: () => render(<CaffeineFlow timezone="America/New_York" step="confirm" />),
+        submitLabel: "카페인 저장",
+        expected: [{
+          consumedAt: "2026-11-01T01:30",
+          consumedAtDisambiguation: "later",
+        }],
+      },
+      {
+        renderFlow: () => render(<AlcoholFlow timezone="America/New_York" step="confirm" />),
+        submitLabel: "음주 저장",
+        expected: [{
+          consumedAt: "2026-11-01T01:30",
+          consumedAtDisambiguation: "later",
+        }],
+      },
+      {
+        renderFlow: () => render(<MealHealthFlow timezone="America/New_York" step="confirm" />),
+        submitLabel: "식사/운동/컨디션 저장",
+        expected: [
+          { eatenAt: "2026-11-01T01:30", eatenAtDisambiguation: "later" },
+          {
+            startedAt: "2026-11-01T01:30",
+            startedAtDisambiguation: "later",
+            endedAt: "2026-11-01T01:30",
+            endedAtDisambiguation: "later",
+          },
+        ],
+      },
+      {
+        renderFlow: () => render(<SleepPhoneFlow timezone="America/New_York" step="confirm" />),
+        submitLabel: "수면/휴대폰 저장",
+        expected: [
+          {
+            startedAt: "2026-11-01T01:30",
+            startedAtDisambiguation: "later",
+            endedAt: "2026-11-01T01:30",
+            endedAtDisambiguation: "later",
+          },
+          { lastUseAt: "2026-11-01T01:30", lastUseAtDisambiguation: "later" },
+        ],
+      },
+    ];
+
+    for (const testCase of cases) {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-11-01T06:30:00.000Z"));
+      const view = testCase.renderFlow();
+      vi.useRealTimers();
+
+      const submissions: FormData[] = [];
+      const form = view.container.querySelector("form");
+      form?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        submissions.push(new FormData(event.currentTarget as HTMLFormElement));
+      }, { capture: true, once: true });
+
+      fireEvent.click(screen.getByRole("button", { name: testCase.submitLabel }));
+
+      const submitted = submissions[0];
+      expect(submitted).not.toBeNull();
+      const items = JSON.parse(String(submitted?.get("items") ?? "[]")) as Array<Record<string, unknown>>;
+      testCase.expected.forEach((expected, index) => {
+        expect(items[index]).toMatchObject(expected);
+      });
+      view.unmount();
+    }
+  });
+
   it("renders caffeine brand step", () => {
     render(<CaffeineFlow timezone="Asia/Seoul" step="brand" />);
 

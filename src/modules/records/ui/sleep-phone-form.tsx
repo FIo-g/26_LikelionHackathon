@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
-import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
+import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 
 type SleepPhoneStep = "sleep" | "phone" | "confirm";
 
@@ -32,7 +32,6 @@ type SleepPhoneFlowProps = Readonly<{
   initialValues?: RawValue;
 }>;
 
-const defaultNow = (timezone: string): string => formatRecordWallTime(new Date(), timezone);
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
 const normalizeStep = (step?: string): SleepPhoneStep => step === "phone" || step === "confirm" ? step : "sleep";
 
@@ -84,19 +83,28 @@ export const SleepPhoneFlow = ({
   successRedirectPath = "/record",
   initialValues = {},
 }: SleepPhoneFlowProps) => {
-  const initial = useMemo(() => ({
-    timezone,
-    sleepStartedAt: safeText(initialValues.sleepStartedAt) || defaultNow(timezone),
-    sleepStartedAtDisambiguation: safeText(initialValues.sleepStartedAtDisambiguation),
-    sleepEndedAt: safeText(initialValues.sleepEndedAt) || defaultNow(timezone),
-    sleepEndedAtDisambiguation: safeText(initialValues.sleepEndedAtDisambiguation),
-    morningFatigue: safeText(initialValues.morningFatigue) || "1",
-    sleepRecordId: safeText(initialValues.sleepRecordId),
-    lastUseAt: safeText(initialValues.lastUseAt) || defaultNow(timezone),
-    lastUseAtDisambiguation: safeText(initialValues.lastUseAtDisambiguation),
-    durationMinutes: safeText(initialValues.durationMinutes) || "0",
-    phoneRecordId: safeText(initialValues.phoneRecordId),
-  }), [initialValues, timezone]);
+  const initial = useMemo(() => {
+    const localNow = formatRecordWallTimeInput(new Date(), timezone);
+    const sleepStartedAt = safeText(initialValues.sleepStartedAt);
+    const sleepEndedAt = safeText(initialValues.sleepEndedAt);
+    const lastUseAt = safeText(initialValues.lastUseAt);
+    return {
+      timezone,
+      sleepStartedAt: sleepStartedAt || localNow.value,
+      sleepStartedAtDisambiguation: safeText(initialValues.sleepStartedAtDisambiguation)
+        || (sleepStartedAt ? "" : localNow.disambiguation ?? ""),
+      sleepEndedAt: sleepEndedAt || localNow.value,
+      sleepEndedAtDisambiguation: safeText(initialValues.sleepEndedAtDisambiguation)
+        || (sleepEndedAt ? "" : localNow.disambiguation ?? ""),
+      morningFatigue: safeText(initialValues.morningFatigue) || "1",
+      sleepRecordId: safeText(initialValues.sleepRecordId),
+      lastUseAt: lastUseAt || localNow.value,
+      lastUseAtDisambiguation: safeText(initialValues.lastUseAtDisambiguation)
+        || (lastUseAt ? "" : localNow.disambiguation ?? ""),
+      durationMinutes: safeText(initialValues.durationMinutes) || "0",
+      phoneRecordId: safeText(initialValues.phoneRecordId),
+    };
+  }, [initialValues, timezone]);
 
   return (
     <RecordFormShell

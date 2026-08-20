@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
-import { formatRecordWallTime } from "@/shared/time/zoned-date-time";
+import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 
 type CaffeineStep = "brand" | "menu-and-amount" | "confirm";
 
@@ -26,7 +26,6 @@ type CaffeineFlowProps = Readonly<{
   };
 }>;
 
-const defaultNow = (timezone: string): string => formatRecordWallTime(new Date(), timezone);
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
 
 const normalizeStep = (step?: string): CaffeineStep => (
@@ -58,15 +57,20 @@ export const CaffeineFlow = ({
   successRedirectPath = "/record",
   initialValues = {},
 }: CaffeineFlowProps) => {
-  const initial = useMemo(() => ({
-    timezone,
-    recordId: safeText(initialValues.recordId),
-    brand: safeText(initialValues.brand),
-    product: safeText(initialValues.product),
-    caffeineMg: safeText(initialValues.caffeineMg),
-    consumedAt: safeText(initialValues.consumedAt) || defaultNow(timezone),
-    consumedAtDisambiguation: safeText(initialValues.consumedAtDisambiguation),
-  }), [
+  const initial = useMemo(() => {
+    const suppliedConsumedAt = safeText(initialValues.consumedAt);
+    const localNow = formatRecordWallTimeInput(new Date(), timezone);
+    return {
+      timezone,
+      recordId: safeText(initialValues.recordId),
+      brand: safeText(initialValues.brand),
+      product: safeText(initialValues.product),
+      caffeineMg: safeText(initialValues.caffeineMg),
+      consumedAt: suppliedConsumedAt || localNow.value,
+      consumedAtDisambiguation: safeText(initialValues.consumedAtDisambiguation)
+        || (suppliedConsumedAt ? "" : localNow.disambiguation ?? ""),
+    };
+  }, [
     initialValues.brand,
     initialValues.caffeineMg,
     initialValues.consumedAt,
