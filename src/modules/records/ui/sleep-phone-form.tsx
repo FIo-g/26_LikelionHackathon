@@ -5,6 +5,8 @@ import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
 import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
+import { RecordFlowHeader } from "./record-flow-header";
+import styles from "./records.module.css";
 
 type SleepPhoneStep = "sleep" | "phone" | "confirm";
 
@@ -67,7 +69,7 @@ const buildSummary = (values: Record<string, string>) => [
 ];
 
 const Disambiguation = ({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) => (
-  <label>
+  <label className={styles.fieldLabel}>
     반복 시각 선택
     <select name={name} value={value} onChange={(event) => onChange(event.currentTarget.value)}>
       <option value="">해당 없음</option>
@@ -116,37 +118,53 @@ export const SleepPhoneFlow = ({
       initialStep={normalizeStep(requestedStep)}
     >
       {({ values, step, setValue, setStep }) => (
-        <main>
-          <h1>수면/휴대폰</h1>
+        <main className={styles.flowPage} data-lunar-screen="record">
+          <RecordFlowHeader section="수면 · 휴대폰" />
+          <div className={styles.flowContent}>
           {step === "sleep" ? (
-            <>
-              <p>1/3 단계</p>
-              <label>수면 시작<input type="datetime-local" name="sleepStartedAt" value={values.sleepStartedAt.slice(0, 16)} onChange={(event) => setValue("sleepStartedAt", event.currentTarget.value)} required /></label>
+            <section className={styles.flowStep} aria-labelledby="sleep-title">
+              <h1 id="sleep-title">수면은 어젯밤,<br />휴대폰은 오늘</h1>
+              <section className={styles.sleepInputCard} aria-labelledby="sleep-card-title">
+                <h2 id="sleep-card-title">어젯밤 수면 기록</h2>
+                <p>직접 입력한 기상 후 어젯밤 기준으로 저장돼요.</p>
+              <label className={styles.fieldLabel}>수면 시작<input type="datetime-local" name="sleepStartedAt" value={values.sleepStartedAt.slice(0, 16)} onChange={(event) => setValue("sleepStartedAt", event.currentTarget.value)} required /></label>
               <Disambiguation name="sleepStartedAtDisambiguation" value={values.sleepStartedAtDisambiguation} onChange={(value) => setValue("sleepStartedAtDisambiguation", value)} />
-              <label>수면 종료<input type="datetime-local" name="sleepEndedAt" value={values.sleepEndedAt.slice(0, 16)} onChange={(event) => setValue("sleepEndedAt", event.currentTarget.value)} required /></label>
+              <label className={styles.fieldLabel}>수면 종료<input type="datetime-local" name="sleepEndedAt" value={values.sleepEndedAt.slice(0, 16)} onChange={(event) => setValue("sleepEndedAt", event.currentTarget.value)} required /></label>
               <Disambiguation name="sleepEndedAtDisambiguation" value={values.sleepEndedAtDisambiguation} onChange={(value) => setValue("sleepEndedAtDisambiguation", value)} />
-              <label>아침 피로(1-5)<input type="number" min="1" max="5" name="morningFatigue" value={values.morningFatigue} onChange={(event) => setValue("morningFatigue", event.currentTarget.value)} required /></label>
-              <button type="button" onClick={() => setStep("phone")}>다음</button>
-            </>
+              <label className={styles.fieldLabel}>아침 피로(1-5)<input type="number" min="1" max="5" name="morningFatigue" value={values.morningFatigue} onChange={(event) => setValue("morningFatigue", event.currentTarget.value)} required /></label>
+              </section>
+              <button className={styles.nextButton} type="button" onClick={() => setStep("phone")}>오늘 휴대폰 기록</button>
+            </section>
           ) : null}
           {step === "phone" ? (
-            <>
-              <p>2/3 단계</p>
-              <label>마지막 휴대폰 사용<input type="datetime-local" name="lastUseAt" value={values.lastUseAt.slice(0, 16)} onChange={(event) => setValue("lastUseAt", event.currentTarget.value)} required /></label>
+            <section className={styles.flowStep} aria-labelledby="phone-title">
+              <h1 id="phone-title">수면은 어젯밤,<br />휴대폰은 오늘</h1>
+              <section className={styles.phoneInputCard} aria-labelledby="phone-card-title">
+                <h2 id="phone-card-title">오늘의 휴대폰 사용시간</h2>
+                <span className={styles.manualPill}>직접 입력</span>
+                <strong>{values.durationMinutes || "0"}분</strong>
+                <p>기기 자동 연동 없이 입력한 값이 저장됩니다.</p>
+              <label className={styles.fieldLabel}>마지막 휴대폰 사용<input type="datetime-local" name="lastUseAt" value={values.lastUseAt.slice(0, 16)} onChange={(event) => setValue("lastUseAt", event.currentTarget.value)} required /></label>
               <Disambiguation name="lastUseAtDisambiguation" value={values.lastUseAtDisambiguation} onChange={(value) => setValue("lastUseAtDisambiguation", value)} />
-              <label>사용 시간(분)<input type="number" min="0" max="1440" name="durationMinutes" value={values.durationMinutes} onChange={(event) => setValue("durationMinutes", event.currentTarget.value)} required /></label>
-              <button type="button" onClick={() => setStep("sleep")}>이전</button>
-              <button type="button" onClick={() => setStep("confirm")}>다음</button>
-            </>
+              <label className={styles.fieldLabel}>사용 시간(분)<input type="number" min="0" max="1440" name="durationMinutes" value={values.durationMinutes} onChange={(event) => setValue("durationMinutes", event.currentTarget.value)} required /></label>
+              </section>
+              <p className={styles.flowNote}>수면과 휴대폰 기록은 서로 다른 날짜 기준으로 저장됩니다.</p>
+              <div className={styles.stepActions}>
+                <button className={styles.secondaryButton} type="button" onClick={() => setStep("sleep")}>이전</button>
+                <button className={styles.nextButton} type="button" onClick={() => setStep("confirm")}>기록 확인</button>
+              </div>
+            </section>
           ) : null}
           {step === "confirm" ? (
-            <>
-              <p>3/3 단계</p>
+            <section className={styles.flowStep} aria-labelledby="sleep-confirm-title">
+              <h1 id="sleep-confirm-title">수면 · 휴대폰 기록을 확인해요</h1>
+              <p className={styles.flowLead}>어젯밤 수면과 오늘 휴대폰 값이 각각 올바른지 확인해주세요.</p>
               <input type="hidden" name="items" value={payloadFor(values)} readOnly />
               <RecordConfirmation title="입력 확인" fields={buildSummary(values)} />
-              <button type="button" onClick={() => setStep("phone")}>이전</button>
-            </>
+              <button className={styles.secondaryButton} type="button" onClick={() => setStep("phone")}>직접 수정</button>
+            </section>
           ) : null}
+          </div>
         </main>
       )}
     </RecordFormShell>

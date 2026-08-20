@@ -6,8 +6,10 @@ import { isIsolatedE2eTestMode } from "@/shared/auth/e2e-test-mode";
 
 type E2ePrisma = {
   user: { upsert: (args: unknown) => Promise<unknown> };
-  userProfile: { upsert: (args: unknown) => Promise<unknown> };
-  sleepGoal: { upsert: (args: unknown) => Promise<unknown> };
+  userProfile: { upsert: (args: unknown) => Promise<unknown>; deleteMany: (args: unknown) => Promise<unknown> };
+  sleepGoal: { upsert: (args: unknown) => Promise<unknown>; deleteMany: (args: unknown) => Promise<unknown> };
+  userHabit: { deleteMany: (args: unknown) => Promise<unknown> };
+  connection: { deleteMany: (args: unknown) => Promise<unknown> };
   specialEvent: { deleteMany: (args: unknown) => Promise<unknown> };
   scheduleAdvice: { deleteMany: (args: unknown) => Promise<unknown> };
   sleepPlan: { deleteMany: (args: unknown) => Promise<unknown>; create: (args: unknown) => Promise<{ id: string }> };
@@ -23,9 +25,20 @@ const localDate = (instant: Date): string => {
 
 const plusMinutes = (instant: Date, minutes: number): Date => new Date(instant.getTime() + minutes * 60_000);
 
+const onboardingSetupMode = (request: Request): "completed" | "incomplete" | null => {
+  const mode = new URL(request.url).searchParams.get("onboarding");
+  if (mode === null || mode === "completed") return "completed";
+  return mode === "incomplete" ? "incomplete" : null;
+};
+
 export async function POST(request: Request): Promise<NextResponse> {
   if (!isIsolatedE2eTestMode()) {
     return new NextResponse(null, { status: 404 });
+  }
+
+  const onboardingMode = onboardingSetupMode(request);
+  if (!onboardingMode) {
+    return NextResponse.json({ code: "INVALID_E2E_SETUP_MODE" }, { status: 400 });
   }
 
   let identity;
@@ -44,16 +57,24 @@ export async function POST(request: Request): Promise<NextResponse> {
   await prisma.sleepPlan.deleteMany({ where: { userId } });
   await prisma.specialEvent.deleteMany({ where: { userId } });
   await prisma.user.upsert({ where: { id: userId }, update: { email: identity.email }, create: { id: userId, email: identity.email } });
-  await prisma.userProfile.upsert({
-    where: { userId },
-    update: { nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
-    create: { userId, nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
-  });
-  await prisma.sleepGoal.upsert({
-    where: { userId },
-    update: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
-    create: { userId, targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
-  });
+
+  if (onboardingMode === "incomplete") {
+    await prisma.connection.deleteMany({ where: { userId } });
+    await prisma.userHabit.deleteMany({ where: { userId } });
+    await prisma.sleepGoal.deleteMany({ where: { userId } });
+    await prisma.userProfile.deleteMany({ where: { userId } });
+  } else {
+    await prisma.userProfile.upsert({
+      where: { userId },
+      update: { nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
+      create: { userId, nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
+    });
+    await prisma.sleepGoal.upsert({
+      where: { userId },
+      update: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
+      create: { userId, targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
+    });
+  }
 
   if (new URL(request.url).searchParams.get("seedPlan") === "1") {
     const plan = await prisma.sleepPlan.create({

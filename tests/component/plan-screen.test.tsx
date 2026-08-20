@@ -12,6 +12,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { CalendarConnectionCard } from "@/modules/planner/ui/calendar-connection-card";
+import { PlanCalendar } from "@/modules/planner/ui/plan-calendar";
 import { PlanDesktopContent, PlanMobileContent, PlanScreen } from "@/modules/planner/ui/plan-screen";
 import type { PlanViewModel } from "@/modules/planner/application/get-plan-view-model";
 
@@ -73,8 +74,25 @@ describe("Plan screen", () => {
   it("keeps calendar connection unavailable and sends people to direct entry", () => {
     render(<CalendarConnectionCard availability="coming-soon" />);
 
-    expect(screen.getByText("캘린더 연동 준비 중")).toBeVisible();
-    expect(screen.getByRole("link", { name: "주요 일정 직접 입력" })).toBeVisible();
+    expect(screen.getByText("캘린더 연결")).toBeVisible();
+    expect(screen.getByRole("button", { name: "연동 준비 중" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "직접 입력" })).toBeVisible();
+  });
+
+  it("places real events in the anchored month and keeps events outside that month visible", () => {
+    render(<PlanCalendar
+      anchorLocalDate="2026-08-21"
+      events={[
+        { id: "august", type: "발표", startsAt: "2026-08-22T00:00:00.000Z" },
+        { id: "september", type: "출장", startsAt: "2026-09-02T14:00:00.000Z" },
+      ]}
+      timezone="America/New_York"
+    />);
+
+    expect(screen.getByRole("heading", { name: "2026년 8월" })).toBeVisible();
+    expect(screen.getByText("발표")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "다른 달 일정" })).toBeVisible();
+    expect(screen.getByText("출장")).toBeVisible();
   });
 
   it("renders direct event entry and generated advice controls", () => {
@@ -83,6 +101,7 @@ describe("Plan screen", () => {
     expect(screen.getByRole("button", { name: "주요 일정 추가" })).toBeVisible();
     expect(screen.getByRole("button", { name: "계획에 반영" })).toBeVisible();
     expect(screen.getByRole("button", { name: "제안 닫기" })).toBeVisible();
+    expect(screen.getByText("목표 수면 · 일정 시간 · 사용 가능한 기록")).toBeVisible();
     expect(screen.getByRole("region", { name: "앞으로 2주" })).toBeVisible();
   });
 
@@ -123,12 +142,36 @@ describe("Plan screen", () => {
           { id: "past-1", type: "지난 일정 1", startsAt: "2026-08-18T12:00:00.000Z" },
           { id: "past-2", type: "지난 일정 2", startsAt: "2026-08-19T12:00:00.000Z" },
           { id: "past-3", type: "지난 일정 3", startsAt: "2026-08-20T12:00:00.000Z" },
-          { id: "upcoming", type: "다가오는 일정", startsAt: "2026-08-22T12:00:00.000Z" },
+          { id: "upcoming-1", type: "다가오는 일정", startsAt: "2026-08-22T12:00:00.000Z" },
+          { id: "upcoming-2", type: "다가오는 일정 2", startsAt: "2026-08-23T12:00:00.000Z" },
+          { id: "upcoming-3", type: "다가오는 일정 3", startsAt: "2026-08-24T12:00:00.000Z" },
+          { id: "upcoming-4", type: "다가오는 일정 4", startsAt: "2026-08-25T12:00:00.000Z" },
         ],
       }} />);
 
       expect(screen.getByText("다가오는 일정")).toBeVisible();
+      expect(screen.getByText("다가오는 일정 4")).toBeVisible();
       expect(screen.queryByText("지난 일정 1")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps past events out of the desktop upcoming calendar", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-21T12:00:00.000Z"));
+
+    try {
+      render(<PlanDesktopContent viewModel={{
+        ...viewModel,
+        events: [
+          { id: "past", type: "지난 발표", startsAt: "2026-08-20T12:00:00.000Z" },
+          { id: "future", type: "다가오는 발표", startsAt: "2026-08-22T12:00:00.000Z" },
+        ],
+      }} />);
+
+      expect(screen.getByText("다가오는 발표")).toBeVisible();
+      expect(screen.queryByText("지난 발표")).not.toBeInTheDocument();
     } finally {
       vi.useRealTimers();
     }

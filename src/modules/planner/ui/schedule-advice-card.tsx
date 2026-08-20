@@ -28,6 +28,7 @@ export const ScheduleAdviceCard = ({ advice, timezone }: { advice: ScheduleAdvic
   });
 
   return <section className={styles.adviceCard} aria-labelledby="schedule-advice-title">
+    <span aria-hidden="true" className={styles.adviceGlow} />
     <div className={styles.sectionHeading}>
       <div><p className={styles.eyebrow}>{advice.triggerType === "reroute" ? "계획 조정 제안" : "수면 조정 제안"}</p><h2 id="schedule-advice-title">{advice.triggerType === "reroute" ? "기록된 활동에 맞춰 이후 계획을 조정해요" : advice.headline}</h2></div>
       <span>신뢰도 {confidenceLabel[advice.proposal.confidence]}</span>
@@ -36,6 +37,10 @@ export const ScheduleAdviceCard = ({ advice, timezone }: { advice: ScheduleAdvic
     {advice.status === "generated" ? <p>이 제안은 아직 계획에 반영되지 않았어요.</p> : null}
     {advice.triggerType === "reroute" ? <p>지나간 일정은 유지하고 이후 일정만 조정합니다.</p> : null}
     {advice.proposal.conflicts.length > 0 ? <p className={styles.warning}>조정 기간이 충분하지 않을 수 있어요.</p> : null}
+    <div className={styles.adviceBasis}>
+      <strong>계산 근거</strong>
+      <span>목표 수면 · 일정 시간 · 사용 가능한 기록</span>
+    </div>
     {advice.status === "generated" ? (
       <div className={styles.adviceActions}>
         <button type="button" onClick={() => setConfirmationOpen(true)}>계획에 반영</button>

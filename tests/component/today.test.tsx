@@ -140,6 +140,42 @@ describe("TodayScreen", () => {
     }
   });
 
+  it("uses the real goal, local date, and score in the Figma-aligned Today shell", () => {
+    render(<TodayScreen viewModel={nowReadyModel} />);
+
+    expect(screen.getByRole("heading", { name: /오늘 밤.*23:00.*편안히 잠들기 위한 준비/ })).toBeVisible();
+    expect(screen.getByText(/TODAY.*8월 20일 목요일/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "오늘 기록하기" })).toHaveAttribute("href", "/record");
+    expect(screen.getByRole("progressbar", { name: "수면 준비도 80점" })).toHaveAttribute("value", "80");
+    expect(screen.getByText("7/7 항목 기준 충족")).toBeVisible();
+    expect(screen.queryByText("3시간 12분")).not.toBeInTheDocument();
+    expect(screen.queryByText("실시간 연동")).not.toBeInTheDocument();
+  });
+
+  it("keeps the real sleep-entry route in the missing-sleep callout", () => {
+    const missingSleepModel: TodayViewModel = {
+      ...nowReadyModel,
+      recordSummary: {
+        ...nowReadyModel.recordSummary,
+        data: nowReadyModel.recordSummary.data?.map((item) => (
+          item.type === "sleep" ? { ...item, presence: "empty" as const } : item
+        )) ?? null,
+      },
+    };
+
+    render(<TodayScreen viewModel={missingSleepModel} />);
+
+    const callout = screen.getByText("어젯밤 수면 기록이 필요해요").closest("li");
+    expect(callout).toBeInstanceOf(HTMLLIElement);
+    if (callout) {
+      expect(within(callout).getByRole("link", { name: "수면 기록 추가" })).toHaveAttribute(
+        "href",
+        "/record/sleep-phone?step=sleep",
+      );
+      expect(within(callout).getByText("기상 후 어제 기준으로 직접 입력해요.")).toBeVisible();
+    }
+  });
+
   it("renders corrupt analysis as an actionable error", () => {
     render(<TodayScreen viewModel={corruptModel} />);
 

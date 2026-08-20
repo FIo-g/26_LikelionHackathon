@@ -3,7 +3,7 @@ import { expect, majorEventForm, setupE2eUser, test, visibleButton, visibleByLab
 test("protects the Plan screen without a session", async ({ page }) => {
   await page.goto("/plan");
 
-  await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "반가워요" })).toBeVisible();
 });
 
 const futureLocalTime = (daysFromNow: number): string => {

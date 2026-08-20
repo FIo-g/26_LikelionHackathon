@@ -1,4 +1,5 @@
 import type { ConnectionAvailability, ConnectionState } from "@/shared/connection/status";
+import styles from "./onboarding.module.css";
 
 type DeviceType = "wearable" | "phone";
 
@@ -10,8 +11,13 @@ type DeviceConnectOptionProps = Readonly<{
 }>;
 
 const TYPE_LABEL_BY_TYPE: Readonly<Record<DeviceType, string>> = {
-  wearable: "웨어러블",
-  phone: "휴대폰",
+  wearable: "위치·수면·운동",
+  phone: "휴대폰 활동 시간",
+};
+
+const TYPE_DESCRIPTION_BY_TYPE: Readonly<Record<DeviceType, string>> = {
+  wearable: "지원 기기를 연결하면 수면과 활동 기록을 자동으로 채워요.",
+  phone: "지원되는 경우 오늘 수치를 자동으로 반영해요.",
 };
 
 const statusText = (props: DeviceConnectOptionProps): string => {
@@ -31,13 +37,20 @@ export const DeviceConnectOption = (props: DeviceConnectOptionProps) => {
   const status = statusText(props);
 
   return (
-    <section>
-      <h3>{TYPE_LABEL_BY_TYPE[props.type]} 연동</h3>
-      <p>{status}</p>
-      <button type="button" disabled={isComingSoon} aria-disabled={isComingSoon ? "true" : "false"}>
-        {isComingSoon ? "준비 중" : "선택하기"}
+    <section className={`${styles.deviceCard} ${props.type === "phone" ? styles.deviceCardBlue : ""}`}>
+      <div>
+        <h3>{TYPE_LABEL_BY_TYPE[props.type]}</h3>
+        <p>{TYPE_DESCRIPTION_BY_TYPE[props.type]}</p>
+      </div>
+      <button
+        className={styles.deviceButton}
+        type="button"
+        disabled={isComingSoon}
+        aria-disabled={isComingSoon ? "true" : "false"}
+        aria-label={`${TYPE_LABEL_BY_TYPE[props.type]}: ${status}`}
+      >
+        {isComingSoon ? "준비 중" : "연결"}
       </button>
     </section>
   );
 };
-

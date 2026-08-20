@@ -36,24 +36,26 @@ export const SignUpForm = () => {
   };
 
   return (
-    <form onSubmit={submit}>
-      <label>
+    <form onSubmit={submit} className={styles.form}>
+      <label className={styles.label}>
         이메일
         <input
           className={styles.field}
           type="email"
           autoComplete="email"
+          placeholder="name@example.com"
           value={email}
           onChange={(event) => setEmail(event.currentTarget.value)}
           required
         />
       </label>
-      <label>
+      <label className={styles.label}>
         비밀번호
         <input
           className={styles.field}
           type="password"
           autoComplete="new-password"
+          placeholder="8자 이상 입력해주세요"
           value={password}
           onChange={(event) => setPassword(event.currentTarget.value)}
           required

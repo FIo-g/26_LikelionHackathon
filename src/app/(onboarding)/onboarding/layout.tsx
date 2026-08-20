@@ -22,8 +22,8 @@ export default async function OnboardingLayout({ children }: Readonly<{ children
   }
 
   return (
-    <main>
+    <div>
       {children}
-    </main>
+    </div>
   );
 }

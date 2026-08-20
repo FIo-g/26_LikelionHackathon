@@ -39,6 +39,18 @@ const viewModel = {
 } as const;
 
 describe("AccountScreen", () => {
+  it("keeps the Figma account structure bound to the authenticated view model", () => {
+    render(<AccountScreen viewModel={viewModel} />);
+
+    expect(screen.getByRole("heading", { level: 1, name: "나와 목표를 관리해요" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "계정 설정" })).toHaveTextContent("개인정보 수정목표 수정연동 관리데이터 관리");
+    expect(screen.getAllByText("23:00 → 07:00")).toHaveLength(2);
+    expect(screen.getAllByDisplayValue("alice@example.test")).toHaveLength(2);
+    expect(screen.getAllByDisplayValue("alice@example.test")[0]).toHaveAttribute("readonly");
+    expect(screen.getAllByDisplayValue("Asia/Seoul")).toHaveLength(2);
+    expect(screen.getByText("내보내기와 계정 데이터 삭제는 본인 확인 후에만 진행할 수 있습니다.")).toBeInTheDocument();
+  });
+
   it("uses unique field ids across desktop and mobile forms", () => {
     render(<AccountScreen viewModel={viewModel} />);
     const ids = Array.from(document.querySelectorAll("input[id], select[id]"), (element) => element.id);
@@ -64,6 +76,8 @@ describe("AccountScreen", () => {
     expect(screen.getAllByText("직접 입력 사용 중")[0]).toBeVisible();
     expect(screen.getAllByText("웨어러블 연동 준비 중")[0]).toBeVisible();
     expect(screen.getAllByText("휴대폰 연동 준비 중")[0]).toBeVisible();
+    expect(screen.getAllByText("직접 입력 기록은 언제든 수정할 수 있어요.")).toHaveLength(2);
+    expect(screen.queryByText("언제든 연결 해제 및 수정 가능")).not.toBeInTheDocument();
     expect(screen.getAllByText("캘린더 연동 준비 중")[0]).toBeVisible();
     expect(screen.queryByText("자동 입력 중")).not.toBeInTheDocument();
     expect(screen.getAllByText("수면")[0]).toBeVisible();
@@ -88,5 +102,16 @@ describe("AccountScreen", () => {
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
+  });
+
+  it("opens the real sleep goal form from the Figma summary card", () => {
+    render(<AccountScreen viewModel={viewModel} />);
+    const trigger = screen.getAllByRole("button", { name: "수면 목표 수정" })[0];
+    fireEvent.click(trigger);
+
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByLabelText("취침 시간")).toHaveValue("23:00");
+    expect(within(dialog).getByLabelText("기상 시간")).toHaveValue("07:00");
+    expect(within(dialog).getByRole("button", { name: "수면 목표 저장" })).toBeEnabled();
   });
 });

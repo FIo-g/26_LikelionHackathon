@@ -132,7 +132,7 @@ describe("intake flows", () => {
 
     expect(screen.getByLabelText("마신 시각")).toHaveValue("2026-11-01T01:30");
     expect(screen.getByLabelText("반복 시각 선택")).toHaveValue("later");
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(screen.getByRole("button", { name: "수치 확인하기" }));
 
     const payload = view.container.querySelector<HTMLInputElement>('input[name="items"]');
     expect(JSON.parse(payload?.value ?? "[]")[0]).toMatchObject({
@@ -217,7 +217,7 @@ describe("intake flows", () => {
   it("renders caffeine brand step", () => {
     render(<CaffeineFlow timezone="Asia/Seoul" step="brand" />);
 
-    expect(screen.getByRole("heading", { name: "카페인 기록" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "어디서 마셨나요?" })).toBeVisible();
     expect(screen.getByLabelText("브랜드")).toBeVisible();
   });
 
@@ -237,6 +237,25 @@ describe("intake flows", () => {
 
     expect(screen.getByText("입력 확인")).toBeVisible();
     expect(screen.getByRole("button", { name: "카페인 저장" })).toBeVisible();
+  });
+
+  it("writes Figma quick selections into the real form fields", () => {
+    const caffeine = render(<CaffeineFlow timezone="Asia/Seoul" step="brand" />);
+    fireEvent.click(screen.getByRole("button", { name: /스타벅스/ }));
+    expect(screen.getByLabelText("브랜드")).toHaveValue("스타벅스");
+    caffeine.unmount();
+
+    render(<AlcoholFlow timezone="Asia/Seoul" step="type" />);
+    fireEvent.click(screen.getByRole("button", { name: /소주/ }));
+    expect(screen.getByLabelText("음주 종류")).toHaveValue("소주");
+  });
+
+  it("describes phone data as manual rather than claiming an unavailable sync", () => {
+    render(<SleepPhoneFlow timezone="Asia/Seoul" step="phone" />);
+
+    expect(screen.getByText("직접 입력")).toBeVisible();
+    expect(screen.getByText("기기 자동 연동 없이 입력한 값이 저장됩니다.")).toBeVisible();
+    expect(screen.queryByText("실시간 연동")).not.toBeInTheDocument();
   });
 
   it("renders alcohol flow amount step", () => {
@@ -299,7 +318,7 @@ describe("intake flows", () => {
     const view = render(<CaffeineFlow timezone="Asia/Seoul" />);
 
     fireEvent.change(screen.getByLabelText("브랜드"), { target: { value: "루이비스" } });
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(screen.getByRole("button", { name: "메뉴 선택하기" }));
 
     expect(window.location.search).toBe("");
     expect(screen.getByLabelText("제품명")).toBeVisible();
@@ -308,7 +327,7 @@ describe("intake flows", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
     expect(screen.getByLabelText("브랜드")).toHaveValue("루이비스");
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(screen.getByRole("button", { name: "메뉴 선택하기" }));
     view.unmount();
 
     render(<CaffeineFlow timezone="Asia/Seoul" />);
@@ -324,6 +343,7 @@ describe("intake flows", () => {
       value: "맥주",
       nextLabel: "잔 수",
       storedStep: "amount",
+      nextButton: "양 입력하기",
     },
     {
       pathname: "/record/meal-health",
@@ -332,6 +352,7 @@ describe("intake flows", () => {
       value: "점심",
       nextLabel: "운동",
       storedStep: "exercise-and-wellness",
+      nextButton: "운동 · 컨디션 입력",
     },
     {
       pathname: "/record/sleep-phone",
@@ -340,13 +361,14 @@ describe("intake flows", () => {
       value: "5",
       nextLabel: "마지막 휴대폰 사용",
       storedStep: "phone",
+      nextButton: "오늘 휴대폰 기록",
     },
-  ])("keeps $pathname health values out of URL history", ({ pathname, renderFlow, label, value, nextLabel, storedStep }) => {
+  ])("keeps $pathname health values out of URL history", ({ pathname, renderFlow, label, value, nextLabel, storedStep, nextButton }) => {
     window.history.replaceState({}, "", pathname);
     renderFlow();
 
     fireEvent.change(screen.getByLabelText(label), { target: { value } });
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(screen.getByRole("button", { name: nextButton }));
 
     expect(screen.getByLabelText(nextLabel)).toBeVisible();
     expect(window.location.search).toBe("");

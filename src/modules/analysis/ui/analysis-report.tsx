@@ -55,13 +55,16 @@ export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) =>
       <span>●</span> {analysisStateText(viewModel.state)}
     </span>
     <header className={styles.hero}>
-      <p className={styles.eyebrow}>ANALYZE</p>
-      <h1>분석</h1>
-      <p>기록에서 보이는 수면 패턴을 차분하게 정리했어요.</p>
+      <p className={styles.eyebrow}>ANALYZE · 최근 14일</p>
+      <h1>
+        <span aria-hidden="true" className={styles.desktopHeroTitle}>내 몸의 리듬을<br />생활 기록으로 이해해요</span>
+        <span className={styles.semanticHeroTitle}>분석</span>
+      </h1>
+      <p>계산된 패턴을 바탕으로 AI가 이해하기 쉬운 관리 방법을 정리합니다.</p>
       <span className={styles[`status_${viewModel.state}`]}><span aria-hidden="true">●</span> {analysisStateText(viewModel.state)}</span>
     </header>
     <div className={styles.primaryLayout}>
-      <MetricGrid metrics={viewModel.metrics} />
+      <MetricGrid metrics={viewModel.metrics} variant="mobile-summary" />
       <AnalysisReport narration={viewModel.narration} report={viewModel.report} />
     </div>
     <aside aria-hidden="true" className={styles.mobileExplainabilityVisual}>
@@ -69,7 +72,11 @@ export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) =>
       <strong>왜 이런 제안인가요?</strong>
       <p>수면·카페인·휴대폰·식사·일정 기록을 계산하고, AI가 알기 쉽게 설명합니다.</p>
     </aside>
-    {viewModel.scheduleAdvice ? <ScheduleAdviceCard advice={viewModel.scheduleAdvice} timezone={viewModel.scheduleAdvice.timezone} /> : null}
+    {viewModel.scheduleAdvice ? (
+      <div className={styles.scheduleAdviceSlot}>
+        <ScheduleAdviceCard advice={viewModel.scheduleAdvice} timezone={viewModel.scheduleAdvice.timezone} />
+      </div>
+    ) : null}
     <div className={styles.desktopDetails}>
       <SleepTrendChart trend={viewModel.trend} />
       <CaffeineProfile model={viewModel.caffeineProfile} />

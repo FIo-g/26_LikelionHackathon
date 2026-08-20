@@ -9,6 +9,8 @@ import { submitHabitsAction } from "@/app/(onboarding)/onboarding/habits/actions
 import { submitProfileAction } from "@/app/(onboarding)/onboarding/profile/actions";
 import { onboardingTimezoneOptions } from "@/app/(onboarding)/onboarding/profile/page";
 import ConnectPage from "@/app/(onboarding)/onboarding/connect/page";
+import HabitsPage from "@/app/(onboarding)/onboarding/habits/page";
+import SleepGoalPage from "@/app/(onboarding)/onboarding/sleep-goal/page";
 import { completeOnboarding } from "@/modules/onboarding/application/complete-onboarding";
 
 vi.mock("@/shared/auth/require-session-user", () => ({
@@ -55,7 +57,7 @@ describe("Onboarding UI", () => {
       />,
     );
 
-    expect(screen.getAllByText("준비 중")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "위치·수면·운동: 준비 중" })).toBeDisabled();
     expect(screen.queryByText("연동 완료")).not.toBeInTheDocument();
   });
 
@@ -78,10 +80,28 @@ describe("Onboarding UI", () => {
   });
 
   it("does not offer a next-step link that skips saving the connection", async () => {
-    render(await ConnectPage());
+    const { container } = render(await ConnectPage());
 
-    expect(screen.getByRole("button", { name: "연결하기" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "직접 입력으로 시작하기" })).toBeVisible();
     expect(screen.queryByRole("link", { name: "다음" })).not.toBeInTheDocument();
+    expect(container.querySelector('input[name="selected"]')).toHaveValue("manual");
+  });
+
+  it("keeps the persisted habit enum values in radio controls", async () => {
+    render(await HabitsPage());
+
+    expect(screen.getByRole("radio", { name: "거의 안 마심" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "이른 편" })).toHaveAttribute("name", "meal");
+    expect(screen.getByRole("radio", { name: "0~1회" })).toHaveAttribute("name", "exercise");
+    expect(screen.getByRole("radio", { name: "낮음" })).toHaveAttribute("name", "phoneUsage");
+  });
+
+  it("submits the goal times through the existing named inputs", async () => {
+    render(await SleepGoalPage());
+
+    expect(screen.getByLabelText("취침 시간")).toHaveValue("23:00");
+    expect(screen.getByLabelText("기상 시간")).toHaveValue("07:00");
+    expect(screen.getByRole("button", { name: "다음" })).toHaveAttribute("type", "submit");
   });
 
   it("returns an incomplete onboarding flow to the saved connection step", async () => {

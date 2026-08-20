@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { safeReturnTo } from "@/shared/auth/entry-path";
 import type { RecordActionState } from "@/modules/records/application/record-service";
+import styles from "./records.module.css";
 
 type FormValues = Record<string, string>;
 
@@ -234,15 +235,15 @@ export const RecordFormShell = ({
   };
 
   return (
-    <form action={formAction} aria-busy={isSubmitting} onSubmit={submit} ref={formRef}>
+    <form className={styles.recordForm} action={formAction} aria-busy={isSubmitting} onSubmit={submit} ref={formRef}>
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
       {children({ values, step, idempotencyKey, setValue, setStep, isSubmitting })}
       {step === submitStep ? (
-        <button type="submit" disabled={isSubmitting} aria-busy={isSubmitting ? "true" : "false"}>
+        <button className={styles.submitButton} type="submit" disabled={isSubmitting} aria-busy={isSubmitting ? "true" : "false"}>
           {submitButtonLabel}
         </button>
       ) : null}
-      <div aria-live="polite" role="status">
+      <div className={styles.formStatus} aria-live="polite" role="status">
         {state?.status === "success" ? <p>저장되었습니다.</p> : null}
         {renderFieldErrors ? <ul>{Object.entries(renderFieldErrors).map(([name, messages]) => (
           name === "_form"

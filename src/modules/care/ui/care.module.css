@@ -28,7 +28,7 @@
 
 .pageHeaderCopy > p:last-child {
   margin: 5px 0 0;
-  color: #766982;
+  color: #73647b;
   font-size: 12px;
 }
 
@@ -136,7 +136,7 @@
 
 .heroScheduleItem dt {
   order: 2;
-  color: #eaddf1;
+  color: #ffffff;
   font-size: 12px;
 }
 
@@ -152,6 +152,7 @@
 .heroEmpty {
   align-self: center;
   max-width: 150px;
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -174,7 +175,7 @@
 
 .sectionCopy {
   margin: 4px 0 0;
-  color: #766982;
+  color: #73647b;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -184,7 +185,7 @@
   padding: 22px;
   border: 1px dashed #d8c7e1;
   border-radius: 18px;
-  color: #766982;
+  color: #73647b;
   background: #ffffff;
   line-height: 1.55;
 }
@@ -262,7 +263,7 @@
 
 .routineContent small,
 .statusText {
-  color: #766982;
+  color: #73647b;
   font-size: 12px;
   line-height: 1.35;
 }
@@ -364,7 +365,7 @@
 
 .toolCopy p {
   margin-top: 3px;
-  color: #766982;
+  color: #73647b;
   font-size: 12px;
   line-height: 1.45;
 }
@@ -381,7 +382,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  color: #766982;
+  color: #73647b;
   font-size: 11px;
 }
 
@@ -449,7 +450,7 @@
 
 .toolGuidance {
   overflow: hidden;
-  color: #766982;
+  color: #73647b;
   font-size: 11px;
   line-height: 1.4;
   text-overflow: ellipsis;
@@ -477,7 +478,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #4f78a8;
+  color: #3d6798;
   font-size: 12px;
 }
 
@@ -539,7 +540,7 @@
   padding: 19px;
   border: 1px solid #f0d6b4;
   border-radius: 20px;
-  color: #766982;
+  color: #73647b;
   background: #fff0dd;
   font-size: 12px;
   line-height: 1.5;

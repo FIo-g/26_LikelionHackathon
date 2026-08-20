@@ -40,6 +40,18 @@ export const setupE2eUser = async (
   seededCleanupIdentities.add(cleanupKey(testInfo));
 };
 
+export const setupIncompleteOnboardingE2eUser = async (
+  request: APIRequestContext,
+  testInfo: TestInfo,
+): Promise<void> => {
+  const identity = e2eTestIdentity(testInfo);
+  const response = await request.post("/__e2e/setup?onboarding=incomplete", {
+    data: { workerIndex: testInfo.workerIndex, namespace: identity.namespace },
+  });
+  expect(response.ok()).toBe(true);
+  seededCleanupIdentities.add(cleanupKey(testInfo));
+};
+
 export const test = base.extend<{ cleanupE2eIdentity: void }>({
   cleanupE2eIdentity: [async ({ context }, use, testInfo) => {
     await use();

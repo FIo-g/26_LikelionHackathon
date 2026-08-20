@@ -16,7 +16,12 @@ const scheduleAdviceCardRequiresTimezone: ScheduleAdviceCardTimezone extends Req
 
 const viewModel = {
   state: "ready",
-  metrics: [],
+  metrics: [
+    { key: "sleep-rhythm", label: "수면 리듬", value: 72, state: "ready" },
+    { key: "phone-wind-down", label: "폰 정리", value: 48, state: "ready" },
+    { key: "caffeine-signal", label: "카페인", value: 36, state: "ready" },
+    { key: "sleep-goal", label: "수면 목표", value: 64, state: "ready" },
+  ],
   trend: [],
   caffeineProfile: { signal: 50, wording: "관찰된 신호", whatIfEnabled: false },
   explainability: [],
@@ -83,5 +88,19 @@ describe("AnalyzeScreen advice and mobile details", () => {
     }]} />);
 
     expect(screen.getByText("목표 수면")).not.toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("keeps every metric in the expanded mobile detail grid", () => {
+    const { container } = render(<AnalyzeScreen viewModel={viewModel} />);
+    const summaryHeading = container.querySelector("#analysis-summary-metrics-title");
+    const detailsHeading = container.querySelector("#analysis-details-metrics-title");
+    const detailsSection = detailsHeading?.closest("section");
+
+    expect(summaryHeading).toBeInTheDocument();
+    expect(detailsHeading).toBeInTheDocument();
+    expect(detailsSection?.className).not.toContain("mobileSummaryMetrics");
+    expect(detailsSection?.querySelectorAll("[data-metric-key]")).toHaveLength(4);
+    expect(detailsSection?.querySelector('[data-metric-key="sleep-rhythm"]')).toHaveTextContent("수면 리듬");
+    expect(detailsSection?.querySelector('[data-metric-key="phone-wind-down"]')).toHaveTextContent("폰 정리");
   });
 });

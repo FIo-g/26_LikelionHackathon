@@ -7,7 +7,7 @@ const futureLocalTime = (daysFromNow: number, hour: number): string => {
 
 test("protects today route without session", async ({ page }) => {
   await page.goto("/today");
-  await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "반가워요" })).toBeVisible();
 });
 
 test("shows accepted plan-day cutoffs instead of the goal fallback", async ({ page }, testInfo) => {

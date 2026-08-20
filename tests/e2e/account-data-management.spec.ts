@@ -20,7 +20,7 @@ test("keeps account export and destructive deletion behind an accessible reauthe
   await expect(dialog.getByRole("button", { name: "계정 삭제" })).toBeEnabled();
   await dialog.getByRole("button", { name: "계정 삭제" }).click();
   await expect(dialog.getByRole("alert")).toContainText("다시 로그인");
-  await expect(page.getByRole("heading", { name: "계정 설정" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "나와 목표를 관리해요" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(management.getByRole("button", { name: "계정 삭제" })).toBeFocused();

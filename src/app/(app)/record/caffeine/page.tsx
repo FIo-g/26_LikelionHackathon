@@ -4,7 +4,7 @@ import { CaffeineFlow } from "@/modules/records/ui/caffeine-flow";
 type SearchParams = Record<string, string | string[] | undefined>;
 
 type CaffeinePageProps = Readonly<{
-  searchParams: Promise<SearchParams> | SearchParams;
+  searchParams: Promise<SearchParams>;
 }>;
 
 const firstParam = (value: string | string[] | undefined): string | undefined => (

@@ -1,3 +1,5 @@
+import styles from "./records.module.css";
+
 export type ConfirmationField = Readonly<{
   label: string;
   value: string;
@@ -10,9 +12,9 @@ type RecordConfirmationProps = Readonly<{
 
 export const RecordConfirmation = ({ title, fields }: RecordConfirmationProps) => {
   return (
-    <section>
+    <section className={styles.confirmation}>
       <h2>{title}</h2>
-      <dl>
+      <dl className={styles.confirmationList}>
         {fields.map((item) => (
           <div key={item.label}>
             <dt>{item.label}</dt>

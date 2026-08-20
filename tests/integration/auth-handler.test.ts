@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DatabaseSync } from "node:sqlite";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
@@ -145,4 +147,3 @@ describe("auth route handler", () => {
     }
   });
 });
-
