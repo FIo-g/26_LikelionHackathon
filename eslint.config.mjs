@@ -14,5 +14,6 @@ export default defineConfig([
     "src/generated/prisma/**",
     "prisma/schema.active.prisma",
     "prisma/schema.auth-check.prisma",
+    "26_LikelionHackathon/**",
   ]),
 ]);

@@ -18,7 +18,7 @@ const isDedicatedPostgresE2eDatabaseUrl = (value) => {
   }
 };
 
-const isDedicatedE2eDatabaseUrl = (value) => (
+export const isDedicatedE2eDatabaseUrl = (value) => (
   isDedicatedSqliteE2eDatabaseUrl(value) || isDedicatedPostgresE2eDatabaseUrl(value)
 );
 
@@ -47,9 +47,9 @@ export const resolveE2eLaunchEnvironment = (source) => {
     NODE_ENV: "test",
     ADAPTIVE_SLEEP_E2E_TEST_MODE: "1",
     DATABASE_URL: databaseUrl.trim(),
+    BETTER_AUTH_SECRET: "adaptive-sleep-e2e-test-secret-2026-only",
     ...(visualTest ? {
       VISUAL_TEST: "1",
-      BETTER_AUTH_SECRET: "adaptive-sleep-visual-test-secret-2026-only",
     } : {}),
   };
 };

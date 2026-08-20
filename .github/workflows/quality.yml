@@ -26,6 +26,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm exec -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
+      - run: npm run verify:auth-schema
       - run: npm run test:run
       - run: npm run lint
       - run: npm run typecheck
@@ -44,14 +46,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npm exec -- playwright install --with-deps chromium
       - name: Capture candidate baselines for review
         if: inputs.visual_mode == 'capture'
         run: npm run test:visual -- --update-snapshots
-      - name: Require committed baselines before strict comparison
-        if: inputs.visual_mode == 'compare'
-        run: test -d tests/visual/__screenshots__/visual
       - name: Compare reviewed baselines strictly
         if: inputs.visual_mode == 'compare'
         run: npm run test:visual
       - run: npm exec -- playwright test tests/e2e/accessibility.spec.ts --project=chromium
+      - if: always()
+        run: rm -f prisma/schema.auth-check.prisma prisma/schema.active.prisma

@@ -32,3 +32,7 @@ export const VISUAL_FRAMES = [
 
 export type VisualFrame = (typeof VISUAL_FRAMES)[number];
 export type VisualFixture = VisualFrame["fixture"];
+
+export const visualBaselineNames = (): readonly string[] => (
+  VISUAL_FRAMES.map(({ name }) => `${name}.png`).sort()
+);

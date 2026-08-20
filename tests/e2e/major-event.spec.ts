@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, setupE2eUser, test } from "./fixtures";
 
 test("protects the Plan screen without a session", async ({ page }) => {
   await page.goto("/plan");
@@ -11,9 +11,8 @@ const futureLocalTime = (daysFromNow: number): string => {
   return `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, "0")}-${String(startsAt.getDate()).padStart(2, "0")}T09:00`;
 };
 
-test("accepts generated advice and separately dismisses a later generated proposal", async ({ page }) => {
-  await page.request.post("/__e2e/setup");
-  await expect(page.getByText("E2E planner user ready")).toBeVisible();
+test("accepts generated advice and separately dismisses a later generated proposal", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
 
   await page.goto("/plan");
   await page.getByLabel("일정 이름").fill("아침 비행");

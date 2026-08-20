@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, setupE2eUser, test } from "./fixtures";
 
-test("keeps account export and destructive deletion behind an accessible reauthentication flow", async ({ page }) => {
-  await page.request.post("/__e2e/setup");
+test("keeps account export and destructive deletion behind an accessible reauthentication flow", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
   await page.goto("/account");
 
   const management = page.getByTestId("account-data-management");
@@ -15,7 +15,7 @@ test("keeps account export and destructive deletion behind an accessible reauthe
   await expect(dialog.getByLabel("삭제 확인 문구")).toBeVisible();
   await expect(dialog.getByRole("button", { name: "계정 삭제" })).toBeDisabled();
 
-  await dialog.getByLabel("확인 이메일").fill("e2e-planner-user@local.test");
+  await dialog.getByLabel("확인 이메일").fill("e2e@example.invalid");
   await dialog.getByLabel("삭제 확인 문구").fill("계정 삭제");
   await expect(dialog.getByRole("button", { name: "계정 삭제" })).toBeEnabled();
   await dialog.getByRole("button", { name: "계정 삭제" }).click();
@@ -26,8 +26,8 @@ test("keeps account export and destructive deletion behind an accessible reauthe
   await expect(management.getByRole("button", { name: "계정 삭제" })).toBeFocused();
 });
 
-test("fails closed for the export API when the isolated E2E cookie is not a Better Auth session", async ({ page }) => {
-  await page.request.post("/__e2e/setup");
+test("fails closed for the export API when the isolated E2E cookie is not a Better Auth session", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
   const response = await page.request.post("/api/account/export", {
     headers: { origin: "http://127.0.0.1:3000", "content-type": "application/json" },
     data: { password: null },

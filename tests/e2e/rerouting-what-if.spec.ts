@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, setupE2eUser, test } from "./fixtures";
 
 const toDateTimeLocal = (instant: Date): string => {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -14,8 +14,8 @@ const toDateTimeLocal = (instant: Date): string => {
   return `${value("year")}-${value("month")}-${value("day")}T${value("hour")}:${value("minute")}`;
 };
 
-test("creates reroute advice only after saving a cutoff-crossing caffeine record", async ({ page }) => {
-  await page.request.post("/__e2e/setup?seedPlan=1");
+test("creates reroute advice only after saving a cutoff-crossing caffeine record", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo, { seedPlan: true });
   await page.goto("/plan");
   const planStrip = page.getByTestId("plan-strip");
   const snapshotDays = async () => planStrip.getByTestId("plan-day").evaluateAll((items) => items.map((item) => ({

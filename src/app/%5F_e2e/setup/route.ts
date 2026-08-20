@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { getPrismaClient } from "@/shared/db/prisma";
+import { e2eIdentity } from "@/shared/auth/e2e-identity";
 import { isIsolatedE2eTestMode } from "@/shared/auth/e2e-test-mode";
-
-const E2E_USER_ID = "e2e-planner-user";
 
 type E2ePrisma = {
   user: { upsert: (args: unknown) => Promise<unknown> };
@@ -29,34 +28,42 @@ export async function POST(request: Request): Promise<NextResponse> {
     return new NextResponse(null, { status: 404 });
   }
 
+  let identity;
+  try {
+    identity = e2eIdentity(await request.json());
+  } catch {
+    return NextResponse.json({ code: "INVALID_E2E_IDENTITY" }, { status: 400 });
+  }
+
   const prisma = getPrismaClient() as unknown as E2ePrisma;
+  const userId = identity.id;
   const now = new Date();
-  await prisma.planRevision.deleteMany({ where: { userId: E2E_USER_ID } });
-  await prisma.planDay.deleteMany({ where: { userId: E2E_USER_ID } });
-  await prisma.scheduleAdvice.deleteMany({ where: { userId: E2E_USER_ID } });
-  await prisma.sleepPlan.deleteMany({ where: { userId: E2E_USER_ID } });
-  await prisma.specialEvent.deleteMany({ where: { userId: E2E_USER_ID } });
-  await prisma.user.upsert({ where: { id: E2E_USER_ID }, update: {}, create: { id: E2E_USER_ID } });
+  await prisma.planRevision.deleteMany({ where: { userId } });
+  await prisma.planDay.deleteMany({ where: { userId } });
+  await prisma.scheduleAdvice.deleteMany({ where: { userId } });
+  await prisma.sleepPlan.deleteMany({ where: { userId } });
+  await prisma.specialEvent.deleteMany({ where: { userId } });
+  await prisma.user.upsert({ where: { id: userId }, update: { email: identity.email }, create: { id: userId, email: identity.email } });
   await prisma.userProfile.upsert({
-    where: { userId: E2E_USER_ID },
+    where: { userId },
     update: { nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
-    create: { userId: E2E_USER_ID, nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
+    create: { userId, nickname: "E2E User", timezone: "Asia/Seoul", onboardingCompletedAt: now },
   });
   await prisma.sleepGoal.upsert({
-    where: { userId: E2E_USER_ID },
+    where: { userId },
     update: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
-    create: { userId: E2E_USER_ID, targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
+    create: { userId, targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
   });
 
   if (new URL(request.url).searchParams.get("seedPlan") === "1") {
     const plan = await prisma.sleepPlan.create({
-      data: { userId: E2E_USER_ID, timezone: "Asia/Seoul", status: "active", activeKey: E2E_USER_ID },
+      data: { userId, timezone: "Asia/Seoul", status: "active", activeKey: userId },
     });
     const historicalBed = plusMinutes(now, -1_440);
     const currentBed = plusMinutes(now, 60);
     const futureBed = plusMinutes(now, 1_500);
     const target = (bedAt: Date) => ({
-      userId: E2E_USER_ID,
+      userId,
       planId: plan.id,
       localDate: localDate(plusMinutes(bedAt, 480)),
       timezone: "Asia/Seoul",
@@ -72,7 +79,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     await prisma.planDay.createMany({ data: [target(historicalBed), target(currentBed), target(futureBed)] });
   }
 
-  const response = NextResponse.json({ message: "E2E planner user ready" });
-  response.cookies.set("adaptive-sleep-e2e-user", E2E_USER_ID, { httpOnly: true, sameSite: "strict", path: "/", maxAge: 60 * 10 });
+  const response = NextResponse.json({ identity });
+  response.cookies.set("adaptive-sleep-e2e-user", userId, { httpOnly: true, sameSite: "strict", path: "/", maxAge: 60 * 10 });
   return response;
 }

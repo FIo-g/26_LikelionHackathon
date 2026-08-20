@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, setupE2eUser, test } from "./fixtures";
 
-test("shows scoped account settings with truthful manual-only connection state", async ({ page }) => {
-  await page.request.post("/__e2e/setup");
+test("shows scoped account settings with truthful manual-only connection state", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
   await page.goto("/account");
 
   await expect(page.getByRole("heading", { name: "계정 설정" })).toBeVisible();

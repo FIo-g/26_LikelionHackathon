@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, setupE2eUser, test } from "./fixtures";
 
 const futureLocalTime = (daysFromNow: number, hour: number): string => {
   const startsAt = new Date(Date.now() + daysFromNow * 24 * 60 * 60 * 1000);
@@ -10,8 +10,8 @@ test("protects today route without session", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
 });
 
-test("shows accepted plan-day cutoffs instead of the goal fallback", async ({ page }) => {
-  await page.request.post("/__e2e/setup");
+test("shows accepted plan-day cutoffs instead of the goal fallback", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
   await page.goto("/plan");
   await page.getByLabel("일정 이름").fill("이른 아침 이동");
   await page.getByLabel("일정 유형").fill("여행");

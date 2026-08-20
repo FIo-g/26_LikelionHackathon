@@ -27,7 +27,7 @@ jobs:
       - run: npm ci
       - run: npm exec -- prisma generate
       - run: ADAPTIVE_SLEEP_RELEASE_VALIDATION=1 BETTER_AUTH_URL=https://preview.example.vercel.app npm run validate:release
-      - run: npm exec --package=auth@latest -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
+      - run: npm exec -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
       - run: npm run verify:auth-schema
       - run: npm run lint && npm run typecheck && npm run test:run tests/unit tests/component
       - if: always()
@@ -36,7 +36,7 @@ jobs:
   contract-sqlite:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: file:./prisma/contract.db
+      DATABASE_URL: file:./.tmp/contract-sqlite.db
       AUTH_RATE_LIMIT_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
@@ -45,10 +45,11 @@ jobs:
       - run: npm ci
       - run: npm run db:schema -- --provider sqlite
       - run: npm exec -- prisma generate --schema prisma/schema.active.prisma
-      - run: npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+      - run: npm run db:migrate:sqlite
+      - run: npm run verify:migrations
       - run: npm run test:run tests/integration/database-contract.test.ts
       - if: always()
-        run: rm -f prisma/contract.db prisma/schema.active.prisma
+        run: rm -f .tmp/contract-sqlite.db prisma/schema.active.prisma
 
   contract-postgresql:
     runs-on: ubuntu-latest
@@ -61,7 +62,8 @@ jobs:
           --health-cmd "pg_isready -U planner -d planner_test"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test
+      DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=contract_postgresql
+      MIGRATION_DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=contract_postgresql
       AUTH_RATE_LIMIT_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +72,9 @@ jobs:
       - run: npm ci
       - run: npm run db:schema -- --provider postgresql
       - run: npm exec -- prisma generate --schema prisma/schema.active.prisma
-      - run: npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+      - run: PGPASSWORD=planner psql -h 127.0.0.1 -U planner -d planner_test -c 'CREATE SCHEMA contract_postgresql'
+      - run: npm exec -- prisma migrate deploy && npm exec -- prisma migrate status
+      - run: DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' npm run verify:migrations
       - run: npm run test:run tests/integration/database-contract.test.ts
       - if: always()
         run: rm -f prisma/schema.active.prisma
@@ -88,6 +92,7 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=e2e_browser
+      MIGRATION_DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=e2e_browser
       ADAPTIVE_SLEEP_E2E_DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=e2e_browser
       AUTH_RATE_LIMIT_ENABLED: "true"
     steps:
@@ -98,9 +103,9 @@ jobs:
       - run: npm exec -- playwright install --with-deps chromium
       - run: PGPASSWORD=planner psql -h 127.0.0.1 -U planner -d planner_test -c 'CREATE SCHEMA IF NOT EXISTS e2e_browser'
       - run: npm exec -- prisma generate && npm exec -- prisma migrate deploy && npm exec -- prisma migrate status
-      - run: npm exec -- playwright test --project=chromium
-      - name: Compare approved visual baselines only when committed
-        if: ${{ hashFiles('tests/visual/__screenshots__/visual/**') != '' }}
+      - run: DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' npm run verify:migrations
+      - run: npm run test:e2e
+      - name: Compare every manifest-declared visual baseline
         run: npm run test:visual
       - run: npm run build
       - if: always()

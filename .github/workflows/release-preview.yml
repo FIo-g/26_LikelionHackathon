@@ -13,6 +13,7 @@ jobs:
     env:
       ADAPTIVE_SLEEP_RELEASE_VALIDATION: "1"
       DATABASE_URL: ${{ secrets.RUNTIME_DATABASE_URL }}
+      MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
       BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
       BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
       AUTH_RATE_LIMIT_ENABLED: "true"
@@ -26,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm exec -- vercel --version
       - run: npm run validate:release
       - run: npm exec -- vercel pull --yes --environment=preview
       - run: npm exec -- vercel build

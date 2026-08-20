@@ -1,5 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { getAuth } from "@/shared/auth/auth";
+import { isE2eUserId } from "@/shared/auth/e2e-identity";
 import { isIsolatedE2eTestMode } from "@/shared/auth/e2e-test-mode";
 import { UnauthorizedError } from "@/shared/auth/errors";
 
@@ -22,8 +23,8 @@ export const requireSessionIdentity = async (requestHeaders?: Headers): Promise<
   const e2eUserId = requestHeaders
     ? undefined
     : (await cookies()).get("adaptive-sleep-e2e-user")?.value;
-  if (isIsolatedE2eTestMode() && e2eUserId === "e2e-planner-user") {
-    return { userId: e2eUserId, email: "e2e-planner-user@local.test" };
+  if (isIsolatedE2eTestMode() && e2eUserId && isE2eUserId(e2eUserId)) {
+    return { userId: e2eUserId, email: null };
   }
 
   let auth: unknown;

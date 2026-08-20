@@ -1,11 +1,29 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import playwrightConfig from "../../playwright.config";
 import { buildE2eServerArguments } from "../../scripts/e2e-server-arguments.mjs";
 import { resolveE2eLaunchEnvironment } from "../../scripts/e2e-launch-config.mjs";
 
+const prisma = vi.hoisted(() => new Proxy({}, {
+  get: (_target, model: string) => ({
+    deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+    upsert: vi.fn().mockResolvedValue({ id: model }),
+    create: vi.fn().mockResolvedValue({ id: `${model}-id` }),
+    createMany: vi.fn().mockResolvedValue({ count: 0 }),
+  }),
+}));
+
+vi.mock("@/shared/db/prisma", () => ({ getPrismaClient: () => prisma }));
+
+import { POST as setupE2eUser } from "@/app/%5F_e2e/setup/route";
+
 const dedicatedUrl = "file:./.tmp/adaptive-sleep-e2e.sqlite";
 
 describe("E2E launcher isolation", () => {
+  afterEach(() => {
+    delete process.env.ADAPTIVE_SLEEP_E2E_TEST_MODE;
+    delete process.env.DATABASE_URL;
+  });
+
   it("refuses to start when Vercel marks the process as a shared deployment", () => {
     expect(() => resolveE2eLaunchEnvironment({
       VERCEL_ENV: "preview",
@@ -47,6 +65,7 @@ describe("E2E launcher isolation", () => {
       NODE_ENV: "test",
       ADAPTIVE_SLEEP_E2E_TEST_MODE: "1",
       DATABASE_URL: dedicatedUrl,
+      BETTER_AUTH_SECRET: "adaptive-sleep-e2e-test-secret-2026-only",
     });
     expect(playwrightConfig.webServer).toMatchObject({ command: "node scripts/start-e2e-server.mjs", reuseExistingServer: false });
   });
@@ -77,5 +96,24 @@ describe("E2E launcher isolation", () => {
       "--port",
       "3000",
     ]);
+  });
+
+  it("uses a unique authenticated E2E identity for each worker namespace", async () => {
+    process.env.ADAPTIVE_SLEEP_E2E_TEST_MODE = "1";
+    process.env.DATABASE_URL = dedicatedUrl;
+    delete process.env.VERCEL_ENV;
+
+    const first = await setupE2eUser(new Request("http://localhost/__e2e/setup", {
+      method: "POST",
+      body: JSON.stringify({ workerIndex: 0, namespace: "auth" }),
+      headers: { "content-type": "application/json" },
+    }));
+    const second = await setupE2eUser(new Request("http://localhost/__e2e/setup", {
+      method: "POST",
+      body: JSON.stringify({ workerIndex: 1, namespace: "auth" }),
+      headers: { "content-type": "application/json" },
+    }));
+
+    expect(first.headers.get("set-cookie")).not.toEqual(second.headers.get("set-cookie"));
   });
 });

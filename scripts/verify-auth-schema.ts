@@ -14,7 +14,13 @@ execFileSync(process.execPath, [
   "src/shared/auth/auth.ts",
   "--output",
   "prisma/schema.auth-check.prisma",
-], { stdio: "inherit" });
+], {
+  stdio: "inherit",
+  env: {
+    ...process.env,
+    AUTH_RATE_LIMIT_ENABLED: "true",
+  },
+});
 
 const [canonical, generated] = await Promise.all([
   readFile("prisma/schema.prisma", "utf8"),
