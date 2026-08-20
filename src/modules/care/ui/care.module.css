@@ -463,12 +463,31 @@
 }
 
 .toolGuidance {
-  overflow: hidden;
+  display: grid;
+  gap: 3px;
   color: #73647b;
   font-size: 11px;
-  line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.45;
+}
+
+.toolGuidance strong {
+  color: #5f346f;
+  font-size: 10px;
+}
+
+.toolGuidance span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sleepGuideGuidance {
+  margin-top: auto;
+}
+
+.sleepGuideProgress {
+  margin-top: 7px;
 }
 
 .signalColumn {

@@ -276,6 +276,7 @@ export const AlcoholEntryScalarFieldEnum = {
   dailyLogId: 'dailyLogId',
   alcoholType: 'alcoholType',
   servings: 'servings',
+  measurementUnit: 'measurementUnit',
   consumedAt: 'consumedAt',
   timezone: 'timezone',
   createdAt: 'createdAt',

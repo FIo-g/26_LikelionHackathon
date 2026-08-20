@@ -5,8 +5,12 @@ import Image from "next/image";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
-import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
+import {
+  formatRecordWallTimeInput,
+  resolveRecordWallTimeDisambiguation,
+} from "@/shared/time/zoned-date-time";
 import { RecordFlowHeader } from "./record-flow-header";
+import { NativePickerField, RepeatedWallTimeChoice } from "./native-picker-field";
 import styles from "./records.module.css";
 
 type CaffeineStep = "brand" | "menu-and-amount" | "confirm";
@@ -18,6 +22,7 @@ export const INTAKE_STEPS = {
 type CaffeineFlowProps = Readonly<{
   timezone: string;
   step?: CaffeineStep | string;
+  freshCreate?: boolean;
   successRedirectPath?: string;
   initialValues?: {
     recordId?: string;
@@ -50,13 +55,18 @@ const payloadFor = (values: Record<string, string>): string => JSON.stringify([{
   product: values.product,
   caffeineMg: values.caffeineMg,
   consumedAt: values.consumedAt,
-  consumedAtDisambiguation: values.consumedAtDisambiguation,
+  consumedAtDisambiguation: resolveRecordWallTimeDisambiguation(
+    values.consumedAt,
+    values.consumedAtDisambiguation,
+    values.timezone,
+  ),
   timezone: values.timezone,
 }]);
 
 export const CaffeineFlow = ({
   timezone,
   step: requestedStep,
+  freshCreate = false,
   successRedirectPath = "/record",
   initialValues = {},
 }: CaffeineFlowProps) => {
@@ -91,6 +101,7 @@ export const CaffeineFlow = ({
       submitButtonLabel="카페인 저장"
       initialValues={initial}
       initialStep={normalizeStep(requestedStep)}
+      freshCreate={freshCreate}
     >
       {({ values, step, setValue, setStep }) => (
         <main className={styles.flowPage} data-lunar-screen="record">
@@ -157,18 +168,22 @@ export const CaffeineFlow = ({
                 카페인(mg)
                 <input name="caffeineMg" inputMode="numeric" value={values.caffeineMg ?? ""} onChange={(event) => setValue("caffeineMg", event.currentTarget.value)} required />
               </label>
-              <label className={styles.fieldLabel}>
-                마신 시각
-                <input name="consumedAt" type="datetime-local" value={(values.consumedAt ?? "").slice(0, 16)} onChange={(event) => setValue("consumedAt", event.currentTarget.value)} required />
-              </label>
-              <label className={styles.fieldLabel}>
-                반복 시각 선택
-                <select name="consumedAtDisambiguation" value={values.consumedAtDisambiguation ?? ""} onChange={(event) => setValue("consumedAtDisambiguation", event.currentTarget.value)}>
-                  <option value="">해당 없음</option>
-                  <option value="earlier">첫 번째 시각</option>
-                  <option value="later">두 번째 시각</option>
-                </select>
-              </label>
+              <NativePickerField
+                label="마신 시각"
+                name="consumedAt"
+                type="datetime-local"
+                value={(values.consumedAt ?? "").slice(0, 16)}
+                onChange={(event) => setValue("consumedAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="마신 시각 반복 시각 선택"
+                name="consumedAtDisambiguation"
+                value={values.consumedAtDisambiguation ?? ""}
+                wallTime={values.consumedAt ?? ""}
+                timezone={timezone}
+                onChange={(value) => setValue("consumedAtDisambiguation", value)}
+              />
               </div>
               <aside className={styles.metricCard}>
                 <span>기록될 카페인 양</span>

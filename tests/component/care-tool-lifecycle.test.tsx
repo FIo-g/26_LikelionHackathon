@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const actions = vi.hoisted(() => ({
@@ -11,6 +12,7 @@ vi.mock("@/app/(app)/care/actions", () => ({
 }));
 
 import { BreathingGuide } from "@/modules/care/ui/breathing-guide";
+import { SleepGuide } from "@/modules/care/ui/sleep-guide";
 import { WhiteNoisePlayer } from "@/modules/care/ui/white-noise-player";
 
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); actions.start.mockReset(); actions.complete.mockReset(); });
@@ -44,6 +46,57 @@ describe("Care tool lifecycle", () => {
     fireEvent.click(screen.getByRole("button", { name: "시작" }));
     await waitFor(() => expect(actions.start).toHaveBeenCalledTimes(2));
     expect(actions.complete).not.toHaveBeenCalled();
+  });
+
+  it("provides timed five-step relaxation guidance instead of only running a timer", async () => {
+    vi.useFakeTimers();
+    let now = 1_000;
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    actions.start.mockResolvedValue({ ok: true, sessionId: "relaxation-1" });
+    render(<SleepGuide localDate="2026-08-19" />);
+
+    expect(screen.getByRole("heading", { name: "5분 이완" })).toBeVisible();
+    expect(screen.getByText("5단계 몸 이완 가이드 · 5분")).toBeVisible();
+    expect(screen.getByText("현재 안내")).toBeVisible();
+    expect(screen.getByText("편안한 자세를 잡고 눈을 감아보세요.")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "시작" }));
+    await act(async () => { await Promise.resolve(); });
+    expect(actions.start).toHaveBeenCalledWith({
+      localDate: "2026-08-19",
+      plannedDurationSeconds: 300,
+      toolKey: "sleep-guide",
+    });
+
+    now = 61_000;
+    act(() => { vi.advanceTimersByTime(1_000); });
+
+    expect(screen.getByRole("progressbar", { name: "5분 이완 진행" })).toHaveAttribute("aria-valuenow", "60");
+    expect(screen.getByText("턱과 이마의 힘을 천천히 풀어주세요.")).toBeVisible();
+    vi.useRealTimers();
+  });
+
+  it("keeps the relaxation guide usable after the Strict Mode effect probe", async () => {
+    let resolveStart: ((value: { ok: boolean; sessionId: string }) => void) | undefined;
+    actions.start.mockImplementation(() => new Promise((resolve) => { resolveStart = resolve; }));
+    render(
+      <StrictMode>
+        <SleepGuide localDate="2026-08-19" />
+      </StrictMode>,
+    );
+
+    const start = screen.getByRole("button", { name: "시작" });
+    fireEvent.click(start);
+    expect(start).toBeDisabled();
+    expect(actions.start).toHaveBeenCalledOnce();
+
+    await act(async () => {
+      resolveStart?.({ ok: true, sessionId: "strict-relaxation-1" });
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole("button", { name: "일시정지" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "시작 중" })).not.toBeInTheDocument();
   });
 
   it("pauses, resumes, and tears down white noise without silently dropping completion errors", async () => {

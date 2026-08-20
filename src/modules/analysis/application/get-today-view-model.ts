@@ -506,13 +506,13 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
   ]);
 
   const rows: ReadonlyArray<RecordSummaryItem> = [
-    { type: "caffeine", label: "카페인", presence: toEntryPresence(Boolean(caffeine)), href: "/record/caffeine?step=brand" },
-    { type: "alcohol", label: "음주", presence: toEntryPresence(Boolean(alcohol)), href: "/record/alcohol?step=type" },
-    { type: "meal", label: "식사", presence: toEntryPresence(Boolean(meal)), href: "/record/meal-health?step=meal" },
-    { type: "exercise", label: "운동", presence: toEntryPresence(Boolean(exercise)), href: "/record/meal-health?step=exercise-and-wellness" },
-    { type: "sleep", label: "수면", presence: toEntryPresence(Boolean(sleep)), href: "/record/sleep-phone?step=sleep" },
-    { type: "phone-usage", label: "휴대폰", presence: toEntryPresence(Boolean(phone)), href: "/record/sleep-phone?step=phone" },
-    { type: "wellness", label: "컨디션", presence: toEntryPresence(Boolean(wellness)), href: "/record/meal-health?step=exercise-and-wellness" },
+    { type: "caffeine", label: "카페인", presence: toEntryPresence(Boolean(caffeine)), href: "/record/caffeine?step=brand&mode=create" },
+    { type: "alcohol", label: "음주", presence: toEntryPresence(Boolean(alcohol)), href: "/record/alcohol?step=type&mode=create" },
+    { type: "meal", label: "식사", presence: toEntryPresence(Boolean(meal)), href: "/record/meal-health?step=meal&focus=meal&mode=create" },
+    { type: "exercise", label: "운동", presence: toEntryPresence(Boolean(exercise)), href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+    { type: "sleep", label: "수면", presence: toEntryPresence(Boolean(sleep)), href: "/record/sleep-phone?step=sleep&focus=sleep&mode=create" },
+    { type: "phone-usage", label: "휴대폰", presence: toEntryPresence(Boolean(phone)), href: "/record/sleep-phone?step=phone&focus=phone&mode=create" },
+    { type: "wellness", label: "컨디션", presence: toEntryPresence(Boolean(wellness)), href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
   ];
 
   const completed = rows.filter((item) => item.presence === "completed").length;

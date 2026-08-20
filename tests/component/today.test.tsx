@@ -42,13 +42,13 @@ const nowReadyModel: TodayViewModel = {
   recordSummary: {
     state: "ready",
     data: [
-      { type: "caffeine", label: "카페인", presence: "completed", href: "/record/caffeine?step=brand" },
-      { type: "alcohol", label: "음주", presence: "completed", href: "/record/alcohol?step=type" },
-      { type: "meal", label: "식사", presence: "empty", href: "/record/meal-health?step=meal" },
-      { type: "exercise", label: "운동", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness" },
-      { type: "sleep", label: "수면", presence: "completed", href: "/record/sleep-phone?step=sleep" },
-      { type: "phone-usage", label: "휴대폰", presence: "completed", href: "/record/sleep-phone?step=phone" },
-      { type: "wellness", label: "컨디션", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness" },
+      { type: "caffeine", label: "카페인", presence: "completed", href: "/record/caffeine?step=brand&mode=create" },
+      { type: "alcohol", label: "음주", presence: "completed", href: "/record/alcohol?step=type&mode=create" },
+      { type: "meal", label: "식사", presence: "empty", href: "/record/meal-health?step=meal&focus=meal&mode=create" },
+      { type: "exercise", label: "운동", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+      { type: "sleep", label: "수면", presence: "completed", href: "/record/sleep-phone?step=sleep&focus=sleep&mode=create" },
+      { type: "phone-usage", label: "휴대폰", presence: "completed", href: "/record/sleep-phone?step=phone&focus=phone&mode=create" },
+      { type: "wellness", label: "컨디션", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
     ],
     message: "오늘 기록 6개 완료",
     action: null,
@@ -68,13 +68,13 @@ const staleReadinessModel: TodayViewModel = {
     ...nowReadyModel.recordSummary,
     state: "ready",
     data: [
-      { type: "caffeine", label: "카페인", presence: "completed", href: "/record/caffeine?step=brand" },
-      { type: "alcohol", label: "음주", presence: "completed", href: "/record/alcohol?step=type" },
-      { type: "meal", label: "식사", presence: "completed", href: "/record/meal-health?step=meal" },
-      { type: "exercise", label: "운동", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness" },
-      { type: "sleep", label: "수면", presence: "completed", href: "/record/sleep-phone?step=sleep" },
-      { type: "phone-usage", label: "휴대폰", presence: "completed", href: "/record/sleep-phone?step=phone" },
-      { type: "wellness", label: "컨디션", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness" },
+      { type: "caffeine", label: "카페인", presence: "completed", href: "/record/caffeine?step=brand&mode=create" },
+      { type: "alcohol", label: "음주", presence: "completed", href: "/record/alcohol?step=type&mode=create" },
+      { type: "meal", label: "식사", presence: "completed", href: "/record/meal-health?step=meal&focus=meal&mode=create" },
+      { type: "exercise", label: "운동", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+      { type: "sleep", label: "수면", presence: "completed", href: "/record/sleep-phone?step=sleep&focus=sleep&mode=create" },
+      { type: "phone-usage", label: "휴대폰", presence: "completed", href: "/record/sleep-phone?step=phone&focus=phone&mode=create" },
+      { type: "wellness", label: "컨디션", presence: "completed", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
     ],
     message: "오늘 기록 7개 완료",
   },
@@ -133,12 +133,12 @@ describe("TodayScreen", () => {
     expect(within(timeline).getAllByRole("listitem")).toHaveLength(5);
     expect(within(timeline).getByText("취침 준비")).toBeVisible();
 
-    expect(screen.getByRole("link", { name: "기록하기" })).toHaveAttribute("href", "/record/meal-health?step=meal");
+    expect(screen.getByRole("link", { name: "기록하기" })).toHaveAttribute("href", "/record/meal-health?step=meal&focus=meal&mode=create");
 
     const caffeineItem = screen.getByText("카페인", { exact: true }).closest("li");
     expect(caffeineItem).toBeInstanceOf(HTMLLIElement);
     if (caffeineItem) {
-      expect(within(caffeineItem).getByRole("link", { name: "수정하기" })).toHaveAttribute("href", "/record/caffeine?step=brand");
+      expect(within(caffeineItem).getByRole("link", { name: "추가 기록" })).toHaveAttribute("href", "/record/caffeine?step=brand&mode=create");
     }
   });
 
@@ -172,7 +172,7 @@ describe("TodayScreen", () => {
     if (callout) {
       expect(within(callout).getByRole("link", { name: "수면 기록 추가" })).toHaveAttribute(
         "href",
-        "/record/sleep-phone?step=sleep",
+        "/record/sleep-phone?step=sleep&focus=sleep&mode=create",
       );
       expect(within(callout).getByText("기상 후 어제 기준으로 직접 입력해요.")).toBeVisible();
     }

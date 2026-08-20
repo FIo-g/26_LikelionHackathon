@@ -4,8 +4,12 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
-import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
+import {
+  formatRecordWallTimeInput,
+  resolveRecordWallTimeDisambiguation,
+} from "@/shared/time/zoned-date-time";
 import { RecordFlowHeader } from "./record-flow-header";
+import { NativePickerField, RepeatedWallTimeChoice } from "./native-picker-field";
 import styles from "./records.module.css";
 
 type SleepPhoneStep = "sleep" | "phone" | "confirm";
@@ -32,6 +36,7 @@ type SleepPhoneFlowProps = Readonly<{
   timezone: string;
   step?: SleepPhoneStep | string;
   focus?: SleepPhoneFocus | string;
+  freshCreate?: boolean;
   successRedirectPath?: string;
   initialValues?: RawValue;
 }>;
@@ -52,9 +57,17 @@ const payloadFor = (values: Record<string, string>, focus: SleepPhoneFocus): str
     ...(values.sleepRecordId ? { recordId: values.sleepRecordId } : {}),
     type: "sleep",
     startedAt: values.sleepStartedAt,
-    startedAtDisambiguation: values.sleepStartedAtDisambiguation,
+    startedAtDisambiguation: resolveRecordWallTimeDisambiguation(
+      values.sleepStartedAt,
+      values.sleepStartedAtDisambiguation,
+      values.timezone,
+    ),
     endedAt: values.sleepEndedAt,
-    endedAtDisambiguation: values.sleepEndedAtDisambiguation,
+    endedAtDisambiguation: resolveRecordWallTimeDisambiguation(
+      values.sleepEndedAt,
+      values.sleepEndedAtDisambiguation,
+      values.timezone,
+    ),
     morningFatigue: values.morningFatigue,
     timezone: values.timezone,
   };
@@ -63,7 +76,11 @@ const payloadFor = (values: Record<string, string>, focus: SleepPhoneFocus): str
     ...(values.phoneRecordId ? { recordId: values.phoneRecordId } : {}),
     type: "phone-usage",
     lastUseAt: values.lastUseAt,
-    lastUseAtDisambiguation: values.lastUseAtDisambiguation,
+    lastUseAtDisambiguation: resolveRecordWallTimeDisambiguation(
+      values.lastUseAt,
+      values.lastUseAtDisambiguation,
+      values.timezone,
+    ),
     durationMinutes: values.durationMinutes,
     timezone: values.timezone,
   };
@@ -86,21 +103,11 @@ const buildSummary = (values: Record<string, string>, focus: SleepPhoneFocus) =>
   return fields;
 };
 
-const Disambiguation = ({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) => (
-  <label className={styles.fieldLabel}>
-    반복 시각 선택
-    <select name={name} value={value} onChange={(event) => onChange(event.currentTarget.value)}>
-      <option value="">해당 없음</option>
-      <option value="earlier">첫 번째 시각</option>
-      <option value="later">두 번째 시각</option>
-    </select>
-  </label>
-);
-
 export const SleepPhoneFlow = ({
   timezone,
   step: requestedStep,
   focus: requestedFocus,
+  freshCreate = false,
   successRedirectPath = "/record",
   initialValues = {},
 }: SleepPhoneFlowProps) => {
@@ -137,11 +144,13 @@ export const SleepPhoneFlow = ({
   return (
     <RecordFormShell
       pathname="/record/sleep-phone"
+      draftScope={focus}
       action={saveRecordBatchAction}
       successRedirectPath={successRedirectPath}
       submitButtonLabel={submitButtonLabel}
       initialValues={initial}
       initialStep={normalizeStep(requestedStep, focus)}
+      freshCreate={freshCreate}
     >
       {({ values, step, setValue, setStep }) => (
         <main className={styles.flowPage} data-lunar-screen="record">
@@ -153,10 +162,38 @@ export const SleepPhoneFlow = ({
               <section className={styles.sleepInputCard} aria-labelledby="sleep-card-title">
                 <h2 id="sleep-card-title">어젯밤 수면 기록</h2>
                 <p>직접 입력한 기상 후 어젯밤 기준으로 저장돼요.</p>
-              <label className={styles.fieldLabel}>수면 시작<input type="datetime-local" name="sleepStartedAt" value={values.sleepStartedAt.slice(0, 16)} onChange={(event) => setValue("sleepStartedAt", event.currentTarget.value)} required /></label>
-              <Disambiguation name="sleepStartedAtDisambiguation" value={values.sleepStartedAtDisambiguation} onChange={(value) => setValue("sleepStartedAtDisambiguation", value)} />
-              <label className={styles.fieldLabel}>수면 종료<input type="datetime-local" name="sleepEndedAt" value={values.sleepEndedAt.slice(0, 16)} onChange={(event) => setValue("sleepEndedAt", event.currentTarget.value)} required /></label>
-              <Disambiguation name="sleepEndedAtDisambiguation" value={values.sleepEndedAtDisambiguation} onChange={(value) => setValue("sleepEndedAtDisambiguation", value)} />
+              <NativePickerField
+                label="수면 시작"
+                name="sleepStartedAt"
+                type="datetime-local"
+                value={values.sleepStartedAt.slice(0, 16)}
+                onChange={(event) => setValue("sleepStartedAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="수면 시작 반복 시각 선택"
+                name="sleepStartedAtDisambiguation"
+                value={values.sleepStartedAtDisambiguation}
+                wallTime={values.sleepStartedAt}
+                timezone={timezone}
+                onChange={(value) => setValue("sleepStartedAtDisambiguation", value)}
+              />
+              <NativePickerField
+                label="수면 종료"
+                name="sleepEndedAt"
+                type="datetime-local"
+                value={values.sleepEndedAt.slice(0, 16)}
+                onChange={(event) => setValue("sleepEndedAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="수면 종료 반복 시각 선택"
+                name="sleepEndedAtDisambiguation"
+                value={values.sleepEndedAtDisambiguation}
+                wallTime={values.sleepEndedAt}
+                timezone={timezone}
+                onChange={(value) => setValue("sleepEndedAtDisambiguation", value)}
+              />
               <label className={styles.fieldLabel}>아침 피로(1-5)<input type="number" min="1" max="5" name="morningFatigue" value={values.morningFatigue} onChange={(event) => setValue("morningFatigue", event.currentTarget.value)} required /></label>
               </section>
               <button className={styles.nextButton} type="button" onClick={() => setStep(focus === "sleep" ? "confirm" : "phone")}>{focus === "sleep" ? "기록 확인" : "오늘 휴대폰 기록"}</button>
@@ -170,8 +207,22 @@ export const SleepPhoneFlow = ({
                 <span className={styles.manualPill}>직접 입력</span>
                 <strong>{values.durationMinutes || "0"}분</strong>
                 <p>기기 자동 연동 없이 입력한 값이 저장됩니다.</p>
-              <label className={styles.fieldLabel}>마지막 휴대폰 사용<input type="datetime-local" name="lastUseAt" value={values.lastUseAt.slice(0, 16)} onChange={(event) => setValue("lastUseAt", event.currentTarget.value)} required /></label>
-              <Disambiguation name="lastUseAtDisambiguation" value={values.lastUseAtDisambiguation} onChange={(value) => setValue("lastUseAtDisambiguation", value)} />
+              <NativePickerField
+                label="마지막 휴대폰 사용"
+                name="lastUseAt"
+                type="datetime-local"
+                value={values.lastUseAt.slice(0, 16)}
+                onChange={(event) => setValue("lastUseAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="마지막 휴대폰 사용 반복 시각 선택"
+                name="lastUseAtDisambiguation"
+                value={values.lastUseAtDisambiguation}
+                wallTime={values.lastUseAt}
+                timezone={timezone}
+                onChange={(value) => setValue("lastUseAtDisambiguation", value)}
+              />
               <label className={styles.fieldLabel}>사용 시간(분)<input type="number" min="0" max="1440" name="durationMinutes" value={values.durationMinutes} onChange={(event) => setValue("durationMinutes", event.currentTarget.value)} required /></label>
               </section>
               <p className={styles.flowNote}>수면과 휴대폰 기록은 서로 다른 날짜 기준으로 저장됩니다.</p>

@@ -84,7 +84,7 @@ const mapRecords = (rows: Readonly<{
 }>): UserDataExport["records"] => [
   ...rows.sleep.map((row) => record("sleep", row, { startedAt: iso(row.startedAt), endedAt: iso(row.endedAt), morningFatigue: integer(row.morningFatigue), timezone: string(row.timezone) }, row.sleepDate)),
   ...rows.caffeine.map((row) => record("caffeine", row, { brand: string(row.brand), product: string(row.product), caffeineMg: integer(row.caffeineMg), consumedAt: iso(row.consumedAt), timezone: string(row.timezone) }, dailyLogDate(row))),
-  ...rows.alcohol.map((row) => record("alcohol", row, { alcoholType: string(row.alcoholType), servings: number(row.servings), consumedAt: iso(row.consumedAt), timezone: string(row.timezone) }, dailyLogDate(row))),
+  ...rows.alcohol.map((row) => record("alcohol", row, { alcoholType: string(row.alcoholType), servings: number(row.servings), measurementUnit: nullableString(row.measurementUnit), consumedAt: iso(row.consumedAt), timezone: string(row.timezone) }, dailyLogDate(row))),
   ...rows.meal.map((row) => record("meal", row, { size: string(row.size), eatenAt: iso(row.eatenAt), notes: nullableString(row.notes), timezone: string(row.timezone) }, dailyLogDate(row))),
   ...rows.exercise.map((row) => record("exercise", row, { exerciseType: string(row.exerciseType), intensity: string(row.intensity), startedAt: iso(row.startedAt), endedAt: iso(row.endedAt), averageHeartRate: row.averageHeartRate === null || row.averageHeartRate === undefined ? null : integer(row.averageHeartRate), timezone: string(row.timezone) }, dailyLogDate(row))),
   ...rows.phoneUsage.map((row) => record("phone-usage", row, { lastUseAt: iso(row.lastUseAt), durationMinutes: integer(row.durationMinutes), timezone: string(row.timezone) }, row.localDate)),

@@ -38,6 +38,7 @@ type CategoryRecordQuery = {
     orderBy: { updatedAt: "desc" };
     select: Record<string, unknown>;
   }) => Promise<CategoryRecordRow | null>;
+  count: (args: { where: { userId: string } }) => Promise<number>;
 };
 
 type PrismaRecordHubClient = {
@@ -63,6 +64,8 @@ type LoadedCategory = Readonly<{
   step: string;
   records: readonly LoadedRecord[];
   editRecords?: readonly LoadedRecord[];
+  recordCount: number;
+  relatedRecordCount?: number;
 }>;
 
 const selectLatest = async (
@@ -74,6 +77,10 @@ const selectLatest = async (
   orderBy: { updatedAt: "desc" },
   select: { id: true, updatedAt: true, ...select },
 });
+
+const countRecords = async (query: CategoryRecordQuery, userId: string): Promise<number> => (
+  query.count({ where: { userId } })
+);
 
 const present = (type: RecordType, row: CategoryRecordRow | null): LoadedRecord[] => (
   row ? [{ type, row }] : []
@@ -91,6 +98,21 @@ const summaryFromRow = (row: CategoryRecordRow | null): string | null => {
   if (typeof row.localDate === "string") return `마지막: ${row.localDate}`;
   const dailyLog = row.dailyLog as { localDate?: unknown } | null | undefined;
   return typeof dailyLog?.localDate === "string" ? `마지막: ${dailyLog.localDate}` : null;
+};
+
+const summaryWithHistory = (
+  row: CategoryRecordRow | null,
+  recordCount: number,
+  relatedRecordCount?: number,
+): string | null => {
+  if (recordCount === 0) return null;
+
+  const values = [
+    summaryFromRow(row),
+    `저장 ${recordCount}건`,
+    relatedRecordCount === undefined ? null : `컨디션 ${relatedRecordCount}건`,
+  ].filter((value): value is string => value !== null);
+  return values.join(" · ");
 };
 
 const derivePresence = (count: number, requiredCount: number): EntryPresence => {
@@ -133,6 +155,7 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
           recordId: row.id,
           alcoholType: text(row.alcoholType),
           servings: text(row.servings),
+          measurementUnit: text(row.measurementUnit),
           ...editableWallTime("consumedAt", row.consumedAt, timezone),
         });
         break;
@@ -184,32 +207,39 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
 };
 
 const loadCategories = async (client: PrismaRecordHubClient, userId: string): Promise<LoadedCategory[]> => {
-  const [caffeine, alcohol, meal, exercise, wellness, sleep, phone] = await Promise.all([
+  const [caffeine, caffeineCount, alcohol, alcoholCount, meal, mealCount, exercise, exerciseCount, wellness, wellnessCount, sleep, sleepCount, phone, phoneCount] = await Promise.all([
     selectLatest(client.caffeineEntry, userId, {
       brand: true, product: true, caffeineMg: true, consumedAt: true,
       dailyLog: { select: { localDate: true } },
     }),
+    countRecords(client.caffeineEntry, userId),
     selectLatest(client.alcoholEntry, userId, {
-      alcoholType: true, servings: true, consumedAt: true,
+      alcoholType: true, servings: true, measurementUnit: true, consumedAt: true,
       dailyLog: { select: { localDate: true } },
     }),
+    countRecords(client.alcoholEntry, userId),
     selectLatest(client.mealEntry, userId, {
       size: true, eatenAt: true, notes: true,
       dailyLog: { select: { localDate: true } },
     }),
+    countRecords(client.mealEntry, userId),
     selectLatest(client.exerciseEntry, userId, {
       exerciseType: true, intensity: true, startedAt: true, endedAt: true, averageHeartRate: true,
       dailyLog: { select: { localDate: true } },
     }),
+    countRecords(client.exerciseEntry, userId),
     selectLatest(client.wellnessEntry, userId, {
       localDate: true, fatigueLevel: true, stressLevel: true,
     }),
+    countRecords(client.wellnessEntry, userId),
     selectLatest(client.sleepSession, userId, {
       sleepDate: true, startedAt: true, endedAt: true, morningFatigue: true,
     }),
+    countRecords(client.sleepSession, userId),
     selectLatest(client.phoneUsageEntry, userId, {
       localDate: true, lastUseAt: true, durationMinutes: true,
     }),
+    countRecords(client.phoneUsageEntry, userId),
   ]);
 
   const mealRecords = present("meal", meal);
@@ -226,6 +256,7 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/caffeine?step=brand",
       step: "brand",
       records: present("caffeine", caffeine),
+      recordCount: caffeineCount,
     },
     {
       type: "alcohol",
@@ -234,6 +265,7 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/alcohol?step=type",
       step: "type",
       records: present("alcohol", alcohol),
+      recordCount: alcoholCount,
     },
     {
       type: "meal",
@@ -242,6 +274,7 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/meal-health?step=meal&focus=meal",
       step: "meal",
       records: mealRecords,
+      recordCount: mealCount,
     },
     {
       type: "exercise",
@@ -251,6 +284,8 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       step: "exercise-and-wellness",
       records: exerciseRecords,
       editRecords: [...exerciseRecords, ...wellnessRecords],
+      recordCount: exerciseCount,
+      relatedRecordCount: wellnessCount,
     },
     {
       type: "phone-usage",
@@ -259,6 +294,7 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/sleep-phone?step=phone&focus=phone",
       step: "phone",
       records: phoneRecords,
+      recordCount: phoneCount,
     },
     {
       type: "sleep",
@@ -267,6 +303,7 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/sleep-phone?step=sleep&focus=sleep",
       step: "sleep",
       records: sleepRecords,
+      recordCount: sleepCount,
     },
   ];
 };
@@ -285,7 +322,7 @@ export const getRecordHub = async (
       label: category.label,
       presence: derivePresence(category.records.length, category.requiredCount),
       inputMode: "manual",
-      summary: summaryFromRow(latestRow(category.records)),
+      summary: summaryWithHistory(latestRow(category.records), category.recordCount, category.relatedRecordCount),
       href: category.href,
       records: category.records.map(({ type, row }) => ({ recordId: row.id, recordType: type })),
       editDraft: category.records.length === 0

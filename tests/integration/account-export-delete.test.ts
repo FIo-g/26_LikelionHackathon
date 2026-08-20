@@ -79,6 +79,17 @@ const seed = async (scope: typeof alice | typeof bob) => {
   await prisma.connection.create({ data: { userId: scope.userId, selected: "manual", mode: "manual", availability: "available", state: "complete" } });
   const dailyLog = await prisma.dailyLog.create({ data: { userId: scope.userId, localDate: "2026-08-20", timezone: scope.timezone } });
   await prisma.sleepSession.create({ data: { userId: scope.userId, dailyLogId: dailyLog.id, sleepDate: "2026-08-20", startedAt: new Date("2026-08-19T14:00:00.000Z"), endedAt: new Date("2026-08-19T22:00:00.000Z"), morningFatigue: 2, timezone: scope.timezone } });
+  await prisma.alcoholEntry.create({
+    data: {
+      userId: scope.userId,
+      dailyLogId: dailyLog.id,
+      alcoholType: "맥주",
+      servings: 1,
+      measurementUnit: scope.userId === alice.userId ? "can" : null,
+      consumedAt: now,
+      timezone: scope.timezone,
+    },
+  });
   await prisma.recordRevision.create({ data: { userId: scope.userId, entityType: "sleep", entityId: `${scope.userId}-sleep`, operation: "create", after: { schemaVersion: 1, record: { id: `${scope.userId}-sleep`, userId: scope.userId, type: "sleep", localDate: "2026-08-20", fields: { startedAt: "2026-08-19T14:00:00.000Z", endedAt: "2026-08-19T22:00:00.000Z", morningFatigue: 2, timezone: scope.timezone } } }, changedAt: now } });
   await prisma.routineCompletion.create({ data: { userId: scope.userId, localDate: "2026-08-20", planDayId: null, routineRevisionKey: "goal:revision", stepKey: "wind-down", completedAt: now } });
   await prisma.careToolSession.create({ data: { userId: scope.userId, localDate: "2026-08-20", toolKey: "breathing", startedAt: now, plannedDurationSeconds: 180 } });
@@ -109,10 +120,27 @@ describeSqlite("account export and atomic deletion", () => {
       identity: { email: emailFor(alice.userId) },
       profile: { age: 28, gender: "prefer-not-to-say", heightCm: 171, weightKg: 62.5 },
       habits: expect.arrayContaining([{ category: "alcohol", value: "monthly" }]),
-      records: [{ type: "sleep" }],
     });
+    expect(exported.records).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: "sleep" }),
+      expect.objectContaining({
+        type: "alcohol",
+        fields: expect.objectContaining({ alcoholType: "맥주", servings: 1, measurementUnit: "can" }),
+      }),
+    ]));
     expect(Object.keys(exported)).not.toEqual(expect.arrayContaining(["user", "accounts", "sessions", "verifications", "rateLimits"]));
     expect(keys).not.toEqual(expect.arrayContaining(["password", "accessToken", "refreshToken", "idToken", "sessionToken", "verificationToken", "secret", "value", "token"]));
+  });
+
+  it("exports legacy alcohol records with a null measurement unit", async () => {
+    const exported = await createExportUserData(createPrismaAccountDataRepository(prisma), clock)(bob);
+
+    expect(exported.records).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        type: "alcohol",
+        fields: expect.objectContaining({ alcoholType: "맥주", servings: 1, measurementUnit: null }),
+      }),
+    ]));
   });
 
   it("rejects a corrupt persisted narration payload", async () => {

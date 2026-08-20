@@ -32,6 +32,12 @@
 .status_ready { color: #207657; font-size: 13px; font-weight: 700; }
 .status_stale { color: #8b6615; font-size: 13px; font-weight: 700; }
 .status_insufficient, .status_error { color: #687189; font-size: 13px; font-weight: 700; }
+.reportSection {
+  /* Narration can contain a long URL, number, or unspaced token. Let the grid
+     item shrink and wrap it instead of widening the mobile viewport. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .reportSection p { color: #59627e; line-height: 1.6; }
 .reportBasis { display: none; }
 .reportAiSource { display: inline-block; margin-right: 6px; padding: 6px 12px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 11px; font-weight: 800; }
@@ -395,6 +401,8 @@
     box-shadow: 0 8px 20px rgba(38, 18, 56, .12);
     color: #ffffff;
   }
+  .reportSection ul,
+  .reportSection form { min-width: 0; }
   .reportSection .eyebrow { margin-bottom: 12px; color: #ffffff; font-size: 11px; letter-spacing: -0.02em; }
   .reportSection h2 { color: #ffffff; font-size: 20px; line-height: 1.45; letter-spacing: -0.055em; }
   .reportSection p { color: #f0e4f5; font-size: 11px; line-height: 1.55; }

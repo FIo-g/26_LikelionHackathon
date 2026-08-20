@@ -4,8 +4,12 @@ import { useMemo } from "react";
 import { saveRecordBatchAction } from "@/app/(app)/record/actions";
 import { RecordConfirmation } from "./record-confirmation";
 import { RecordFormShell } from "./record-form-shell";
-import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
+import {
+  formatRecordWallTimeInput,
+  resolveRecordWallTimeDisambiguation,
+} from "@/shared/time/zoned-date-time";
 import { RecordFlowHeader } from "./record-flow-header";
+import { NativePickerField, RepeatedWallTimeChoice } from "./native-picker-field";
 import styles from "./records.module.css";
 
 type MealHealthStep = "meal" | "exercise-and-wellness" | "confirm";
@@ -39,6 +43,7 @@ type MealHealthFlowProps = Readonly<{
   timezone: string;
   step?: MealHealthStep | string;
   focus?: MealHealthFocus | string;
+  freshCreate?: boolean;
   successRedirectPath?: string;
   initialValues?: RawValue;
 }>;
@@ -66,7 +71,11 @@ const payloadFor = (values: Record<string, string>, focus: MealHealthFocus): str
     type: "meal",
     size: values.mealSize,
     eatenAt: values.mealEatenAt,
-    eatenAtDisambiguation: values.mealEatenAtDisambiguation,
+    eatenAtDisambiguation: resolveRecordWallTimeDisambiguation(
+      values.mealEatenAt,
+      values.mealEatenAtDisambiguation,
+      values.timezone,
+    ),
     notes: values.mealNotes,
     timezone: values.timezone,
   };
@@ -77,9 +86,17 @@ const payloadFor = (values: Record<string, string>, focus: MealHealthFocus): str
     exerciseType: values.exerciseType,
     intensity: values.exerciseIntensity,
     startedAt: values.exerciseStartedAt,
-    startedAtDisambiguation: values.exerciseStartedAtDisambiguation,
+    startedAtDisambiguation: resolveRecordWallTimeDisambiguation(
+      values.exerciseStartedAt,
+      values.exerciseStartedAtDisambiguation,
+      values.timezone,
+    ),
     endedAt: values.exerciseEndedAt,
-    endedAtDisambiguation: values.exerciseEndedAtDisambiguation,
+    endedAtDisambiguation: resolveRecordWallTimeDisambiguation(
+      values.exerciseEndedAt,
+      values.exerciseEndedAtDisambiguation,
+      values.timezone,
+    ),
     averageHeartRate: toNumberOrNull(values.exerciseAverageHeartRate ?? ""),
     timezone: values.timezone,
   };
@@ -111,21 +128,11 @@ const buildSummary = (values: Record<string, string>, focus: MealHealthFocus) =>
   return fields;
 };
 
-const Disambiguation = ({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) => (
-  <label className={styles.fieldLabel}>
-    반복 시각 선택
-    <select name={name} value={value} onChange={(event) => onChange(event.currentTarget.value)}>
-      <option value="">해당 없음</option>
-      <option value="earlier">첫 번째 시각</option>
-      <option value="later">두 번째 시각</option>
-    </select>
-  </label>
-);
-
 export const MealHealthFlow = ({
   timezone,
   step: requestedStep,
   focus: requestedFocus,
+  freshCreate = false,
   successRedirectPath = "/record",
   initialValues = {},
 }: MealHealthFlowProps) => {
@@ -170,11 +177,13 @@ export const MealHealthFlow = ({
   return (
     <RecordFormShell
       pathname="/record/meal-health"
+      draftScope={focus}
       action={saveRecordBatchAction}
       successRedirectPath={successRedirectPath}
       submitButtonLabel={submitButtonLabel}
       initialValues={initial}
       initialStep={normalizeStep(requestedStep, focus)}
+      freshCreate={freshCreate}
     >
       {({ values, step, setValue, setStep }) => (
         <main className={styles.flowPage} data-lunar-screen="record">
@@ -190,11 +199,22 @@ export const MealHealthFlow = ({
                   <option value="small">small</option><option value="medium">medium</option><option value="large">large</option>
                 </select>
               </label>
-              <label className={styles.fieldLabel}>
-                식사 시각
-                <input type="datetime-local" name="mealEatenAt" value={values.mealEatenAt.slice(0, 16)} onChange={(event) => setValue("mealEatenAt", event.currentTarget.value)} required />
-              </label>
-              <Disambiguation name="mealEatenAtDisambiguation" value={values.mealEatenAtDisambiguation} onChange={(value) => setValue("mealEatenAtDisambiguation", value)} />
+              <NativePickerField
+                label="식사 시각"
+                name="mealEatenAt"
+                type="datetime-local"
+                value={values.mealEatenAt.slice(0, 16)}
+                onChange={(event) => setValue("mealEatenAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="식사 시각 반복 시각 선택"
+                name="mealEatenAtDisambiguation"
+                value={values.mealEatenAtDisambiguation}
+                wallTime={values.mealEatenAt}
+                timezone={timezone}
+                onChange={(value) => setValue("mealEatenAtDisambiguation", value)}
+              />
               <label className={styles.fieldLabel}>
                 메모
                 <input name="mealNotes" value={values.mealNotes} onChange={(event) => setValue("mealNotes", event.currentTarget.value)} />
@@ -224,17 +244,52 @@ export const MealHealthFlow = ({
                   <option value="low">low</option><option value="medium">medium</option><option value="high">high</option>
                 </select>
               </label>
-              <label className={styles.fieldLabel}>운동 시작<input type="datetime-local" name="exerciseStartedAt" value={values.exerciseStartedAt.slice(0, 16)} onChange={(event) => setValue("exerciseStartedAt", event.currentTarget.value)} required /></label>
-              <Disambiguation name="exerciseStartedAtDisambiguation" value={values.exerciseStartedAtDisambiguation} onChange={(value) => setValue("exerciseStartedAtDisambiguation", value)} />
-              <label className={styles.fieldLabel}>운동 종료<input type="datetime-local" name="exerciseEndedAt" value={values.exerciseEndedAt.slice(0, 16)} onChange={(event) => setValue("exerciseEndedAt", event.currentTarget.value)} required /></label>
-              <Disambiguation name="exerciseEndedAtDisambiguation" value={values.exerciseEndedAtDisambiguation} onChange={(value) => setValue("exerciseEndedAtDisambiguation", value)} />
+              <NativePickerField
+                label="운동 시작"
+                name="exerciseStartedAt"
+                type="datetime-local"
+                value={values.exerciseStartedAt.slice(0, 16)}
+                onChange={(event) => setValue("exerciseStartedAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="운동 시작 반복 시각 선택"
+                name="exerciseStartedAtDisambiguation"
+                value={values.exerciseStartedAtDisambiguation}
+                wallTime={values.exerciseStartedAt}
+                timezone={timezone}
+                onChange={(value) => setValue("exerciseStartedAtDisambiguation", value)}
+              />
+              <NativePickerField
+                label="운동 종료"
+                name="exerciseEndedAt"
+                type="datetime-local"
+                value={values.exerciseEndedAt.slice(0, 16)}
+                onChange={(event) => setValue("exerciseEndedAt", event.currentTarget.value)}
+                required
+              />
+              <RepeatedWallTimeChoice
+                label="운동 종료 반복 시각 선택"
+                name="exerciseEndedAtDisambiguation"
+                value={values.exerciseEndedAtDisambiguation}
+                wallTime={values.exerciseEndedAt}
+                timezone={timezone}
+                onChange={(value) => setValue("exerciseEndedAtDisambiguation", value)}
+              />
               <label className={styles.fieldLabel}>평균 심박수<input name="exerciseAverageHeartRate" inputMode="numeric" value={values.exerciseAverageHeartRate} onChange={(event) => setValue("exerciseAverageHeartRate", event.currentTarget.value)} /></label>
               </div>
               <h2 className={styles.subsectionTitle}>오늘의 컨디션</h2>
               <div className={styles.fieldGrid}>
                 <label className={styles.fieldLabel}>피로도<input type="number" min="1" max="5" name="fatigueLevel" value={values.fatigueLevel} onChange={(event) => setValue("fatigueLevel", event.currentTarget.value)} required /></label>
                 <label className={styles.fieldLabel}>스트레스<input type="number" min="1" max="5" name="stressLevel" value={values.stressLevel} onChange={(event) => setValue("stressLevel", event.currentTarget.value)} required /></label>
-                <label className={styles.fieldLabel}>컨디션 날짜<input type="date" name="wellnessLocalDate" value={values.wellnessLocalDate} onChange={(event) => setValue("wellnessLocalDate", event.currentTarget.value)} required /></label>
+                <NativePickerField
+                  label="컨디션 날짜"
+                  name="wellnessLocalDate"
+                  type="date"
+                  value={values.wellnessLocalDate}
+                  onChange={(event) => setValue("wellnessLocalDate", event.currentTarget.value)}
+                  required
+                />
               </div>
               <aside className={styles.noticeCard}>
                 <strong>식사 시간도 수면 준비에 반영돼요</strong>

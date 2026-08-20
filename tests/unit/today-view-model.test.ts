@@ -141,6 +141,15 @@ describe("getTodayViewModel", () => {
     expect(model.readiness.message).toBe("마지막 정상 분석을 표시합니다");
     expect(model.recordSummary.state).toBe("ready");
     expect(model.recordSummary.message).toBe("오늘 기록 4개 완료");
+    expect(model.recordSummary.data?.map(({ type, href }) => ({ type, href }))).toEqual([
+      { type: "caffeine", href: "/record/caffeine?step=brand&mode=create" },
+      { type: "alcohol", href: "/record/alcohol?step=type&mode=create" },
+      { type: "meal", href: "/record/meal-health?step=meal&focus=meal&mode=create" },
+      { type: "exercise", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+      { type: "sleep", href: "/record/sleep-phone?step=sleep&focus=sleep&mode=create" },
+      { type: "phone-usage", href: "/record/sleep-phone?step=phone&focus=phone&mode=create" },
+      { type: "wellness", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+    ]);
   });
 
   it("reads a parsed result from a ready snapshot entity", async () => {

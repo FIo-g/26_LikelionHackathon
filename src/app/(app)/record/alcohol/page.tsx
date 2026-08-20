@@ -8,5 +8,5 @@ const firstParam = (value: string | string[] | undefined): string | undefined =>
 export default async function AlcoholPage({ searchParams }: AlcoholPageProps) {
   const { timezone } = await requireUserScope();
   const query = await searchParams;
-  return <AlcoholFlow timezone={timezone} step={firstParam(query.step)} />;
+  return <AlcoholFlow freshCreate={firstParam(query.mode) === "create"} timezone={timezone} step={firstParam(query.step)} />;
 }

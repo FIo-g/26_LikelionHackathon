@@ -209,6 +209,7 @@ model AlcoholEntry {
   dailyLogId  String
   alcoholType String
   servings    Float
+  measurementUnit String?
   consumedAt  DateTime
   timezone    String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

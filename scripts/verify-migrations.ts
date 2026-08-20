@@ -159,14 +159,22 @@ const verifySqliteHistory = async (): Promise<void> => {
     database.exec(`INSERT INTO "User" ("id", "email", "emailVerified", "createdAt", "updatedAt") VALUES ('legacy', 'legacy@example.test', false, '${timestamp}', '${timestamp}')`);
     database.exec(`INSERT INTO "UserProfile" ("id", "userId", "nickname", "timezone", "createdAt", "updatedAt") VALUES ('legacy-profile', 'legacy', 'Legacy', 'Asia/Seoul', '${timestamp}', '${timestamp}')`);
     database.exec(`INSERT INTO "UserHabit" ("id", "userId", "caffeine", "exercise", "meal", "phoneUsage", "createdAt", "updatedAt") VALUES ('legacy-habit', 'legacy', 'none', 'rare', 'mixed', 'low', '${timestamp}', '${timestamp}')`);
+    database.exec(`INSERT INTO "DailyLog" ("id", "userId", "localDate", "timezone") VALUES ('legacy-log', 'legacy', '2026-08-20', 'Asia/Seoul')`);
+    database.exec(`INSERT INTO "AlcoholEntry" ("id", "userId", "dailyLogId", "alcoholType", "servings", "consumedAt", "timezone", "createdAt", "updatedAt") VALUES ('legacy-alcohol', 'legacy', 'legacy-log', '맥주', 1, '${timestamp}', 'Asia/Seoul', '${timestamp}', '${timestamp}')`);
 
     for (const migration of forwardMigrations) {
       database.exec(await readFile(migration, "utf8"));
     }
     const legacyProfile = database.prepare('SELECT "age", "gender", "heightCm", "weightKg" FROM "UserProfile" WHERE "userId" = \'legacy\'').get() as Record<string, unknown> | undefined;
     const legacyHabit = database.prepare('SELECT "alcohol" FROM "UserHabit" WHERE "userId" = \'legacy\'').get() as Record<string, unknown> | undefined;
-    if (!legacyProfile || Object.values(legacyProfile).some((value) => value !== null) || legacyHabit?.alcohol !== null) {
-      throw new Error("nullable profile and habit migration does not preserve legacy users");
+    const legacyAlcohol = database.prepare('SELECT "measurementUnit" FROM "AlcoholEntry" WHERE "id" = \'legacy-alcohol\'').get() as Record<string, unknown> | undefined;
+    if (
+      !legacyProfile
+      || Object.values(legacyProfile).some((value) => value !== null)
+      || legacyHabit?.alcohol !== null
+      || legacyAlcohol?.measurementUnit !== null
+    ) {
+      throw new Error("nullable profile, habit, or alcohol migration does not preserve legacy records");
     }
     const connection: MigrationConnection = {
       execute: async (sql) => { database.exec(sql); },
@@ -196,8 +204,8 @@ const verifyPostgresqlHistory = async (rawUrl: string): Promise<void> => {
   for (const name of checkConstraints) {
     if (!sql.includes(name)) throw new Error(`missing PostgreSQL constraint: ${name}`);
   }
-  for (const column of ["age", "gender", "heightCm", "weightKg", "alcohol"] as const) {
-    if (!sql.includes(`\"${column}\"`)) throw new Error(`missing profile or habit migration column: ${column}`);
+  for (const column of ["age", "gender", "heightCm", "weightKg", "alcohol", "measurementUnit"] as const) {
+    if (!sql.includes(`\"${column}\"`)) throw new Error(`missing additive migration column: ${column}`);
   }
   if (/\b(DROP\s+TABLE|TRUNCATE|PRAGMA|AUTOINCREMENT)\b/i.test(sql)) {
     throw new Error("unsafe or SQLite SQL in release migration");
@@ -229,6 +237,19 @@ const verifyPostgresqlHistory = async (rawUrl: string): Promise<void> => {
     );
     if (new Set(result.rows.map(({ conname }) => conname)).size !== checkConstraints.length) {
       throw new Error("PostgreSQL constraints do not match migration");
+    }
+    const measurementUnitColumn = await client.query<{ data_type: string; is_nullable: string }>(
+      `SELECT data_type, is_nullable
+       FROM information_schema.columns
+       WHERE table_schema = $1 AND table_name = 'AlcoholEntry' AND column_name = 'measurementUnit'`,
+      [schema],
+    );
+    if (
+      measurementUnitColumn.rows.length !== 1
+      || measurementUnitColumn.rows[0]?.data_type !== "text"
+      || measurementUnitColumn.rows[0]?.is_nullable !== "YES"
+    ) {
+      throw new Error("PostgreSQL AlcoholEntry.measurementUnit column is missing or incompatible");
     }
     await verifyObservableConstraints({
       execute: async (sql) => { await client.query(sql); },

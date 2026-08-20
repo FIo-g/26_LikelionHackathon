@@ -24,7 +24,7 @@ export default async function RecordHubPage() {
         <p className={styles.recordEyebrow}>RECORD · 오늘 {today}</p>
         <h1 className={styles.recordTitle}>오늘의 생활 기록</h1>
         <p className={styles.recordSubtitle}>저장된 기록을 확인하고, 빠진 항목만 직접 기록하세요.</p>
-        <Link className={styles.quickRecordAction} href="/record/caffeine?step=brand">빠른 기록 시작</Link>
+        <Link className={styles.quickRecordAction} href="/record/caffeine?step=brand&mode=create">빠른 기록 시작</Link>
       </header>
 
       <section className={styles.recordContent} aria-labelledby="record-today-title">

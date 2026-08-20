@@ -30,9 +30,12 @@ export const SleepGuide = ({ localDate }: { localDate: string }) => {
     const timer = window.setInterval(update, 250);
     return () => window.clearInterval(timer);
   }, [running]);
-  useEffect(() => () => {
-    mounted.current = false; sessionId.current = null; completing.current = false;
-    startInFlight.current = false; activeStartedAtMs.current = null;
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false; sessionId.current = null; completing.current = false;
+      startInFlight.current = false; activeStartedAtMs.current = null;
+    };
   }, []);
   useEffect(() => {
     if (elapsed < DURATION_SECONDS || !sessionId.current || completing.current) return;
@@ -78,18 +81,21 @@ export const SleepGuide = ({ localDate }: { localDate: string }) => {
         <span className={styles.toolIcon} aria-hidden="true">~</span>
         <div className={styles.toolCopy}>
           <h3>5분 이완</h3>
-          <p>5분 이완 가이드</p>
+          <p>5단계 몸 이완 가이드 · 5분</p>
         </div>
       </div>
+      <p className={`${styles.toolGuidance} ${styles.sleepGuideGuidance}`} aria-live="polite">
+        <strong>현재 안내</strong>
+        <span>{step.label}</span>
+      </p>
       <div
-        className={styles.toolProgress}
+        className={`${styles.toolProgress} ${styles.sleepGuideProgress}`}
         aria-label="5분 이완 진행"
         aria-valuemax={DURATION_SECONDS}
         aria-valuemin={0}
         aria-valuenow={elapsed}
         role="progressbar"
       >
-        <p className={styles.toolGuidance} aria-live="polite">{step.label}</p>
         <div className={styles.toolProgressHeader}>
           <span className={styles.toolProgressLabel}>{running ? "진행 중" : hasSession ? "일시정지" : "준비됨"}</span>
           <span className={styles.toolProgressValue}>{elapsed}초 / 5분</span>

@@ -180,6 +180,7 @@
 .menuButton, .menuSelected { width: 100%; }
 .fieldGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .fieldLabel { display: flex; min-width: 0; flex-direction: column; gap: 7px; color: #5a4566; font-size: 12px; font-weight: 700; }
+.fieldHelp { margin: -5px 0 0; color: #74657d; font-size: 11px; line-height: 17px; }
 .fieldLabel input, .fieldLabel select {
   width: 100%;
   min-height: 48px;
@@ -192,6 +193,7 @@
   font-size: 14px;
   font-weight: 600;
 }
+.nativePickerField, .nativePickerField input { cursor: pointer; }
 .fieldLabel input:focus-visible, .fieldLabel select:focus-visible,
 .choiceButton:focus-visible, .choiceSelected:focus-visible, .menuButton:focus-visible, .menuSelected:focus-visible,
 .nextButton:focus-visible, .secondaryButton:focus-visible, .quickButton:focus-visible, .quickSelected:focus-visible {
@@ -241,6 +243,7 @@
   cursor: pointer;
 }
 .nextButton, .submitButton { color: #fff; background: #653374; box-shadow: 0 6px 16px rgb(95 52 111 / 16%); }
+.nextButton:disabled { cursor: not-allowed; opacity: 0.55; }
 .secondaryButton { border: 1px solid #dfd0e8; color: #5f346f; background: #fff; }
 .submitButton { display: block; width: min(512px, calc(100% - 48px)); margin: 0 auto 24px; }
 .submitButton:disabled { cursor: wait; opacity: 0.65; }

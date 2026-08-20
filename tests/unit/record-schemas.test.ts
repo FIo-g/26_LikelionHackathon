@@ -46,6 +46,34 @@ describe("record schemas", () => {
     })).toThrow();
   });
 
+  it("requires a known unit for new alcohol records", () => {
+    const input = {
+      type: "alcohol" as const,
+      alcoholType: "맥주",
+      servings: 1,
+      measurementUnit: "can",
+      consumedAt: new Date("2026-08-19T07:00:00Z"),
+      timezone: "Asia/Seoul",
+    };
+
+    expect(parseCreateRecordInput(createClock(), input)).toMatchObject(input);
+    expect(() => parseCreateRecordInput(createClock(), {
+      ...input,
+      measurementUnit: "cup",
+    })).toThrow();
+    expect(() => parseCreateRecordInput(createClock(), {
+      ...input,
+      measurementUnit: "",
+    })).toThrow();
+    expect(() => parseCreateRecordInput(createClock(), {
+      type: "alcohol",
+      alcoholType: input.alcoholType,
+      servings: input.servings,
+      consumedAt: input.consumedAt,
+      timezone: input.timezone,
+    })).toThrow();
+  });
+
   it("accepts valid records", () => {
     expect(parseCreateRecordInput(createClock(), {
       type: "wellness",
