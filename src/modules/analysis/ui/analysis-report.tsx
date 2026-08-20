@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState } from "react";
 import { ScheduleAdviceCard } from "@/modules/planner/ui/schedule-advice-card";
 import { retryNarrationAction, type NarrationRetryActionState } from "@/app/(app)/analyze/actions";
@@ -9,9 +10,16 @@ import { DataBasisPanel } from "./data-basis-panel";
 import { ExplainabilityCard } from "./explainability-card";
 import { MetricGrid } from "./metric-grid";
 import { SleepTrendChart } from "./sleep-trend-chart";
+import { FigmaMobileHeader } from "@/shared/ui/figma-mobile-header";
 import styles from "./analyze.module.css";
 
 const initialRetryState: NarrationRetryActionState = { status: "idle" };
+
+const analysisStateText = (state: AnalyzeViewModel["state"]) => (
+  state === "ready" ? "분석 완료" : state === "stale" ? "이전 분석 표시" : "기록을 기다리는 중"
+);
+
+const hasAiNarration = (report: ReportViewModel) => report.status === "ready";
 
 export const AnalysisReport = ({
   report,
@@ -21,15 +29,19 @@ export const AnalysisReport = ({
   narration?: Readonly<{ id: string; retryAvailable: boolean }> | null;
 }) => {
   const [retryState, retryAction, retryPending] = useActionState(retryNarrationAction, initialRetryState);
+  const isAiNarration = hasAiNarration(report);
+  const reportLabel = isAiNarration ? "AI 분석 리포트" : "분석 리포트";
 
   return (
     <section aria-labelledby="analysis-report-title" className={styles.reportSection}>
-      <p className={styles.eyebrow}>분석 리포트</p>
+      <p className={`${styles.eyebrow} ${styles.reportEyebrow}`}>{reportLabel}</p>
       <h2 id="analysis-report-title">{report.headline}</h2>
       <p>{report.body}</p>
+      {isAiNarration ? <span className={styles.reportAiSource}>AI 서술</span> : null}
+      <span aria-hidden="true" className={styles.reportBasis}>계산 결과 기반</span>
       <ul>{report.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>
       {narration?.retryAvailable ? (
-        <form action={retryAction}>
+        <form action={retryAction} aria-busy={retryPending}>
           <input name="narrationId" type="hidden" value={narration.id} />
           <button disabled={retryPending} type="submit">{retryPending ? "다시 준비 중" : "리포트 다시 시도"}</button>
           {retryState.status !== "idle" ? <p aria-live="polite" role={retryState.status === "error" ? "alert" : undefined}>{retryState.message}</p> : null}
@@ -40,32 +52,68 @@ export const AnalysisReport = ({
   );
 };
 
-export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) => (
-  <main className={styles.page}>
-    <header className={styles.hero}>
-      <p className={styles.eyebrow}>ANALYZE</p>
-      <h1>분석</h1>
-      <p>기록에서 보이는 수면 패턴을 차분하게 정리했어요.</p>
-      <span className={styles[`status_${viewModel.state}`]}><span aria-hidden="true">●</span> {viewModel.state === "ready" ? "분석 완료" : viewModel.state === "stale" ? "이전 분석 표시" : "기록을 기다리는 중"}</span>
-    </header>
-    <div className={styles.primaryLayout}>
-      <MetricGrid metrics={viewModel.metrics} />
-      <AnalysisReport narration={viewModel.narration} report={viewModel.report} />
-    </div>
-    {viewModel.scheduleAdvice ? <ScheduleAdviceCard advice={viewModel.scheduleAdvice} /> : null}
-    <div className={styles.desktopDetails}>
-      <SleepTrendChart trend={viewModel.trend} />
-      <CaffeineProfile model={viewModel.caffeineProfile} />
-      <ExplainabilityCard evidence={viewModel.explainability} />
-      <DataBasisPanel dataBasis={viewModel.dataBasis} />
-    </div>
-    <details className={styles.mobileDetails}>
-      <summary>전체 지표·근거 보기</summary>
-      <MetricGrid metrics={viewModel.metrics} />
-      <SleepTrendChart trend={viewModel.trend} />
-      <CaffeineProfile model={viewModel.caffeineProfile} />
-      <ExplainabilityCard evidence={viewModel.explainability} />
-      <DataBasisPanel dataBasis={viewModel.dataBasis} />
-    </details>
-  </main>
-);
+export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) => {
+  const isAiNarration = hasAiNarration(viewModel.report);
+  const focusDataBasis = () => {
+    const dataBasis = document.getElementById("analysis-data-basis");
+    if (!dataBasis) return;
+
+    const prefersReducedMotion = typeof window.matchMedia === "function"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior = prefersReducedMotion ? "auto" : "smooth";
+    dataBasis.scrollIntoView({ behavior, block: "start" });
+    dataBasis.focus({ preventScroll: true });
+  };
+
+  return (
+    <main data-lunar-screen="analyze" className={styles.page}>
+      <FigmaMobileHeader
+        subtitle={isAiNarration ? "계산 결과와 AI 설명을 함께 확인해요." : "계산 결과를 함께 확인해요."}
+        title="최근 14일 분석"
+      />
+      <span aria-hidden="true" className={`${styles.mobileAnalysisState} ${styles[`status_${viewModel.state}`]}`}>
+        <span>●</span> {analysisStateText(viewModel.state)}
+      </span>
+      <header className={styles.hero}>
+        <p className={styles.eyebrow}>ANALYZE · 최근 14일</p>
+        <h1>
+          <span aria-hidden="true" className={styles.desktopHeroTitle}>내 몸의 리듬을<br />생활 기록으로 이해해요</span>
+          <span className={styles.semanticHeroTitle}>분석</span>
+        </h1>
+        <p>{isAiNarration ? "계산된 패턴을 바탕으로 AI가 이해하기 쉬운 관리 방법을 정리합니다." : "계산된 패턴을 바탕으로 이해하기 쉬운 관리 방법을 정리합니다."}</p>
+        <button aria-controls="analysis-data-basis" className={styles.dataBasisControl} onClick={focusDataBasis} type="button">
+          분석 기준 보기
+        </button>
+        <span className={`${styles.desktopAnalysisState} ${styles[`status_${viewModel.state}`]}`}><span aria-hidden="true">●</span> {analysisStateText(viewModel.state)}</span>
+      </header>
+      <div className={styles.primaryLayout}>
+        <MetricGrid metrics={viewModel.metrics} variant="mobile-summary" />
+        <AnalysisReport narration={viewModel.narration} report={viewModel.report} />
+      </div>
+      <aside aria-hidden="true" className={styles.mobileExplainabilityVisual}>
+        <Image alt="" height={92} src="/assets/lunar-rabbit/rabbit-face.png" width={92} />
+        <strong>왜 이런 제안인가요?</strong>
+        <p>{isAiNarration ? "수면·카페인·휴대폰·식사·일정 기록을 계산하고, AI가 알기 쉽게 설명합니다." : "수면·카페인·휴대폰·식사·일정 기록을 바탕으로 관리 방법을 정리합니다."}</p>
+      </aside>
+      {viewModel.scheduleAdvice ? (
+        <div className={styles.scheduleAdviceSlot}>
+          <ScheduleAdviceCard advice={viewModel.scheduleAdvice} timezone={viewModel.scheduleAdvice.timezone} />
+        </div>
+      ) : null}
+      <div className={styles.desktopDetails}>
+        <SleepTrendChart trend={viewModel.trend} />
+        <CaffeineProfile model={viewModel.caffeineProfile} />
+        <ExplainabilityCard evidence={viewModel.explainability} />
+        <DataBasisPanel dataBasis={viewModel.dataBasis} />
+      </div>
+      <details className={styles.mobileDetails}>
+        <summary>전체 지표·근거 보기</summary>
+        <MetricGrid metrics={viewModel.metrics} />
+        <SleepTrendChart trend={viewModel.trend} />
+        <CaffeineProfile model={viewModel.caffeineProfile} />
+        <ExplainabilityCard evidence={viewModel.explainability} />
+        <DataBasisPanel dataBasis={viewModel.dataBasis} id="analysis-data-basis-details" />
+      </details>
+    </main>
+  );
+};

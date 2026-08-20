@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createScheduleAdviceService } from "@/modules/planner/application/create-schedule-advice";
 import type { PlannerRepository } from "@/modules/planner/application/ports";
@@ -25,7 +25,7 @@ const createRepository = () => {
     findAdvice: async (adviceId) => advice.get(adviceId) ?? null,
     findActivePlan: async () => null,
     listActiveDays: async () => [],
-    acceptAdvice: async () => ({ planId: "plan-1", revisionId: "revision-1" }),
+    acceptAdvice: async () => ({ planId: "plan-1", revisionId: "revision-1", changedDates: [] }),
     dismissAdvice: async () => undefined,
     supersedeGeneratedAdvice: async () => undefined,
     findCurrentGoal: async () => ({
@@ -34,7 +34,7 @@ const createRepository = () => {
       targetDurationMinutes: 480,
     }),
     findCurrentBaseline: async () => null,
-    listEvents: async () => events.map(({ id, type, startsAt }) => ({ id, type, startsAt })),
+    listEvents: async () => events.map(({ id, title, type, startsAt }) => ({ id, title, type, startsAt })),
     findLatestGeneratedAdvice: async () => [...advice.values()].find((item) => item.status === "generated") ?? null,
     findLatestDismissedAdvice: async () => null,
     findPlanForEvent: async () => null,
@@ -51,6 +51,7 @@ describe("create schedule advice", () => {
       executeTransaction: async (work) => work(),
       createPlannerRepository: () => fixture.repository,
       createMutationReceiptRepository: () => ({ execute: async (_command, work) => work() }),
+      narrationDependencies: null,
     });
 
     const result = await service.createScheduleAdvice({
@@ -65,5 +66,30 @@ describe("create schedule advice", () => {
     expect(await fixture.repository.findAdvice(result.adviceId)).toMatchObject({ status: "generated" });
     expect(await fixture.repository.findPlanForEvent(result.eventId)).toBeNull();
     expect(fixture.events).toHaveLength(1);
+  });
+
+  it("does not open the default database when narration is explicitly disabled", async () => {
+    const fixture = createRepository();
+    const getPrisma = vi.fn(() => {
+      throw new Error("DEFAULT_DATABASE_OPENED");
+    });
+    const service = createScheduleAdviceService(scope, {
+      clock: { now: () => now },
+      getPrisma,
+      executeTransaction: async (work) => work(),
+      createPlannerRepository: () => fixture.repository,
+      createMutationReceiptRepository: () => ({ execute: async (_command, work) => work() }),
+      narrationDependencies: null,
+    });
+
+    await expect(service.createScheduleAdvice({
+      idempotencyKey: "event-advice-without-narration",
+      title: "아침 비행",
+      type: "travel",
+      startsAt: "2026-08-22T00:00:00.000Z",
+      desiredWakeAt: "2026-08-21T19:00:00.000Z",
+      notes: null,
+    })).resolves.toMatchObject({ eventId: "event-1", adviceId: "advice-1" });
+    expect(getPrisma).not.toHaveBeenCalled();
   });
 });

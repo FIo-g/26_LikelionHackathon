@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { parseCreateRecordInput } from "@/modules/records/domain/schemas";
+import type { CreateRecordInput, RecordEntity } from "@/modules/records/domain/types";
 import { createRecordRepository } from "@/modules/records/infrastructure/prisma-record-repository";
 
 type DailyLogRow = {
@@ -75,7 +76,6 @@ const createMockDb = () => {
       dailyLog: {
         upsert: async ({
           where,
-          create,
           update,
         }: {
           where: { userId_localDate_timezone: { userId: string; localDate: string; timezone: string } };
@@ -113,16 +113,23 @@ const createMockDb = () => {
               : undefined,
           };
         },
-        create: async ({ data }: { data: Omit<CaffeineRow, "id"> }) => {
+        create: async ({
+          data,
+          include,
+        }: { data: Omit<CaffeineRow, "id">; include?: { dailyLog?: { select: { localDate: true } } } }) => {
           const row = { ...data, id: createId() };
           state.caffeineEntries.push(row);
           const dailyLog = state.dailyLogs.find((item) => item.id === row.dailyLogId);
           return {
             ...row,
-            dailyLog: dailyLog ? { localDate: dailyLog.localDate } : undefined,
+            dailyLog: include?.dailyLog && dailyLog ? { localDate: dailyLog.localDate } : undefined,
           };
         },
-        update: async ({ where, data }: { where: { id: string }; data: Partial<CaffeineRow> }) => {
+        update: async ({
+          where,
+          data,
+          include,
+        }: { where: { id: string }; data: Partial<CaffeineRow>; include?: { dailyLog?: { select: { localDate: true } } } }) => {
           const index = state.caffeineEntries.findIndex((item) => item.id === where.id);
           if (index < 0) {
             throw new Error("Not found");
@@ -136,7 +143,7 @@ const createMockDb = () => {
           const dailyLog = state.dailyLogs.find((item) => item.id === state.caffeineEntries[index].dailyLogId);
           return {
             ...state.caffeineEntries[index],
-            dailyLog: dailyLog ? { localDate: dailyLog.localDate } : undefined,
+            dailyLog: include?.dailyLog && dailyLog ? { localDate: dailyLog.localDate } : undefined,
           };
         },
         delete: async ({ where }: { where: { id: string } }) => {
@@ -279,14 +286,34 @@ const createScope = (userId: string) => ({
 
 const clock = { now: () => new Date("2026-08-20T00:00:00.000Z") };
 
-const caffeineFixture = parseCreateRecordInput(clock, {
-  type: "caffeine",
-  brand: "test",
-  product: "americano",
-  caffeineMg: 100,
-  consumedAt: new Date("2026-08-19T07:00:00.000Z"),
-  timezone: "Asia/Seoul",
-});
+const createCaffeineFixture = (): Extract<CreateRecordInput, { type: "caffeine" }> => {
+  const input = parseCreateRecordInput(clock, {
+    type: "caffeine",
+    brand: "test",
+    product: "americano",
+    caffeineMg: 100,
+    consumedAt: new Date("2026-08-19T07:00:00.000Z"),
+    timezone: "Asia/Seoul",
+  });
+
+  if (input.type !== "caffeine") {
+    throw new Error("Expected caffeine fixture");
+  }
+
+  return input;
+};
+
+const caffeineFixture = createCaffeineFixture();
+
+const requireCaffeineRecord = (
+  record: RecordEntity | null,
+): Extract<RecordEntity, { type: "caffeine" }> => {
+  if (record?.type !== "caffeine") {
+    throw new Error("Expected caffeine record");
+  }
+
+  return record;
+};
 
 describe("record repository", () => {
   let fixture: ReturnType<typeof createMockDb>;
@@ -309,7 +336,7 @@ describe("record repository", () => {
     ).rejects.toThrow("RECORD_NOT_FOUND");
 
     const checked = await alice.findById("caffeine", created.id);
-    expect(checked?.caffeineMg).toBe(caffeineFixture.caffeineMg);
+    expect(requireCaffeineRecord(checked).caffeineMg).toBe(caffeineFixture.caffeineMg);
   });
 
   it("reuses one daily log for same user and localDate", async () => {
@@ -324,6 +351,8 @@ describe("record repository", () => {
 
     expect(first.userId).toBe("alice");
     expect(second.userId).toBe("alice");
+    expect(first.localDate).toBe("2026-08-19");
+    expect(second.localDate).toBe("2026-08-19");
     expect(fixture.state.dailyLogs).toHaveLength(1);
     expect(fixture.state.dailyLogs[0].localDate).toBe("2026-08-19");
     expect(fixture.state.caffeineEntries).toHaveLength(2);
@@ -339,7 +368,7 @@ describe("record repository", () => {
       caffeineMg: 80,
     });
 
-    expect(updated?.caffeineMg).toBe(80);
+    expect(requireCaffeineRecord(updated).caffeineMg).toBe(80);
 
     await expect(
       bob.delete("caffeine", created.id),
@@ -347,5 +376,23 @@ describe("record repository", () => {
 
     await alice.delete("caffeine", created.id);
     await expect(alice.findById("caffeine", created.id)).resolves.toBeNull();
+  });
+
+  it("rejects an update input whose discriminator does not match the requested record type", async () => {
+    const alice = createRecordRepository(fixture.db as never, createScope("alice"));
+    const created = await alice.create("caffeine", caffeineFixture);
+
+    await expect(alice.update("caffeine", created.id, {
+      type: "sleep",
+      startedAt: new Date("2026-08-19T06:00:00.000Z"),
+      endedAt: new Date("2026-08-19T07:00:00.000Z"),
+      morningFatigue: 3,
+      timezone: "Asia/Seoul",
+    })).rejects.toThrow("INVALID_RECORD_TYPE");
+
+    await expect(alice.findById("caffeine", created.id)).resolves.toMatchObject({
+      type: "caffeine",
+      caffeineMg: 100,
+    });
   });
 });

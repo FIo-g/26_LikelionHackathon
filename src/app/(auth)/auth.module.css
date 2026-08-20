@@ -1,52 +1,287 @@
 .wrapper {
   min-height: 100vh;
   display: grid;
-  place-items: center;
-  padding: var(--space-3);
-  background: radial-gradient(circle at 82% 8%, #e8edff 0, transparent 36%), var(--color-canvas);
+  grid-template-columns: 660px minmax(0, 1fr);
+  background: #f4eef8;
+}
+
+.welcome {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 68px;
+  color: #fff;
+  background: #301b44;
+}
+
+.brand {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+}
+
+.welcome h2 {
+  margin: 68px 0 0;
+  font-family: "Noto Sans KR", Pretendard, sans-serif;
+  font-size: 30px;
+  line-height: 40px;
+}
+
+.welcomeCopy {
+  margin: 72px 0 0;
+  color: #e6d7ee;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+.welcomeGlow {
+  position: absolute;
+  top: -170px;
+  left: 382px;
+  width: 420px;
+  height: 420px;
+}
+
+.welcomeStars > img {
+  position: absolute;
+}
+
+.starOne { top: 72px; left: 68px; }
+.starTwo { top: 128px; left: 180px; }
+.starThree { top: 82px; left: 312px; }
+.starFour { top: 104px; left: 514px; }
+.starFive { top: 282px; left: 584px; }
+.starSix { top: 640px; left: 136px; }
+.starSeven { top: 732px; left: 252px; }
+.starEight { top: 498px; left: 514px; }
+.starNine { top: 820px; left: 74px; }
+
+.welcomeArtwork {
+  position: absolute;
+  left: 362px;
+  top: 562px;
+  width: 188px;
+  height: 216px;
+}
+
+.welcomeMoon {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  width: 188px;
+  height: 188px;
+}
+
+.welcomeMoonCutout {
+  position: absolute;
+  top: 0;
+  left: 52px;
+  width: 188px;
+  height: 188px;
+}
+
+.welcomeRabbit {
+  position: absolute;
+  top: 48px;
+  left: 24px;
+  width: 126px;
+  height: 126px;
+  object-fit: contain;
 }
 
 .card {
-  width: min(520px, 100%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  padding: var(--space-4);
+  position: relative;
+  align-self: center;
+  justify-self: center;
+  width: min(520px, calc(100% - 64px));
+  min-height: 620px;
+  border: 1px solid #e2d6e9;
+  border-radius: 26px;
+  padding: 34px 49px 24px;
   background: #fff;
+  box-shadow: 0 10px 28px rgba(38, 18, 56, 0.08);
+  transform: translate(-30px, -14px);
+}
+
+.panelArtwork {
+  position: absolute;
+  top: 25px;
+  right: 39px;
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+}
+
+.panelMoon {
+  position: absolute;
+  inset: 0;
+}
+
+.panelRabbit {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
 }
 
 .heading {
-  margin: 0 0 16px;
-  font-size: var(--font-heading-page-size);
-  line-height: var(--font-heading-page-line-height);
+  margin: 0;
+  color: #21152e;
+  font-size: 28px;
+  line-height: 38px;
 }
 
-.footer {
-  margin-top: 12px;
-  color: #647089;
-  font-size: 0.92rem;
+.subtitle {
+  margin: 7px 0 62px;
+  color: #766982;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
 }
 
-.help {
-  margin: 24px 0 0;
-  color: #647089;
-  font-size: 0.9rem;
+.form {
+  display: grid;
+  gap: 32px;
 }
 
 .error {
+  margin: -4px 0 0;
   color: #ad4f4f;
-  margin-top: 8px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.label {
+  display: grid;
+  gap: 8px;
+  color: #766982;
+  font-size: 11px;
+  line-height: 16px;
 }
 
 .field {
-  display: block;
   width: 100%;
-  margin: 10px 0;
-  padding: 10px;
+  height: 52px;
+  border: 1px solid #e2d6e9;
+  border-radius: 12px;
+  padding: 0 16px;
+  color: #21152e;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.field::placeholder {
+  color: #93889d;
+}
+
+.field:focus {
+  border-color: #5f346f;
 }
 
 .button {
-  margin-top: 14px;
-  padding: 10px 14px;
+  width: 100%;
+  height: 48px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: #5f346f;
+  box-shadow: 0 5px 14px rgba(38, 18, 56, 0.08);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-@media (max-width: 767px) { .wrapper { align-items: start; padding: var(--space-2); padding-top: max(64px, env(safe-area-inset-top)); }.card { padding: var(--space-3); } }
+.button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 75px;
+  padding-top: 30px;
+  border-top: 1px solid #e2d6e9;
+  color: #766982;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.footer a {
+  color: #5f346f;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.privacy {
+  margin: 15px 0 0;
+  color: #766982;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 15px;
+}
+
+@media (max-width: 900px) {
+  .wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: max(82px, env(safe-area-inset-top)) 24px 40px;
+    background:
+      url("/assets/lunar-rabbit/night-header.svg") top center / 100% 154px no-repeat,
+      #f4eef8;
+  }
+
+  .welcome {
+    display: none;
+  }
+
+  .card {
+    width: min(520px, 100%);
+    min-height: 0;
+    border-radius: 22px;
+    padding: 34px 24px 24px;
+    transform: none;
+  }
+
+  .welcomeGlow,
+  .welcomeStars {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .card {
+    padding: 30px 22px 24px;
+  }
+
+  .heading {
+    font-size: 26px;
+    line-height: 36px;
+  }
+
+  .panelArtwork {
+    top: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .panelArtwork .panelRabbit {
+    width: 46px;
+    height: 46px;
+  }
+}

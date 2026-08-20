@@ -1,14 +1,15 @@
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import type { Page } from "@playwright/test";
 import { seedVisualFixtureData } from "../../scripts/seed-visual-fixtures";
+import { e2eIdentity } from "../../src/shared/auth/e2e-identity";
 import type { VisualFixture } from "./manifest";
 
-const VISUAL_RUN_ID = randomUUID();
-
 export const visualIdentity = (workerIndex: number, frameName: string) => {
-  const safeFrame = frameName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  const namespace = `visual-${createHash("sha256").update(frameName).digest("hex").slice(0, 12)}`;
+  const identity = e2eIdentity({ workerIndex, namespace });
   return {
-    email: `visual+${VISUAL_RUN_ID}-${workerIndex}-${safeFrame}@example.invalid`,
+    ...identity,
+    workerIndex,
     password: "Visual-test-only-2026!",
   } as const;
 };

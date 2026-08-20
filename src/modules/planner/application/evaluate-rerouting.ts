@@ -5,7 +5,11 @@ import { buildAdviceNarrationFacts } from "@/modules/narration/domain/types";
 import type { NarrationRepository } from "@/modules/narration/application/ports";
 import type { NarrationRequest } from "@/modules/narration/application/generate-narration";
 import type { CreateRecordInput } from "@/modules/records/domain/types";
-import { generateRerouteProposal } from "../domain/generate-reroute-proposal";
+import {
+  generateRerouteProposal,
+  rerouteTriggerInstant,
+  selectReroutePlanDays,
+} from "../domain/generate-reroute-proposal";
 import type { PlannerRepository } from "./ports";
 
 export type ReroutingMutation = Readonly<{
@@ -34,22 +38,31 @@ export const evaluateRerouting = async (
     plannerRepository.listActiveDays(activePlan.id),
   ]);
   if (!goal) return null;
+  const now = clock.now();
 
   const proposals = finalRecords
     .slice()
     .sort((left, right) => left.recordId.localeCompare(right.recordId))
-    .map((record) => ({
-      record,
-      proposal: generateRerouteProposal({
-        timezone: scope.timezone,
-        goal,
-        baseline,
-        trigger: { recordId: record.recordId, input: record.input },
-        activeDays,
-        now: clock.now(),
-      }),
-    }))
-    .filter((candidate): candidate is { record: ReroutingMutation; proposal: NonNullable<ReturnType<typeof generateRerouteProposal>> } => candidate.proposal !== null);
+    .map((record) => {
+      const trigger = { recordId: record.recordId, input: record.input };
+      const eligibleDays = selectReroutePlanDays(activeDays, trigger, now);
+      return {
+        record,
+        trigger,
+        eligibleDays,
+        proposal: generateRerouteProposal({
+          timezone: scope.timezone,
+          goal,
+          baseline,
+          trigger,
+          activeDays: eligibleDays,
+          now,
+        }),
+      };
+    })
+    .filter((candidate): candidate is typeof candidate & {
+      proposal: NonNullable<typeof candidate.proposal>;
+    } => candidate.proposal !== null);
   const selected = proposals[0];
   if (!selected) {
     await plannerRepository.supersedeGeneratedAdvice(activePlan.id);
@@ -72,6 +85,18 @@ export const evaluateRerouting = async (
     event: null,
     planId: activePlan.id,
     triggerRecordId: selected.record.recordId,
+    planActiveKey: activePlan.activeKey ?? null,
+    planRevisionId: activePlan.revisionId ?? null,
+    triggerInstant: rerouteTriggerInstant(selected.trigger).toISOString(),
+    activeDays: selected.eligibleDays.map((day) => ({
+      localDate: day.localDate,
+      targetBedAt: day.targetBedAt,
+      targetWakeAt: day.targetWakeAt,
+      caffeineCutoffAt: day.caffeineCutoffAt,
+      exerciseCutoffAt: day.exerciseCutoffAt,
+      mealCutoffAt: day.mealCutoffAt,
+      windDownAt: day.windDownAt,
+    })),
     rerouteRecords,
   };
   const inputHash = hashCanonicalJson(inputSnapshot);

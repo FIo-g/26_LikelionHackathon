@@ -2,7 +2,8 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 
-import { deleteAccountActionIdle, deleteUserAccountAction } from "@/app/(app)/account/actions";
+import { deleteUserAccountAction } from "@/app/(app)/account/actions";
+import { deleteAccountActionIdle } from "@/modules/account/domain/schemas";
 import styles from "./account.module.css";
 
 type DataManagementProps = Readonly<{ reauth: { exportRequiresReauth: boolean; deleteRequiresReauth: boolean } }>;

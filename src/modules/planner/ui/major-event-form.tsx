@@ -4,10 +4,15 @@ import { createMajorEventAction } from "@/app/(app)/plan/actions";
 import { RecordFormShell } from "@/modules/records/ui/record-form-shell";
 import styles from "./plan.module.css";
 
-export const MajorEventForm = () => (
-  <section className={styles.eventFormCard} id="major-event-form" aria-labelledby="major-event-title">
+type MajorEventFormProps = Readonly<{
+  formId?: string;
+  titleId?: string;
+}>;
+
+export const MajorEventForm = ({ formId = "major-event-form", titleId = "major-event-title" }: MajorEventFormProps) => (
+  <section className={styles.eventFormCard} id={formId} aria-labelledby={titleId}>
     <p className={styles.eyebrow}>직접 입력</p>
-    <h2 id="major-event-title">주요 일정 추가</h2>
+    <h2 id={titleId}>주요 일정 추가</h2>
     <p>이 일정은 계획을 바로 바꾸지 않아요. 먼저 조정 제안을 확인할 수 있어요.</p>
     <RecordFormShell pathname="/plan" action={createMajorEventAction} successRedirectPath="/plan" submitButtonLabel="주요 일정 추가">
       {({ values, setValue }) => (

@@ -572,6 +572,7 @@ export type AlcoholEntryCreateOrConnectWithoutUserInput = {
 
 export type AlcoholEntryCreateManyUserInputEnvelope = {
   data: Prisma.AlcoholEntryCreateManyUserInput | Prisma.AlcoholEntryCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type AlcoholEntryUpsertWithWhereUniqueWithoutUserInput = {
@@ -633,6 +634,7 @@ export type AlcoholEntryCreateOrConnectWithoutDailyLogInput = {
 
 export type AlcoholEntryCreateManyDailyLogInputEnvelope = {
   data: Prisma.AlcoholEntryCreateManyDailyLogInput | Prisma.AlcoholEntryCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type AlcoholEntryUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1490,6 +1492,7 @@ export type AlcoholEntryCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many AlcoholEntries.
    */
   data: Prisma.AlcoholEntryCreateManyInput | Prisma.AlcoholEntryCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1508,6 +1511,7 @@ export type AlcoholEntryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many AlcoholEntries.
    */
   data: Prisma.AlcoholEntryCreateManyInput | Prisma.AlcoholEntryCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

@@ -525,6 +525,7 @@ export type MutationReceiptCreateOrConnectWithoutUserInput = {
 
 export type MutationReceiptCreateManyUserInputEnvelope = {
   data: Prisma.MutationReceiptCreateManyUserInput | Prisma.MutationReceiptCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type MutationReceiptUpsertWithWhereUniqueWithoutUserInput = {
@@ -1370,6 +1371,7 @@ export type MutationReceiptCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many MutationReceipts.
    */
   data: Prisma.MutationReceiptCreateManyInput | Prisma.MutationReceiptCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1388,6 +1390,7 @@ export type MutationReceiptCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    * The data used to create many MutationReceipts.
    */
   data: Prisma.MutationReceiptCreateManyInput | Prisma.MutationReceiptCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

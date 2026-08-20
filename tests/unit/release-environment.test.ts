@@ -11,7 +11,7 @@ const validEnvironment = {
   BETTER_AUTH_URL: "https://preview.example.vercel.app",
   AUTH_RATE_LIMIT_ENABLED: "true",
   OPENAI_API_KEY: "sk-private-value-that-must-not-appear",
-  OPENAI_MODEL: "gpt-5.6-terra",
+  OPENAI_MODEL: "gpt-5.6-luna",
 };
 
 describe("release environment validation", () => {

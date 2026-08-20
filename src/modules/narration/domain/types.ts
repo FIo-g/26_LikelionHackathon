@@ -2,6 +2,14 @@ import type { AnalysisResult } from "@/modules/analysis/domain/types";
 import type { ScheduleProposal } from "@/modules/planner/domain/types";
 import type { ConfidenceLevel } from "@/shared/domain/contracts";
 
+export const NARRATION_METRIC_LABELS: Readonly<Record<string, readonly string[]>> = {
+  readiness: ["수면 준비 상태", "수면 준비", "준비도", "readiness"],
+  "sleep-rhythm": ["수면 리듬", "sleep rhythm"],
+  "phone-wind-down": ["폰 정리", "휴대폰", "phone wind-down"],
+  "caffeine-signal": ["카페인 점수", "카페인", "caffeine"],
+  "sleep-goal": ["수면 목표", "sleep goal"],
+};
+
 export type NarrationTarget =
   | Readonly<{ analysisSnapshotId: string; scheduleAdviceId: null }>
   | Readonly<{ analysisSnapshotId: null; scheduleAdviceId: string }>;

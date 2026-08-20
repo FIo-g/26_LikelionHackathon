@@ -1,27 +1,25 @@
 "use server";
 
 import { sleepGoalSchema } from "@/modules/onboarding/domain/schemas";
-import { actionError } from "@/modules/onboarding/application/ports";
 import { requireSessionUserId } from "@/shared/auth/require-session-user";
 import { saveSleepGoalStep } from "@/modules/onboarding/application/save-sleep-goal-step";
+import { createOnboardingRepository } from "@/modules/onboarding/infrastructure/prisma-onboarding-repository";
 import { redirect } from "next/navigation";
+import { readOnboardingFormValues } from "../form-values";
+import { redirectIfOnboardingPrerequisiteIsMissing } from "../flow";
 
-export async function submitSleepGoalAction(
-  previousState: ReturnType<typeof actionError>,
-  formData: FormData,
-) {
+export async function submitSleepGoalAction(formData: FormData): Promise<void> {
   const userId = await requireSessionUserId();
+  const progress = await createOnboardingRepository(userId).getProgress();
+  redirectIfOnboardingPrerequisiteIsMissing(progress, "sleep-goal");
 
-  const values = Object.fromEntries(Array.from(formData.entries()).map(([key, value]) => [
-    key,
-    typeof value === "string" ? value : "",
-  ]));
+  const values = readOnboardingFormValues(formData);
   const parsed = sleepGoalSchema.safeParse(values);
 
   if (!parsed.success) {
-    return actionError(previousState, formData, parsed.error.flatten().fieldErrors);
+    return;
   }
 
   await saveSleepGoalStep(userId, parsed.data);
-  redirect("/onboarding/habits");
+  redirect("/onboarding/connect");
 }

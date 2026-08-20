@@ -446,6 +446,7 @@ export type BaselineSnapshotCreateOrConnectWithoutUserInput = {
 
 export type BaselineSnapshotCreateManyUserInputEnvelope = {
   data: Prisma.BaselineSnapshotCreateManyUserInput | Prisma.BaselineSnapshotCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type BaselineSnapshotUpsertWithWhereUniqueWithoutUserInput = {
@@ -1258,6 +1259,7 @@ export type BaselineSnapshotCreateManyArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many BaselineSnapshots.
    */
   data: Prisma.BaselineSnapshotCreateManyInput | Prisma.BaselineSnapshotCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1276,6 +1278,7 @@ export type BaselineSnapshotCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    * The data used to create many BaselineSnapshots.
    */
   data: Prisma.BaselineSnapshotCreateManyInput | Prisma.BaselineSnapshotCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

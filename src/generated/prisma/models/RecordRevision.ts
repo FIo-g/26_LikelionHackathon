@@ -440,6 +440,7 @@ export type RecordRevisionCreateOrConnectWithoutUserInput = {
 
 export type RecordRevisionCreateManyUserInputEnvelope = {
   data: Prisma.RecordRevisionCreateManyUserInput | Prisma.RecordRevisionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type RecordRevisionUpsertWithWhereUniqueWithoutUserInput = {
@@ -1252,6 +1253,7 @@ export type RecordRevisionCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many RecordRevisions.
    */
   data: Prisma.RecordRevisionCreateManyInput | Prisma.RecordRevisionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1270,6 +1272,7 @@ export type RecordRevisionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * The data used to create many RecordRevisions.
    */
   data: Prisma.RecordRevisionCreateManyInput | Prisma.RecordRevisionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

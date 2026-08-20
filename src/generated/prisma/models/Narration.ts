@@ -716,6 +716,7 @@ export type NarrationCreateOrConnectWithoutUserInput = {
 
 export type NarrationCreateManyUserInputEnvelope = {
   data: Prisma.NarrationCreateManyUserInput | Prisma.NarrationCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type NarrationUpsertWithWhereUniqueWithoutUserInput = {
@@ -772,7 +773,6 @@ export type NarrationCreateWithoutAnalysisSnapshotInput = {
 
 export type NarrationUncheckedCreateWithoutAnalysisSnapshotInput = {
   id?: string
-  userId: string
   scheduleAdviceId?: string | null
   provider: string
   model?: string | null
@@ -793,6 +793,7 @@ export type NarrationCreateOrConnectWithoutAnalysisSnapshotInput = {
 
 export type NarrationCreateManyAnalysisSnapshotInputEnvelope = {
   data: Prisma.NarrationCreateManyAnalysisSnapshotInput | Prisma.NarrationCreateManyAnalysisSnapshotInput[]
+  skipDuplicates?: boolean
 }
 
 export type NarrationUpsertWithWhereUniqueWithoutAnalysisSnapshotInput = {
@@ -829,7 +830,6 @@ export type NarrationCreateWithoutScheduleAdviceInput = {
 
 export type NarrationUncheckedCreateWithoutScheduleAdviceInput = {
   id?: string
-  userId: string
   analysisSnapshotId?: string | null
   provider: string
   model?: string | null
@@ -850,6 +850,7 @@ export type NarrationCreateOrConnectWithoutScheduleAdviceInput = {
 
 export type NarrationCreateManyScheduleAdviceInputEnvelope = {
   data: Prisma.NarrationCreateManyScheduleAdviceInput | Prisma.NarrationCreateManyScheduleAdviceInput[]
+  skipDuplicates?: boolean
 }
 
 export type NarrationUpsertWithWhereUniqueWithoutScheduleAdviceInput = {
@@ -934,7 +935,6 @@ export type NarrationUncheckedUpdateManyWithoutUserInput = {
 
 export type NarrationCreateManyAnalysisSnapshotInput = {
   id?: string
-  userId: string
   scheduleAdviceId?: string | null
   provider: string
   model?: string | null
@@ -966,7 +966,6 @@ export type NarrationUpdateWithoutAnalysisSnapshotInput = {
 
 export type NarrationUncheckedUpdateWithoutAnalysisSnapshotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scheduleAdviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -982,7 +981,6 @@ export type NarrationUncheckedUpdateWithoutAnalysisSnapshotInput = {
 
 export type NarrationUncheckedUpdateManyWithoutAnalysisSnapshotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scheduleAdviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -998,7 +996,6 @@ export type NarrationUncheckedUpdateManyWithoutAnalysisSnapshotInput = {
 
 export type NarrationCreateManyScheduleAdviceInput = {
   id?: string
-  userId: string
   analysisSnapshotId?: string | null
   provider: string
   model?: string | null
@@ -1030,7 +1027,6 @@ export type NarrationUpdateWithoutScheduleAdviceInput = {
 
 export type NarrationUncheckedUpdateWithoutScheduleAdviceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   analysisSnapshotId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1046,7 +1042,6 @@ export type NarrationUncheckedUpdateWithoutScheduleAdviceInput = {
 
 export type NarrationUncheckedUpdateManyWithoutScheduleAdviceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   analysisSnapshotId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1852,6 +1847,7 @@ export type NarrationCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many Narrations.
    */
   data: Prisma.NarrationCreateManyInput | Prisma.NarrationCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1870,6 +1866,7 @@ export type NarrationCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many Narrations.
    */
   data: Prisma.NarrationCreateManyInput | Prisma.NarrationCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

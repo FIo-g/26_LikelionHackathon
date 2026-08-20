@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createAcceptScheduleAdviceService } from "@/modules/planner/application/accept-schedule-advice";
 import type { PlannerRepository } from "@/modules/planner/application/ports";
-import type { PlanDayTarget, ScheduleAdviceEntity } from "@/modules/planner/domain/types";
+import type { PlanDayTarget, PlannerStatus, PlanStatus, ScheduleAdviceEntity, SleepPlanEntity } from "@/modules/planner/domain/types";
 
 const scope = { userId: "user-1", timezone: "Asia/Seoul" };
 const now = new Date("2026-08-20T00:00:00.000Z");
@@ -18,10 +18,10 @@ const target = (localDate: string, wakeAt: string): PlanDayTarget => ({
 });
 
 type AcceptanceState = {
-  advice: ScheduleAdviceEntity & { eventId: string | null };
-  competingAdvice: { status: string };
-  days: Array<PlanDayTarget & { id: string; planId: string; status: string }>;
-  plans: Array<{ id: string; status: string }>;
+  advice: Omit<ScheduleAdviceEntity, "status"> & { status: PlannerStatus };
+  competingAdvice: { status: PlannerStatus };
+  days: Array<PlanDayTarget & { id: string; planId: string; status: PlanStatus }>;
+  plans: SleepPlanEntity[];
   revisions: Array<{ id: string; planId: string; sourceAdviceId: string; before: readonly PlanDayTarget[]; after: readonly PlanDayTarget[] }>;
   receipts: Array<{ operation: string; idempotencyKey: string; response: unknown }>;
 };
@@ -86,7 +86,7 @@ const createRepository = (state: AcceptanceState, failRevision: boolean): Planne
       .forEach((day) => { day.status = "superseded"; });
     const plan = state.plans.find((item) => item.status === "active")!;
     const after = state.advice.proposal.days.filter((day) => day.localDate >= effectiveLocalDate);
-    state.days.push(...after.map((day, index) => ({ ...day, id: `new-day-${index}`, planId: plan.id, status: "active" })));
+    state.days.push(...after.map((day, index) => ({ ...day, id: `new-day-${index}`, planId: plan.id, status: "active" as const })));
     state.advice.status = "accepted";
     state.competingAdvice.status = "superseded";
     if (failRevision) throw new Error("REVISION_INSERT_FAILED");

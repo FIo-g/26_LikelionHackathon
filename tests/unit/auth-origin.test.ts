@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveAuthOrigin } from "@/shared/auth/auth-origin";
 
 describe("resolveAuthOrigin", () => {
@@ -31,6 +31,24 @@ describe("resolveAuthOrigin", () => {
       VERCEL_ENV: "preview",
       VERCEL_URL: "*.vercel.app",
     })).toThrow("INVALID_AUTH_ORIGIN");
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it("calls the auth API through the same-origin base path", async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", fetch);
+    vi.stubGlobal("window", { location: { origin: "https://auth-origin.test" } });
+
+    const { authClient } = await import("@/shared/auth/auth-client");
+    await authClient.getSession();
+
+    const requestUrl = String(fetch.mock.calls[0]?.[0]);
+    expect(new URL(requestUrl).pathname).toMatch(/^\/api\/auth/);
+    expect(new URL(requestUrl).origin).toBe(window.location.origin);
   });
 });
 

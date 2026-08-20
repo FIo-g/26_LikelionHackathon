@@ -14,7 +14,7 @@ describe("narration runtime safety", () => {
   it("treats missing or invalid model configuration as unavailable", async () => {
     expect(readNarrationEnvironment({ OPENAI_API_KEY: "key" })).toBeNull();
     expect(readNarrationEnvironment({ OPENAI_API_KEY: "key", OPENAI_MODEL: "gpt-5.3-codex-spark" })).toBeNull();
-    expect(readNarrationEnvironment({ OPENAI_API_KEY: "key", OPENAI_MODEL: "gpt-5.6-terra" })).toMatchObject({ model: "gpt-5.6-terra" });
+    expect(readNarrationEnvironment({ OPENAI_API_KEY: "key", OPENAI_MODEL: "gpt-5.6-luna" })).toMatchObject({ model: "gpt-5.6-luna" });
 
     const repository = { createPending: vi.fn(), markReady: vi.fn(), markFallback: vi.fn(), recoverStalePending: vi.fn(), retry: vi.fn(), findForAnalysisSnapshot: vi.fn() };
     await generateNarration({ narrationId: "narration-1", facts }, { provider: null, repository });

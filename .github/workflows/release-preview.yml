@@ -17,7 +17,7 @@ jobs:
       BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
       AUTH_RATE_LIMIT_ENABLED: "true"
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: gpt-5.6-terra
+      OPENAI_MODEL: gpt-5.6-luna
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
@@ -26,7 +26,22 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm exec -- vercel --version
       - run: npm run validate:release
       - run: npm exec -- vercel pull --yes --environment=preview
       - run: npm exec -- vercel build
-      - run: npm run deploy:preview
+      - run: npm exec -- playwright install --with-deps chromium
+      - name: Deploy preview
+        id: deploy_preview
+        shell: bash
+        run: |
+          deployment_url="$(npm exec -- vercel deploy --prebuilt --yes | tail -n 1)"
+          case "$deployment_url" in
+            https://*.vercel.app|https://*.vercel.app/) ;;
+            *) echo "::error::Vercel did not return an HTTPS .vercel.app deployment URL" >&2; exit 1 ;;
+          esac
+          echo "url=${deployment_url%/}" >> "$GITHUB_OUTPUT"
+      - name: Run production smoke against deployed preview
+        env:
+          BASE_URL: ${{ steps.deploy_preview.outputs.url }}
+        run: npm exec -- playwright test --config playwright.remote.config.ts --project preview-smoke

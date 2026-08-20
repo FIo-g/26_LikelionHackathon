@@ -7,7 +7,7 @@ import { createDeleteUserAccount } from "@/modules/account/application/delete-us
 import { readSensitiveActionSession } from "@/modules/account/application/require-recent-authentication";
 import { createUpdateProfileService } from "@/modules/account/application/update-profile";
 import { createUpdateSleepGoalService } from "@/modules/account/application/update-sleep-goal";
-import { accountActionIdle, accountProfileSchema, accountSleepGoalSchema, type AccountActionState } from "@/modules/account/domain/schemas";
+import { accountActionIdle, accountProfileSchema, accountSleepGoalSchema, deleteAccountActionIdle, type AccountActionState, type DeleteAccountActionState } from "@/modules/account/domain/schemas";
 import { assertTrustedMutationOrigin } from "@/modules/account/domain/export-schema";
 import { AUTH_SESSION_COOKIE } from "@/shared/auth/auth";
 import { requireUserScope } from "@/shared/auth/require-user-scope";
@@ -19,12 +19,17 @@ const errorState = (formData: FormData, fieldErrors: Record<string, readonly str
 const successState = (formData: FormData): AccountActionState => ({ status: "success", values: valuesFor(formData), fieldErrors: {} });
 const revalidateAccount = () => { revalidatePath("/account"); revalidatePath("/today"); revalidatePath("/analyze"); revalidatePath("/plan"); revalidatePath("/care"); };
 
-export type DeleteAccountActionState = Readonly<{ status: "idle" | "error"; error: string | null }>;
-export const deleteAccountActionIdle: DeleteAccountActionState = { status: "idle", error: null };
-
 export async function updateProfileAction(_previousState: AccountActionState = accountActionIdle, formData: FormData): Promise<AccountActionState> {
+  void _previousState;
   const values = valuesFor(formData);
-  const parsed = accountProfileSchema.safeParse({ nickname: values.nickname, timezone: values.timezone });
+  const parsed = accountProfileSchema.safeParse({
+    nickname: values.nickname,
+    timezone: values.timezone,
+    age: values.age,
+    gender: values.gender,
+    heightCm: values.heightCm,
+    weightKg: values.weightKg,
+  });
   if (!parsed.success) return errorState(formData, parsed.error.flatten().fieldErrors as Record<string, readonly string[]>);
   try {
     const scope = await requireUserScope();
@@ -37,6 +42,7 @@ export async function updateProfileAction(_previousState: AccountActionState = a
 }
 
 export async function updateSleepGoalAction(_previousState: AccountActionState = accountActionIdle, formData: FormData): Promise<AccountActionState> {
+  void _previousState;
   const values = valuesFor(formData);
   const parsed = accountSleepGoalSchema.safeParse({ targetBedTime: values.targetBedTime, targetWakeTime: values.targetWakeTime });
   if (!parsed.success) return errorState(formData, parsed.error.flatten().fieldErrors as Record<string, readonly string[]>);
@@ -51,6 +57,7 @@ export async function updateSleepGoalAction(_previousState: AccountActionState =
 }
 
 export async function deleteUserAccountAction(_previousState: DeleteAccountActionState = deleteAccountActionIdle, formData: FormData): Promise<DeleteAccountActionState> {
+  void _previousState;
   try {
     const requestHeaders = new Headers(await headers());
     assertTrustedMutationOrigin(requestHeaders.get("origin"));

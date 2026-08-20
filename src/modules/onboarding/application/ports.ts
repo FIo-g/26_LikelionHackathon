@@ -8,10 +8,11 @@ import type {
 } from "../domain/types";
 
 export interface OnboardingRepository {
+  saveProfile(input: ProfileInput): Promise<void>;
   saveConnect(input: ConnectInput): Promise<void>;
   saveSleepGoal(input: SleepGoalInput): Promise<void>;
   replaceHabits(input: HabitValues): Promise<void>;
-  complete(input: ProfileInput): Promise<void>;
+  complete(): Promise<void>;
   getProgress(): Promise<OnboardingProgressData>;
 }
 
@@ -47,4 +48,3 @@ export const normalizeSleepGoalInput = (input: SleepGoalFormInput): SleepGoalInp
   targetWakeTime: input.targetWakeTime,
   targetDurationMinutes: 0,
 });
-

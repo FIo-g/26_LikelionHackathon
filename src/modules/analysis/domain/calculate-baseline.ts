@@ -1,14 +1,21 @@
+import { Temporal } from "@js-temporal/polyfill";
+
 import type { BaselineResult, NormalizedAnalysisInput, NormalizedDailyRecords, SleepGoal } from "./types";
 import { estimateConfidenceLevelFromScore, clampToRange } from "./calculate-confidence";
 
-const LOCAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MIN_VALID_SLEEP_MINUTES = 120;
 const MAX_VALID_SLEEP_MINUTES = 960;
 const REQUIRED_SLEEP_DAYS = 3;
 
 const clampToMinute = (value: number): number => Math.round(((value % 1440) + 1440) % 1440);
 
-const isValidLocalDate = (value: string): value is string => LOCAL_DATE_RE.test(value);
+const isValidLocalDate = (value: string): value is string => {
+  try {
+    return Temporal.PlainDate.from(value).toString() === value;
+  } catch {
+    return false;
+  }
+};
 
 const parseTargetMinute = (time: string): number | null => {
   const [, hour, minute] = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(time) ?? [];
@@ -20,7 +27,7 @@ const parseTargetMinute = (time: string): number | null => {
 };
 
 const isValidMinute = (value: number | null): value is number => (
-  Number.isFinite(value) && value >= 0 && value < 1440 && Number.isInteger(value)
+  value !== null && Number.isFinite(value) && value >= 0 && value < 1440 && Number.isInteger(value)
 );
 
 const median = (values: readonly number[]): number | null => {
@@ -81,13 +88,20 @@ const nearestToTarget = (values: readonly number[], targetMinute: number): numbe
   return selected;
 };
 
-const deriveTargetGoal = (goal: Partial<SleepGoal>): SleepGoal => ({
-  targetBedTime: goal.targetBedTime ?? "22:00",
-  targetWakeTime: goal.targetWakeTime ?? "07:00",
-  targetDurationMinutes: Number.isFinite(goal.targetDurationMinutes) && goal.targetDurationMinutes > 0
-    ? goal.targetDurationMinutes
-    : 480,
-});
+const deriveTargetGoal = (goal: Partial<SleepGoal>): SleepGoal => {
+  const duration = goal.targetDurationMinutes;
+  return {
+    targetBedTime: goal.targetBedTime ?? "22:00",
+    targetWakeTime: goal.targetWakeTime ?? "07:00",
+    targetDurationMinutes: duration !== undefined && Number.isFinite(duration) && duration > 0
+      ? duration
+      : 480,
+  };
+};
+
+const isDailyRecordsArray = (
+  input: Readonly<NormalizedAnalysisInput> | readonly NormalizedDailyRecords[],
+): input is readonly NormalizedDailyRecords[] => Array.isArray(input);
 
 const normalizeInput = (
   input: Readonly<NormalizedAnalysisInput> | readonly NormalizedDailyRecords[],
@@ -95,7 +109,7 @@ const normalizeInput = (
   days: readonly NormalizedDailyRecords[];
   goal: SleepGoal;
 } => {
-  if (Array.isArray(input)) {
+  if (isDailyRecordsArray(input)) {
     return {
       days: input,
       goal: deriveTargetGoal({

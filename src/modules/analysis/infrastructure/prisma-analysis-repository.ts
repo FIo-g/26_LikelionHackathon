@@ -1,16 +1,35 @@
 import { assertJsonSize, parseVersionedJson } from "@/shared/validation/versioned-json";
-import { analysisResultSchema } from "@/modules/analysis/domain/schemas";
-import { calculateSleepImpact } from "@/modules/analysis/domain/calculate-sleep-impact";
+import { Temporal } from "@js-temporal/polyfill";
+import {
+  analysisResultSchemaEnvelope,
+  baselineResultSchema,
+  baselineResultSchemaEnvelope,
+} from "@/modules/analysis/domain/schemas";
+import {
+  calculateSleepImpact,
+  classifySleepImpactRow,
+} from "@/modules/analysis/domain/calculate-sleep-impact";
 import { ROLLING_ANALYSIS_DAYS } from "@/modules/records/application/affected-analysis-dates";
-import type { AnalysisResult, AnalysisSnapshotEntity, ImpactFactorEntity, NormalizedAnalysisInput, NormalizedDailyRecords, SleepImpactResult } from "@/modules/analysis/application/ports";
-import type { AnalysisSnapshotStatus } from "@/modules/analysis/application/ports";
-import type { AnalysisRepository } from "@/modules/analysis/application/ports";
-import type { BaselineSnapshotEntity } from "@/modules/analysis/application/ports";
-import type { AnalysisRepositoryFactory, UserScope } from "@/modules/analysis/application/ports";
-import type { AnalysisResult as DomainAnalysisResult, NormalizedAnalysisInput as DomainNormalizedAnalysisInput, NormalizedDailyRecords as DomainNormalizedDailyRecords, SleepGoal } from "@/modules/analysis/domain/types";
+import type {
+  AnalysisRepository,
+  AnalysisRepositoryFactory,
+  AnalysisSnapshotEntity,
+  AnalysisSnapshotStatus,
+  BaselineSnapshotEntity,
+  CorruptAnalysisSnapshotFailure,
+  ImpactFactorEntity,
+  ParseResult,
+} from "@/modules/analysis/application/ports";
+import type { UserScope } from "@/shared/domain/contracts";
+import type {
+  AnalysisEnvelope,
+  BaselineEnvelope,
+  NormalizedAnalysisInput,
+  NormalizedDailyRecords,
+  SleepGoal,
+  SleepImpactResult,
+} from "@/modules/analysis/domain/types";
 import type { TransactionClient } from "@/shared/db/transaction";
-import type { ParseResult } from "@/modules/analysis/application/ports";
-import type { CorruptAnalysisSnapshotFailure } from "@/modules/analysis/application/ports";
 
 type PrismaAnalysisClient = TransactionClient & {
   sleepGoal: {
@@ -62,7 +81,6 @@ type PrismaAnalysisClient = TransactionClient & {
     findMany: (args: unknown) => Promise<Array<{
       startedAt: Date;
       endedAt: Date;
-      durationMinutes: number;
       updatedAt: Date;
       dailyLog?: {
         localDate: string;
@@ -98,6 +116,25 @@ type PrismaAnalysisClient = TransactionClient & {
     updateMany: (args: unknown) => Promise<unknown>;
     create: (args: unknown) => Promise<{ id: string }>;
   };
+  baselineSnapshot: {
+    findMany: (args: unknown) => Promise<Array<{
+      id: string;
+      timezone: string;
+      status: AnalysisSnapshotStatus;
+      result: unknown;
+      generatedAt: Date;
+      supersededAt: Date | null;
+    }>>;
+    updateMany: (args: unknown) => Promise<unknown>;
+    create: (args: unknown) => Promise<{
+      id: string;
+      timezone?: string;
+      status?: AnalysisSnapshotStatus;
+      result?: unknown;
+      generatedAt?: Date;
+      supersededAt?: Date | null;
+    }>;
+  };
   impactFactor: {
     createMany: (args: unknown) => Promise<unknown>;
   };
@@ -113,13 +150,32 @@ type StoredAnalysisSnapshot = Readonly<{
   supersededAt: Date | null;
 }>;
 
-const LOCAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+type StoredBaselineSnapshot = Readonly<{
+  id: string;
+  timezone: string;
+  status: "current" | "superseded";
+  result: unknown;
+  generatedAt: Date;
+  supersededAt: Date | null;
+}>;
+
+type MutableNormalizedDailyRecords = {
+  -readonly [Key in keyof NormalizedDailyRecords]: Key extends "caffeine"
+    ? Array<NormalizedDailyRecords["caffeine"][number]>
+    : NormalizedDailyRecords[Key];
+};
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const assertLocalDate = (value: string): void => {
-  if (!LOCAL_DATE_RE.test(value)) {
-    throw new Error("INVALID_LOCAL_DATE");
+  try {
+    if (Temporal.PlainDate.from(value).toString() === value) {
+      return;
+    }
+  } catch {
+    // Fall through to the stable repository error below.
   }
+  throw new Error("INVALID_LOCAL_DATE");
 };
 
 const assertString = (value: unknown): string => String(value);
@@ -187,7 +243,7 @@ const toAnalysisDateRange = (localDate: string, days = ROLLING_ANALYSIS_DAYS): r
   return dates;
 };
 
-const createDefaultDay = (localDate: string): DomainNormalizedDailyRecords => ({
+const createDefaultDay = (localDate: string): MutableNormalizedDailyRecords => ({
   localDate,
   sleepMinutes: null,
   bedMinuteOfDay: null,
@@ -197,6 +253,7 @@ const createDefaultDay = (localDate: string): DomainNormalizedDailyRecords => ({
   lastPhoneUseAt: null,
   phoneDurationMinutes: null,
   exerciseMinutes: null,
+  lastExerciseAt: null,
   lastMealAt: null,
   fatigueLevel: null,
   stressLevel: null,
@@ -207,77 +264,92 @@ const toAnalysisSnapshot = (raw: CorruptAnalysisSnapshotFailure): ParseResult<An
   failure: raw,
 });
 
-const parseStoredResult = (value: unknown, snapshotId: string): ParseResult<AnalysisResult> => {
+const parseStoredEnvelope = <T>(
+  value: unknown,
+  snapshotId: string,
+  code: "CORRUPT_ANALYSIS_SNAPSHOT" | "CORRUPT_BASELINE_SNAPSHOT",
+  parse: (value: unknown) => T,
+): ParseResult<T> => {
   try {
     const asString = typeof value === "string"
       ? value
       : JSON.stringify(value);
 
     if (!asString) {
-      return toAnalysisSnapshot({
-        code: "CORRUPT_ANALYSIS_SNAPSHOT",
-        snapshotId,
-      }) as ParseResult<AnalysisResult>;
+      return { ok: false, failure: { code, snapshotId } };
     }
 
-    const parsed = parseVersionedJson<{ analysisResult: AnalysisResult }>(asString);
-    const result = analysisResultSchema.parse(parsed.analysisResult);
+    const versioned = parseVersionedJson<Record<string, unknown>>(asString);
 
     return {
       ok: true,
-      value: result,
+      value: parse(versioned),
     };
   } catch {
     return {
       ok: false,
       failure: {
-        code: "CORRUPT_ANALYSIS_SNAPSHOT",
+        code,
         snapshotId,
       },
     };
   }
 };
 
+const parseStoredAnalysisEnvelope = (value: unknown, snapshotId: string): ParseResult<AnalysisEnvelope> => (
+  parseStoredEnvelope(value, snapshotId, "CORRUPT_ANALYSIS_SNAPSHOT", (parsed) => analysisResultSchemaEnvelope.parse(parsed))
+);
+
+const parseStoredBaselineEnvelope = (value: unknown, snapshotId: string): ParseResult<BaselineEnvelope> => (
+  parseStoredEnvelope(value, snapshotId, "CORRUPT_BASELINE_SNAPSHOT", (parsed) => baselineResultSchemaEnvelope.parse(parsed))
+);
+
 const normalizeSet = (rows: readonly string[]): string[] => [...new Set(rows)].sort();
 
-export const createAnalysisImpactRows = (input: DomainNormalizedAnalysisInput): ReadonlyArray<ImpactFactorEntity> => {
-  const toExposureRows = (
-    predicate: (row: DomainNormalizedDailyRecords) => boolean,
-  ): number[] => input.days
-    .filter((row) => row.sleepMinutes !== null && predicate(row))
-    .map((row) => row.sleepMinutes as number);
+const MIN_VALID_SLEEP_MINUTES = 120;
+const MAX_VALID_SLEEP_MINUTES = 960;
 
-  const toUnexposedRows = (
-    predicate: (row: DomainNormalizedDailyRecords) => boolean,
-  ): number[] => input.days
-    .filter((row) => row.sleepMinutes !== null && !predicate(row))
+export const createAnalysisImpactRows = (input: NormalizedAnalysisInput): ReadonlyArray<ImpactFactorEntity> => {
+  const targetBedMinuteOfDay = parseMinuteToNumber(input.goal.targetBedTime) ?? 1380;
+  const cohort = (factor: SleepImpactResult["factor"], exposed: boolean): number[] => input.days
+    .filter((row) => {
+      if (row.sleepMinutes === null || row.sleepMinutes < MIN_VALID_SLEEP_MINUTES || row.sleepMinutes > MAX_VALID_SLEEP_MINUTES) {
+        return false;
+      }
+      return classifySleepImpactRow({
+        factor,
+        row,
+        timezone: input.timezone,
+        targetBedMinuteOfDay,
+      })[exposed ? "exposed" : "unexposed"];
+    })
     .map((row) => row.sleepMinutes as number);
 
   const impactRows: SleepImpactResult[] = [
     calculateSleepImpact({
       factor: "caffeine",
-      exposed: toExposureRows((row) => row.caffeine.length > 0),
-      unexposed: toUnexposedRows((row) => row.caffeine.length > 0),
+      exposed: cohort("caffeine", true),
+      unexposed: cohort("caffeine", false),
     }),
     calculateSleepImpact({
       factor: "phone",
-      exposed: toExposureRows((row) => row.lastPhoneUseAt !== null),
-      unexposed: toUnexposedRows((row) => row.lastPhoneUseAt !== null),
+      exposed: cohort("phone", true),
+      unexposed: cohort("phone", false),
     }),
     calculateSleepImpact({
       factor: "alcohol",
-      exposed: toExposureRows((row) => (row.alcoholServings ?? 0) > 0),
-      unexposed: toUnexposedRows((row) => (row.alcoholServings ?? 0) > 0),
+      exposed: cohort("alcohol", true),
+      unexposed: cohort("alcohol", false),
     }),
     calculateSleepImpact({
       factor: "meal",
-      exposed: toExposureRows((row) => row.lastMealAt !== null),
-      unexposed: toUnexposedRows((row) => row.lastMealAt !== null),
+      exposed: cohort("meal", true),
+      unexposed: cohort("meal", false),
     }),
     calculateSleepImpact({
       factor: "exercise",
-      exposed: toExposureRows((row) => row.exerciseMinutes !== null),
-      unexposed: toUnexposedRows((row) => row.exerciseMinutes !== null),
+      exposed: cohort("exercise", true),
+      unexposed: cohort("exercise", false),
     }),
   ];
 
@@ -296,7 +368,7 @@ const loadWindowFromDb = async (
   scope: UserScope,
   localDate: string,
   days: number,
-): Promise<DomainNormalizedAnalysisInput> => {
+): Promise<NormalizedAnalysisInput> => {
   assertLocalDate(localDate);
 
   const sleepGoal = await db.sleepGoal.findUnique({
@@ -314,6 +386,11 @@ const loadWindowFromDb = async (
 
   const parsedDays = toAnalysisDateRange(localDate, days);
   const dateSet = normalizeSet(parsedDays);
+  const firstDate = dateSet[0] ?? localDate;
+  const recordDateSet = normalizeSet([
+    Temporal.PlainDate.from(firstDate).subtract({ days: 1 }).toString(),
+    ...dateSet,
+  ]);
 
   const [sleepSessions, caffeineRows, alcoholRows, mealRows, exerciseRows, phoneRows, wellnessRows] = await Promise.all([
     db.sleepSession.findMany({
@@ -336,11 +413,10 @@ const loadWindowFromDb = async (
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate: { in: dateSet },
+          localDate: { in: recordDateSet },
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         caffeineMg: true,
         consumedAt: true,
@@ -353,11 +429,10 @@ const loadWindowFromDb = async (
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate: { in: dateSet },
+          localDate: { in: recordDateSet },
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         servings: true,
         consumedAt: true,
@@ -370,11 +445,10 @@ const loadWindowFromDb = async (
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate: { in: dateSet },
+          localDate: { in: recordDateSet },
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         eatenAt: true,
         dailyLog: { select: { localDate: true } },
@@ -386,23 +460,22 @@ const loadWindowFromDb = async (
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate: { in: dateSet },
+          localDate: { in: recordDateSet },
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         startedAt: true,
         endedAt: true,
+        dailyLog: { select: { localDate: true } },
         updatedAt: true,
-        durationMinutes: true,
       },
     }),
     db.phoneUsageEntry.findMany({
       where: {
         userId: scope.userId,
         timezone: scope.timezone,
-        localDate: { in: dateSet },
+        localDate: { in: recordDateSet },
       },
       orderBy: { updatedAt: "asc" },
       select: {
@@ -428,7 +501,7 @@ const loadWindowFromDb = async (
     }),
   ]);
 
-  const daysByDate = new Map<string, DomainNormalizedDailyRecords>(dateSet.map((item) => [item, createDefaultDay(item)]));
+  const daysByDate = new Map<string, MutableNormalizedDailyRecords>(dateSet.map((item) => [item, createDefaultDay(item)]));
 
   for (const row of sleepSessions) {
     const day = daysByDate.get(assertString(row.sleepDate));
@@ -447,21 +520,50 @@ const loadWindowFromDb = async (
     }
   }
 
+  const sleepDateForObservation = (observedAt: Date, fallbackDate: string | null | undefined): string | null => {
+    const followingSleep = sleepSessions
+      .map((session) => ({
+        localDate: assertString(session.sleepDate),
+        startedAt: toDate(session.startedAt),
+      }))
+      .filter((session) => {
+        const gap = session.startedAt.getTime() - observedAt.getTime();
+        return daysByDate.has(session.localDate) && gap >= 0 && gap <= DAY_MS;
+      })
+      .sort((left, right) => left.startedAt.getTime() - right.startedAt.getTime())[0];
+
+    if (followingSleep) {
+      return followingSleep.localDate;
+    }
+
+    // No sleep session follows this observation yet (e.g. today, before tonight's
+    // sleep is logged). Only fall back to the record's own day if that day's sleep
+    // hasn't already happened -- otherwise this would misattribute e.g. an afternoon
+    // behavior to a morning sleep that already ended before the behavior occurred.
+    if (fallbackDate && daysByDate.get(fallbackDate)?.sleepMinutes === null) {
+      return fallbackDate;
+    }
+
+    return null;
+  };
+
   for (const row of caffeineRows) {
-    const rowDate = row.dailyLog?.localDate;
+    const consumedAt = toDate(row.consumedAt);
+    const rowDate = sleepDateForObservation(consumedAt, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
     }
 
     day.caffeine.push({
-      consumedAt: toDate(row.consumedAt).toISOString(),
+      consumedAt: consumedAt.toISOString(),
       caffeineMg: toNumber(row.caffeineMg),
     });
   }
 
   for (const row of alcoholRows) {
-    const rowDate = row.dailyLog?.localDate;
+    const consumedAt = toDate(row.consumedAt);
+    const rowDate = sleepDateForObservation(consumedAt, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
@@ -474,40 +576,44 @@ const loadWindowFromDb = async (
   }
 
   for (const row of mealRows) {
-    const rowDate = row.dailyLog?.localDate;
+    const mealTime = toDate(row.eatenAt);
+    const rowDate = sleepDateForObservation(mealTime, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
     }
 
-    const mealTime = toDate(row.eatenAt);
     if (!day.lastMealAt || mealTime.getTime() > new Date(day.lastMealAt).getTime()) {
       day.lastMealAt = mealTime.toISOString();
     }
   }
 
   for (const row of exerciseRows) {
-    const rowDate = row.dailyLog?.localDate;
+    const endedAt = toDate(row.endedAt);
+    const rowDate = sleepDateForObservation(endedAt, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
     }
 
     const startedAt = toDate(row.startedAt);
-    const endedAt = toDate(row.endedAt);
     const durationMinutes = Math.round((endedAt.getTime() - startedAt.getTime()) / 60000);
     if (Number.isFinite(durationMinutes) && durationMinutes > 0) {
       day.exerciseMinutes = (day.exerciseMinutes ?? 0) + durationMinutes;
+      if (!day.lastExerciseAt || endedAt.getTime() > new Date(day.lastExerciseAt).getTime()) {
+        day.lastExerciseAt = endedAt.toISOString();
+      }
     }
   }
 
   for (const row of phoneRows) {
-    const day = daysByDate.get(assertString(row.localDate));
+    const lastUseAt = toDate(row.lastUseAt);
+    const rowDate = sleepDateForObservation(lastUseAt, row.localDate);
+    const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
     }
 
-    const lastUseAt = toDate(row.lastUseAt);
     if (!day.lastPhoneUseAt || lastUseAt.getTime() > new Date(day.lastPhoneUseAt).getTime()) {
       day.lastPhoneUseAt = lastUseAt.toISOString();
       day.phoneDurationMinutes = toNumber(row.durationMinutes);
@@ -542,6 +648,7 @@ const loadWindowFromDb = async (
 };
 
 const analysisSnapshotCurrentKey = (scope: UserScope, localDate: string): string => `${scope.userId}:${scope.timezone}:${localDate}`;
+const baselineSnapshotCurrentKey = (scope: UserScope): string => `${scope.userId}:${scope.timezone}:baseline`;
 
 const findSnapshot = async (
   client: PrismaAnalysisClient,
@@ -569,12 +676,83 @@ const findSnapshot = async (
   return row as StoredAnalysisSnapshot;
 };
 
-export const createAnalysisRepository = (db: TransactionClient, scope: UserScope): AnalysisRepository => {
+export const createAnalysisRepository = (
+  db: TransactionClient,
+  scope: UserScope,
+  options: Readonly<{ now: () => Date }> = { now: () => new Date() },
+): AnalysisRepository => {
   const client = db as PrismaAnalysisClient;
 
   return {
-    loadWindow: async (localDate, days): Promise<DomainNormalizedAnalysisInput> => {
+    loadWindow: async (localDate, days): Promise<NormalizedAnalysisInput> => {
       return loadWindowFromDb(client, scope, localDate, days);
+    },
+    supersedeCurrentBaseline: async (at): Promise<void> => {
+      await client.baselineSnapshot.updateMany({
+        where: {
+          userId: scope.userId,
+          timezone: scope.timezone,
+          status: "current",
+        },
+        data: {
+          status: "superseded",
+          supersededAt: at,
+          currentKey: null,
+        },
+      });
+    },
+    saveCurrentBaseline: async (result): Promise<BaselineSnapshotEntity> => {
+      const baseline = baselineResultSchema.parse(result);
+      const payload: BaselineEnvelope = { schemaVersion: 1, baseline };
+      assertJsonSize(payload);
+      const generatedAt = options.now();
+      const row = await client.baselineSnapshot.create({
+        data: {
+          userId: scope.userId,
+          timezone: scope.timezone,
+          status: "current",
+          result: payload,
+          generatedAt,
+          currentKey: baselineSnapshotCurrentKey(scope),
+        },
+      });
+      return {
+        id: row.id,
+        timezone: scope.timezone,
+        status: "current",
+        result: baseline,
+        generatedAt,
+        supersededAt: null,
+      };
+    },
+    findCurrentBaseline: async (): Promise<ParseResult<BaselineSnapshotEntity> | null> => {
+      const [row] = await client.baselineSnapshot.findMany({
+        where: {
+          userId: scope.userId,
+          timezone: scope.timezone,
+          status: "current",
+        },
+        orderBy: { generatedAt: "desc" },
+        take: 1,
+      }) as StoredBaselineSnapshot[];
+      if (!row) {
+        return null;
+      }
+      const parsed = parseStoredBaselineEnvelope(row.result, row.id);
+      if (!parsed.ok) {
+        return parsed;
+      }
+      return {
+        ok: true,
+        value: {
+          id: row.id,
+          timezone: row.timezone,
+          status: row.status,
+          result: parsed.value.baseline,
+          generatedAt: row.generatedAt,
+          supersededAt: row.supersededAt,
+        },
+      };
     },
     supersedeCurrent: async (localDate, at): Promise<void> => {
       assertLocalDate(localDate);
@@ -593,14 +771,14 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
         },
       });
     },
-    saveCurrent: async (localDate, result, impactFactors): Promise<{ snapshotId: string }> => {
+    saveCurrent: async (localDate, baselineSnapshotId, result, impactFactors): Promise<{ snapshotId: string }> => {
       assertLocalDate(localDate);
 
-      const parsed = analysisResultSchema.parse(result);
-      const payload = {
+      const payload = analysisResultSchemaEnvelope.parse({
         schemaVersion: 1,
-        analysisResult: parsed,
-      } as const;
+        baselineSnapshotId,
+        analysisResult: result,
+      });
 
       assertJsonSize(payload);
 
@@ -618,6 +796,7 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
       if (impactFactors.length > 0) {
         await client.impactFactor.createMany({
           data: impactFactors.map((item) => ({
+            userId: scope.userId,
             analysisSnapshotId: snapshotId,
             factor: item.factor,
             exposedCount: item.exposedCount,
@@ -637,7 +816,7 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
         return null;
       }
 
-      const parsed = parseStoredResult(row.result, row.id);
+      const parsed = parseStoredAnalysisEnvelope(row.result, row.id);
       if (!parsed.ok) {
         return parsed;
       }
@@ -649,7 +828,8 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
           localDate: row.localDate,
           timezone: row.timezone,
           status: row.status,
-          result: parsed.value,
+          baselineSnapshotId: parsed.value.baselineSnapshotId,
+          result: parsed.value.analysisResult,
           generatedAt: row.generatedAt,
           supersededAt: row.supersededAt,
         },
@@ -668,7 +848,7 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
       }) as StoredAnalysisSnapshot[];
 
       for (const row of rows) {
-        const parsed = parseStoredResult(row.result, row.id);
+        const parsed = parseStoredAnalysisEnvelope(row.result, row.id);
         if (!parsed.ok) {
           continue;
         }
@@ -680,7 +860,8 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
             localDate: row.localDate,
             timezone: row.timezone,
             status: row.status,
-            result: parsed.value,
+            baselineSnapshotId: parsed.value.baselineSnapshotId,
+            result: parsed.value.analysisResult,
             generatedAt: row.generatedAt,
             supersededAt: row.supersededAt,
           },
@@ -706,8 +887,10 @@ export const createSnapshotFactory = (): AnalysisRepositoryFactory => (
 ) => createAnalysisRepository(
   tx as TransactionClient,
   scope,
+  options,
 );
 
 export const createAnalysisRepositoryFactory = createSnapshotFactory;
 
 export const analysisSnapshotCurrentKeyValue = analysisSnapshotCurrentKey;
+export const baselineSnapshotCurrentKeyValue = baselineSnapshotCurrentKey;

@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1220" height="174" viewBox="0 0 1220 174" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Night header" clip-path="url(#clip0_0_4)">
+<rect width="1220" height="174" fill="#301B44"/>
+<ellipse id="Header glow" cx="1060" cy="7" rx="270" ry="195" fill="#704480"/>
+<circle id="Star 1" cx="71.5" cy="35.5" r="1.5" fill="white"/>
+<circle id="Star 2" cx="211" cy="85" r="1" fill="white"/>
+<circle id="Star 3" cx="383" cy="39" r="1" fill="white"/>
+<circle id="Star 4" cx="571.5" cy="113.5" r="1.5" fill="white"/>
+<circle id="Star 5" cx="761" cy="49" r="1" fill="white"/>
+<circle id="Star 6" cx="941.5" cy="93.5" r="1.5" fill="white"/>
+<circle id="Star 7" cx="1121.5" cy="35.5" r="1.5" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_0_4">
+<rect width="1220" height="174" fill="white"/>
+</clipPath>
+</defs>
+</svg>

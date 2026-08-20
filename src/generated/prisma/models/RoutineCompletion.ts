@@ -504,6 +504,7 @@ export type RoutineCompletionCreateOrConnectWithoutUserInput = {
 
 export type RoutineCompletionCreateManyUserInputEnvelope = {
   data: Prisma.RoutineCompletionCreateManyUserInput | Prisma.RoutineCompletionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type RoutineCompletionUpsertWithWhereUniqueWithoutUserInput = {
@@ -548,7 +549,6 @@ export type RoutineCompletionCreateWithoutPlanDayInput = {
 
 export type RoutineCompletionUncheckedCreateWithoutPlanDayInput = {
   id?: string
-  userId: string
   localDate: string
   routineRevisionKey: string
   stepKey: string
@@ -563,6 +563,7 @@ export type RoutineCompletionCreateOrConnectWithoutPlanDayInput = {
 
 export type RoutineCompletionCreateManyPlanDayInputEnvelope = {
   data: Prisma.RoutineCompletionCreateManyPlanDayInput | Prisma.RoutineCompletionCreateManyPlanDayInput[]
+  skipDuplicates?: boolean
 }
 
 export type RoutineCompletionUpsertWithWhereUniqueWithoutPlanDayInput = {
@@ -623,7 +624,6 @@ export type RoutineCompletionUncheckedUpdateManyWithoutUserInput = {
 
 export type RoutineCompletionCreateManyPlanDayInput = {
   id?: string
-  userId: string
   localDate: string
   routineRevisionKey: string
   stepKey: string
@@ -643,7 +643,6 @@ export type RoutineCompletionUpdateWithoutPlanDayInput = {
 
 export type RoutineCompletionUncheckedUpdateWithoutPlanDayInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   localDate?: Prisma.StringFieldUpdateOperationsInput | string
   routineRevisionKey?: Prisma.StringFieldUpdateOperationsInput | string
   stepKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -653,7 +652,6 @@ export type RoutineCompletionUncheckedUpdateWithoutPlanDayInput = {
 
 export type RoutineCompletionUncheckedUpdateManyWithoutPlanDayInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   localDate?: Prisma.StringFieldUpdateOperationsInput | string
   routineRevisionKey?: Prisma.StringFieldUpdateOperationsInput | string
   stepKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1409,6 +1407,7 @@ export type RoutineCompletionCreateManyArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many RoutineCompletions.
    */
   data: Prisma.RoutineCompletionCreateManyInput | Prisma.RoutineCompletionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1427,6 +1426,7 @@ export type RoutineCompletionCreateManyAndReturnArgs<ExtArgs extends runtime.Typ
    * The data used to create many RoutineCompletions.
    */
   data: Prisma.RoutineCompletionCreateManyInput | Prisma.RoutineCompletionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

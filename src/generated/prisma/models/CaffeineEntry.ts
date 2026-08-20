@@ -588,6 +588,7 @@ export type CaffeineEntryCreateOrConnectWithoutUserInput = {
 
 export type CaffeineEntryCreateManyUserInputEnvelope = {
   data: Prisma.CaffeineEntryCreateManyUserInput | Prisma.CaffeineEntryCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type CaffeineEntryUpsertWithWhereUniqueWithoutUserInput = {
@@ -652,6 +653,7 @@ export type CaffeineEntryCreateOrConnectWithoutDailyLogInput = {
 
 export type CaffeineEntryCreateManyDailyLogInputEnvelope = {
   data: Prisma.CaffeineEntryCreateManyDailyLogInput | Prisma.CaffeineEntryCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type CaffeineEntryUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1523,6 +1525,7 @@ export type CaffeineEntryCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many CaffeineEntries.
    */
   data: Prisma.CaffeineEntryCreateManyInput | Prisma.CaffeineEntryCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1541,6 +1544,7 @@ export type CaffeineEntryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * The data used to create many CaffeineEntries.
    */
   data: Prisma.CaffeineEntryCreateManyInput | Prisma.CaffeineEntryCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

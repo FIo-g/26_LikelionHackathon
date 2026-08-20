@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { GeneratedAdviceInput, PlanDayTarget } from "@/modules/planner/application/ports";
 import { createPrismaPlannerRepository } from "@/modules/planner/infrastructure/prisma-planner-repository";
 import { createPlannerInputHash } from "@/modules/planner/domain/generate-schedule-proposal";
+import type { TransactionClient } from "@/shared/db/transaction";
 
 type AdviceRow = GeneratedAdviceInput & {
   id: string;
@@ -59,9 +60,55 @@ const createAdviceInput = (): GeneratedAdviceInput => {
   };
 };
 
+const createLegacyRerouteAdviceInput = (): GeneratedAdviceInput => {
+  const inputSnapshot: GeneratedAdviceInput["inputSnapshot"] = {
+    schemaVersion: 1,
+    timezone: "Asia/Seoul",
+    goal: {
+      targetBedTime: "23:00",
+      targetWakeTime: "07:00",
+      targetDurationMinutes: 480,
+    },
+    baselineId: null,
+    event: null,
+    planId: "plan-legacy",
+    triggerRecordId: "caffeine-legacy",
+    rerouteRecords: [{
+      id: "caffeine-legacy",
+      type: "caffeine",
+      input: {
+        type: "caffeine",
+        brand: "테스트",
+        product: "커피",
+        caffeineMg: 120,
+        consumedAt: "2026-09-11T12:30:00.000Z",
+        timezone: "Asia/Seoul",
+      },
+    }],
+  };
+
+  return {
+    eventId: null,
+    planId: "plan-legacy",
+    triggerType: "reroute",
+    inputHash: createPlannerInputHash(inputSnapshot),
+    inputSnapshot,
+    proposal: {
+      adjustmentStartsOn: day.localDate,
+      eventWakeAt: day.targetWakeAt,
+      days: [day],
+      conflicts: [],
+      confidence: "low",
+      evidence: [],
+      algorithmVersion: "provisional-v1",
+    },
+  };
+};
+
 const createMockPlannerDb = () => {
   const state = {
     advice: [] as AdviceRow[],
+    events: [] as Array<Record<string, unknown>>,
     plans: [] as Array<Record<string, unknown>>,
     days: [] as Array<Record<string, unknown>>,
     revisions: [] as Array<Record<string, unknown>>,
@@ -70,6 +117,16 @@ const createMockPlannerDb = () => {
   const nextId = (prefix: string) => `${prefix}-${sequence++}`;
 
   const db = {
+    specialEvent: {
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const row = { ...data, id: nextId("event") };
+        state.events.push(row);
+        return row;
+      },
+      findMany: async ({ where }: { where: { userId: string } }) => (
+        state.events.filter((event) => event.userId === where.userId)
+      ),
+    },
     scheduleAdvice: {
       create: async ({ data }: { data: Omit<AdviceRow, "id" | "generatedAt"> }) => {
         const row: AdviceRow = { ...data, id: nextId("advice"), generatedAt: new Date("2026-08-20T00:00:00.000Z") };
@@ -124,17 +181,58 @@ const createMockPlannerDb = () => {
         return row;
       },
     },
-    $transaction: async <T>(callback: (transaction: typeof db) => Promise<T>): Promise<T> => callback(db),
+    $transaction: async <T>(callback: (transaction: unknown) => Promise<T>): Promise<T> => callback(db),
   };
 
   return { db, state };
 };
 
 describe("prisma planner repository", () => {
+  it("returns a scoped event title with its type and instant for Plan reloads", async () => {
+    const fixture = createMockPlannerDb();
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
+    fixture.state.events.push(
+      { id: "alice-event", userId: "alice", title: "졸업 발표 리허설", type: "발표", startsAt: new Date("2026-09-12T00:00:00.000Z") },
+      { id: "bob-event", userId: "bob", title: "다른 사용자의 일정", type: "여행", startsAt: new Date("2026-09-13T00:00:00.000Z") },
+    );
+
+    await expect(repository.listEvents()).resolves.toEqual([{
+      id: "alice-event",
+      title: "졸업 발표 리허설",
+      type: "발표",
+      startsAt: "2026-09-12T00:00:00.000Z",
+    }]);
+  });
+
+  it("reads a legacy reroute advice that predates canonical plan identity fields", async () => {
+    const fixture = createMockPlannerDb();
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
+    fixture.state.advice.push({
+      ...createLegacyRerouteAdviceInput(),
+      id: "advice-legacy",
+      userId: "alice",
+      status: "generated",
+      generatedAt: new Date("2026-08-20T00:00:00.000Z"),
+    });
+
+    await expect(repository.findAdvice("advice-legacy")).resolves.toMatchObject({
+      id: "advice-legacy",
+      triggerType: "reroute",
+      inputSnapshot: { planId: "plan-legacy", triggerRecordId: "caffeine-legacy" },
+    });
+  });
+
+  it("still rejects a new reroute write without canonical plan identity fields", async () => {
+    const fixture = createMockPlannerDb();
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
+
+    await expect(repository.saveGeneratedAdvice(createLegacyRerouteAdviceInput())).rejects.toThrow();
+  });
+
   it("does not expose or mutate another user's generated advice", async () => {
     const fixture = createMockPlannerDb();
-    const alice = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
-    const bob = createPrismaPlannerRepository(fixture.db as never, { userId: "bob", timezone: "Asia/Seoul" });
+    const alice = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
+    const bob = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "bob", timezone: "Asia/Seoul" });
 
     const { adviceId } = await alice.saveGeneratedAdvice(createAdviceInput());
 
@@ -146,7 +244,7 @@ describe("prisma planner repository", () => {
 
   it("accepts scoped generated advice into one active plan and revision", async () => {
     const fixture = createMockPlannerDb();
-    const repository = createPrismaPlannerRepository(fixture.db as never, { userId: "alice", timezone: "Asia/Seoul" });
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
     const { adviceId } = await repository.saveGeneratedAdvice(createAdviceInput());
 
     const result = await repository.acceptAdvice({

@@ -560,6 +560,7 @@ export type SpecialEventCreateOrConnectWithoutUserInput = {
 
 export type SpecialEventCreateManyUserInputEnvelope = {
   data: Prisma.SpecialEventCreateManyUserInput | Prisma.SpecialEventCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type SpecialEventUpsertWithWhereUniqueWithoutUserInput = {
@@ -1514,6 +1515,7 @@ export type SpecialEventCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many SpecialEvents.
    */
   data: Prisma.SpecialEventCreateManyInput | Prisma.SpecialEventCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1532,6 +1534,7 @@ export type SpecialEventCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many SpecialEvents.
    */
   data: Prisma.SpecialEventCreateManyInput | Prisma.SpecialEventCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

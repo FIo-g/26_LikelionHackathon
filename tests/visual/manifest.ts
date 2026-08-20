@@ -1,9 +1,9 @@
 export const VISUAL_FRAMES = [
   { name: "sign-in-desktop", path: "/sign-in", viewport: { width: 1440, height: 1024 }, fixture: "signed-out" },
-  { name: "onboarding-connect-mobile", path: "/onboarding/connect", viewport: { width: 390, height: 844 }, fixture: "new-user" },
-  { name: "onboarding-goal-mobile", path: "/onboarding/sleep-goal", viewport: { width: 390, height: 844 }, fixture: "onboarding-connect" },
-  { name: "onboarding-habits-mobile", path: "/onboarding/habits", viewport: { width: 390, height: 844 }, fixture: "onboarding-goal" },
-  { name: "onboarding-profile-mobile", path: "/onboarding/profile", viewport: { width: 390, height: 844 }, fixture: "onboarding-habits" },
+  { name: "onboarding-profile-mobile", path: "/onboarding/profile", viewport: { width: 390, height: 844 }, fixture: "new-user" },
+  { name: "onboarding-habits-mobile", path: "/onboarding/habits", viewport: { width: 390, height: 844 }, fixture: "onboarding-profile" },
+  { name: "onboarding-goal-mobile", path: "/onboarding/sleep-goal", viewport: { width: 390, height: 844 }, fixture: "onboarding-habits" },
+  { name: "onboarding-connect-mobile", path: "/onboarding/connect", viewport: { width: 390, height: 844 }, fixture: "onboarding-goal" },
   { name: "today-desktop", path: "/today", viewport: { width: 1440, height: 1024 }, fixture: "complete-user" },
   { name: "today-mobile", path: "/today", viewport: { width: 390, height: 844 }, fixture: "complete-user" },
   { name: "record-desktop", path: "/record", viewport: { width: 1440, height: 1024 }, fixture: "complete-user" },
@@ -32,3 +32,7 @@ export const VISUAL_FRAMES = [
 
 export type VisualFrame = (typeof VISUAL_FRAMES)[number];
 export type VisualFixture = VisualFrame["fixture"];
+
+export const visualBaselineNames = (): readonly string[] => (
+  VISUAL_FRAMES.map(({ name }) => `${name}.png`).sort()
+);

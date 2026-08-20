@@ -33,6 +33,13 @@ export type SpecialEventInput = Readonly<{
   timezone: string;
 }>;
 
+export type SpecialEventSummary = Readonly<{
+  id: string;
+  title: string;
+  type: string;
+  startsAt: string;
+}>;
+
 export type PlannerInputSnapshot = VersionedPayload<{
   timezone: string;
   goal: {
@@ -49,6 +56,10 @@ export type PlannerInputSnapshot = VersionedPayload<{
   } | null;
   planId: string | null;
   triggerRecordId: string | null;
+  planActiveKey?: string | null;
+  planRevisionId?: string | null;
+  triggerInstant?: string;
+  activeDays?: readonly PlanDayTarget[];
   rerouteRecords?: readonly Readonly<{ id: string; type: string; input: Record<string, string | number | null> }>[];
 }>;
 
@@ -69,6 +80,8 @@ export type ScheduleAdviceEntity = GeneratedAdviceInput & Readonly<{
 export type SleepPlanEntity = Readonly<{
   id: string;
   status: PlanStatus;
+  activeKey?: string | null;
+  revisionId?: string | null;
 }>;
 
 export type PlanDayEntity = PlanDayTarget & Readonly<{

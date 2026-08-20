@@ -515,6 +515,7 @@ export type SleepPlanCreateOrConnectWithoutUserInput = {
 
 export type SleepPlanCreateManyUserInputEnvelope = {
   data: Prisma.SleepPlanCreateManyUserInput | Prisma.SleepPlanCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type SleepPlanUpsertWithWhereUniqueWithoutUserInput = {
@@ -1575,6 +1576,7 @@ export type SleepPlanCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many SleepPlans.
    */
   data: Prisma.SleepPlanCreateManyInput | Prisma.SleepPlanCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1593,6 +1595,7 @@ export type SleepPlanCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many SleepPlans.
    */
   data: Prisma.SleepPlanCreateManyInput | Prisma.SleepPlanCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

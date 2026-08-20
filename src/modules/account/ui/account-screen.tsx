@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { AccountViewModel } from "../application/ports";
 import { BottomSheet } from "@/shared/ui/bottom-sheet";
 import { ConnectionList } from "./connection-list";
@@ -5,6 +6,102 @@ import { DataManagementEntry } from "./data-management-entry";
 import { ManualInputRules } from "./manual-input-rules";
 import { ProfileForm } from "./profile-form";
 import { SleepGoalCard } from "./sleep-goal-card";
+import { FigmaMobileHeader } from "@/shared/ui/figma-mobile-header";
 import styles from "./account.module.css";
 
-export const AccountScreen = ({ viewModel }: Readonly<{ viewModel: AccountViewModel }>) => <main className={styles.accountLayout}><header className={styles.header}><p className={styles.eyebrow}>ACCOUNT</p><h1>계정 설정</h1><p>내 정보와 수면 목표, 기록 방식의 상태를 확인하세요.</p></header><nav aria-label="계정 설정" className={styles.desktopTabs}><a href="#profile">개인 정보</a><a href="#goal">수면 목표</a><a href="#connections">연결 관리</a><a href="#data">데이터 관리</a></nav><div className={styles.desktopDetails}><section id="profile" className={styles.card}><h2>개인 정보</h2><ProfileForm identity={viewModel.identity} profile={viewModel.profile} /></section><section id="goal" className={styles.card}><h2>수면 목표</h2><SleepGoalCard goal={viewModel.sleepGoal} /></section><section id="connections" className={styles.card}><h2>연결 관리</h2><ConnectionList connections={viewModel.connections} /><ManualInputRules categories={viewModel.manualInputCategories} /></section></div><div className={styles.mobileDetails}><section className={styles.summaryCard}><h2>개인 정보</h2><p>{viewModel.profile.nickname} · {viewModel.profile.timezone}</p><BottomSheet triggerLabel="개인 정보 수정"><ProfileForm identity={viewModel.identity} profile={viewModel.profile} /></BottomSheet></section><section className={styles.summaryCard}><h2>수면 목표</h2><p>{viewModel.sleepGoal.targetBedTime} 취침 · {viewModel.sleepGoal.targetWakeTime} 기상</p><BottomSheet triggerLabel="수면 목표 수정"><SleepGoalCard goal={viewModel.sleepGoal} /></BottomSheet></section><section className={styles.summaryCard}><h2>연결 관리</h2><p>직접 입력만 사용 중입니다.</p><BottomSheet triggerLabel="연결·직접 입력 보기"><ConnectionList connections={viewModel.connections} /><ManualInputRules categories={viewModel.manualInputCategories} /></BottomSheet></section></div><div id="data"><DataManagementEntry reauth={viewModel.dataManagement} /></div></main>;
+const mobileConnectionLabel = (type: AccountViewModel["connections"][number]["type"], label: string): string => {
+  if (type === "wearable") return "웨어러블 수면·운동";
+  if (type === "phone") return "휴대폰 사용시간";
+  return label;
+};
+
+const mobileConnectionState = (availability: AccountViewModel["connections"][number]["availability"]): string => (
+  availability === "available" ? "직접 입력" : "준비 중"
+);
+
+const habitLabels = {
+  caffeine: { none: "거의 마시지 않음", sometimes: "가끔", daily: "매일" },
+  alcohol: { none: "마시지 않음", monthly: "월 1회 이하", weekly: "주 1회 이상", frequent: "자주" },
+  meal: { early: "이른 편", mixed: "보통", late: "늦은 편" },
+  exercise: { rare: "거의 하지 않음", weekly: "주 1회 이상", frequent: "자주" },
+} as const;
+
+export const AccountScreen = ({ viewModel }: Readonly<{ viewModel: AccountViewModel }>) => {
+  const visibleConnections = viewModel.connections.filter((connection) => connection.type === "wearable" || connection.type === "phone");
+
+  return (
+    <main data-lunar-screen="account" className={styles.accountLayout}>
+      <FigmaMobileHeader title="프로필 · 수면 목표" subtitle="나의 정보와 연결 상태를 한곳에서 관리해요." />
+      <header className={styles.header}>
+        <Image alt="" className={styles.desktopHeaderArt} fill priority sizes="(min-width: 768px) 1220px, 0px" src="/assets/lunar-rabbit/account-desktop-header.svg" />
+        <div className={styles.headerCopy}>
+          <p className={styles.eyebrow}>ACCOUNT &amp; SETTINGS</p>
+          <h1>나와 목표를 관리해요</h1>
+          <p>개인정보, 수면 목표, 데이터 연결 상태를 언제든 수정할 수 있어요.</p>
+        </div>
+      </header>
+      <nav aria-label="계정 설정" className={styles.desktopTabs}>
+        <a aria-current="page" href="#profile">개인정보 수정</a><a href="#goal">목표 수정</a><a href="#connections">연동 관리</a><a href="#data">데이터 관리</a>
+      </nav>
+      <div className={styles.desktopDetails}>
+        <section id="profile" className={`${styles.card} ${styles.desktopProfileCard}`}>
+          <h2>개인정보 수정</h2>
+          <p className={styles.sectionDescription}>분석 기준을 업데이트하는 정보입니다.</p>
+          <ProfileForm idPrefix="desktop-profile" identity={viewModel.identity} profile={viewModel.profile} />
+        </section>
+        <section id="goal" className={`${styles.card} ${styles.desktopGoalCard}`}>
+          <Image alt="" className={styles.goalGlow} height={220} src="/assets/lunar-rabbit/account-goal-glow.svg" width={240} />
+          <h2>수면 목표 수정</h2>
+          <p className={styles.desktopGoalTime}>{viewModel.sleepGoal.targetBedTime} → {viewModel.sleepGoal.targetWakeTime}</p>
+          <p className={styles.desktopGoalDescription}>목표 취침과 기상 시간을 바꾸면, 오늘의 준비 타임라인과 계획 추천에 바로 반영됩니다.</p>
+          <BottomSheet triggerLabel="수면 목표 수정" triggerVisualLabel="목표 시간 수정"><SleepGoalCard idPrefix="desktop-goal" goal={viewModel.sleepGoal} /></BottomSheet>
+        </section>
+        <section id="connections" className={`${styles.card} ${styles.desktopConnectionCard}`}>
+          <h2>연동 관리</h2>
+          <ConnectionList connections={viewModel.connections} />
+        </section>
+      </div>
+      {viewModel.habits ? (
+        <section className={styles.habitSummary} aria-labelledby="account-habits-title">
+          <div>
+            <h2 id="account-habits-title">생활 습관</h2>
+            <p>온보딩에서 저장한 기본 습관이에요. 실제 기록은 기록 화면에서 계속 보완할 수 있어요.</p>
+          </div>
+          <dl>
+            <div><dt>카페인</dt><dd>{habitLabels.caffeine[viewModel.habits.caffeine]}</dd></div>
+            <div><dt>음주</dt><dd>{viewModel.habits.alcohol ? habitLabels.alcohol[viewModel.habits.alcohol] : "입력하지 않음"}</dd></div>
+            <div><dt>식사</dt><dd>{habitLabels.meal[viewModel.habits.meal]}</dd></div>
+            <div><dt>운동</dt><dd>{habitLabels.exercise[viewModel.habits.exercise]}</dd></div>
+          </dl>
+        </section>
+      ) : null}
+      <ManualInputRules idPrefix="desktop-manual-rules" categories={viewModel.manualInputCategories} />
+      <aside className={styles.dataSummary} id="data"><strong>데이터 관리</strong><p>기록은 개인화 분석을 위한 구조화된 데이터로 관리하며, 필요하면 내보내기·수정·삭제 범위를 선택할 수 있습니다.</p></aside>
+      <div className={styles.mobileDetails}>
+        <section className={`${styles.summaryCard} ${styles.mobileProfileCard}`}>
+          <Image alt="" height={64} src="/assets/lunar-rabbit/rabbit-face.png" width={64} />
+          <div className={styles.mobileProfileCopy}>
+            <h2>{viewModel.profile.nickname} · 기본 프로필</h2>
+            <p>타임존 {viewModel.profile.timezone}{viewModel.profile.heightCm ? ` · ${viewModel.profile.heightCm}cm` : ""}{viewModel.profile.weightKg ? ` · ${viewModel.profile.weightKg}kg` : ""}</p>
+          </div>
+          <BottomSheet triggerLabel="개인 정보 수정" triggerVisualLabel="수정"><ProfileForm idPrefix="mobile-profile" identity={viewModel.identity} profile={viewModel.profile} /></BottomSheet>
+        </section>
+        <section className={`${styles.summaryCard} ${styles.mobileGoalCard}`}>
+          <h2>수면 목표</h2>
+          <p>{viewModel.sleepGoal.targetBedTime} → {viewModel.sleepGoal.targetWakeTime}</p>
+          <BottomSheet triggerLabel="수면 목표 수정" triggerVisualLabel="목표 수정"><SleepGoalCard idPrefix="mobile-goal" goal={viewModel.sleepGoal} /></BottomSheet>
+        </section>
+        <section className={`${styles.summaryCard} ${styles.mobileConnectionCard}`}>
+          <h2>연동 관리</h2>
+          <ul className={styles.mobileConnectionList}>
+            {visibleConnections.map((connection) => <li key={connection.type}><span aria-hidden="true" /><strong>{mobileConnectionLabel(connection.type, connection.label)}</strong><em>{mobileConnectionState(connection.availability)}</em></li>)}
+          </ul>
+          <p className={styles.mobileInputPill}>직접 입력</p>
+          <BottomSheet triggerLabel="연결·직접 입력 보기" triggerVisualLabel="관리"><ConnectionList connections={viewModel.connections} /><ManualInputRules idPrefix="mobile-manual-rules" categories={viewModel.manualInputCategories} /></BottomSheet>
+        </section>
+        <aside className={styles.mobileManualNote}><strong>연동 없이도 직접 기록할 수 있어요</strong><p>수면은 기상 후 어젯밤 기준으로 입력합니다.</p></aside>
+      </div>
+      <div className={styles.dataManagement}><DataManagementEntry reauth={viewModel.dataManagement} /></div>
+    </main>
+  );
+};

@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { buildE2eServerArguments } from "./e2e-server-arguments.mjs";
 import { resolveE2eLaunchEnvironment } from "./e2e-launch-config.mjs";
+import { applySqliteMigrations } from "./apply-sqlite-migrations.mjs";
 
 const port = process.env.E2E_PORT ?? "3000";
 let env;
@@ -12,6 +13,8 @@ try {
 }
 
 if (process.exitCode) process.exit();
+
+if (env.DATABASE_URL.startsWith("file:")) applySqliteMigrations(env.DATABASE_URL);
 
 const child = spawn(process.execPath, buildE2eServerArguments(env.VISUAL_TEST === "1", port), {
   env,

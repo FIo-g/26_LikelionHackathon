@@ -1,6 +1,6 @@
-import { profileSchema, sleepGoalSchema } from "@/modules/onboarding/domain/schemas";
+import { profileUpdateSchema, sleepGoalSchema } from "@/modules/onboarding/domain/schemas";
 
-export const accountProfileSchema = profileSchema;
+export const accountProfileSchema = profileUpdateSchema;
 export const accountSleepGoalSchema = sleepGoalSchema;
 
 export type AccountActionState = Readonly<{
@@ -10,3 +10,6 @@ export type AccountActionState = Readonly<{
 }>;
 
 export const accountActionIdle: AccountActionState = { status: "idle", values: {}, fieldErrors: {} };
+
+export type DeleteAccountActionState = Readonly<{ status: "idle" | "error"; error: string | null }>;
+export const deleteAccountActionIdle: DeleteAccountActionState = { status: "idle", error: null };

@@ -1,4 +1,4 @@
-import { auth } from "@/shared/auth/auth";
+import { getAuth } from "@/shared/auth/auth";
 import type { Clock } from "@/shared/domain/contracts";
 import { ReauthenticationError } from "../domain/export-schema";
 
@@ -45,7 +45,7 @@ export const requireRecentAuthentication = async (
   password: string | null,
   requestHeaders: Headers,
   clock: Clock,
-  verifier: unknown = auth,
+  verifier: unknown = getAuth(),
 ): Promise<void> => {
   if (clock.now().getTime() - session.createdAt.getTime() <= FRESH_SESSION_MS) return;
   if (!password || !hasPasswordVerifier(verifier)) throw new ReauthenticationError();
@@ -60,7 +60,7 @@ export const requireRecentAuthentication = async (
 
 export const readSensitiveActionSession = async (
   requestHeaders: Headers,
-  reader: unknown = auth,
+  reader: unknown = getAuth(),
 ): Promise<(SensitiveActionSession & { sessionId: string }) | null> => {
   if (!hasSessionReader(reader)) return null;
   try {

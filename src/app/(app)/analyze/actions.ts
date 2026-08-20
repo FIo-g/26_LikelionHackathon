@@ -57,20 +57,12 @@ export const previewCaffeineWhatIfAction = async (
   } catch {
     return { status: "error", message: "미리보기를 준비하지 못했어요. 시간을 바꾸어 다시 시도해 주세요." };
   }
-  const params = new URLSearchParams({
-    step: "confirm",
-    brand: "직접 입력",
-    product: "카페인",
-    caffeineMg: String(caffeineMg),
-    consumedAt,
-  });
-
   return {
     status: "success",
     beforeReadiness: preview.before.readiness,
     afterReadiness: preview.after.readiness,
     delta: preview.delta,
-    actualRecordHref: `/record/caffeine?${params.toString()}`,
+    actualRecordHref: "/record/caffeine",
   };
 };
 

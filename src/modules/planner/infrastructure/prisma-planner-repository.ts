@@ -9,6 +9,7 @@ import {
   planDayTargetSchema,
   scheduleProposalSchema,
   specialEventInputSchema,
+  storedGeneratedAdviceInputSchema,
 } from "../domain/schemas";
 import type { PlanDayEntity, ScheduleAdviceEntity, SleepPlanEntity } from "../domain/types";
 import type { PlannerRepository } from "../application/ports";
@@ -55,7 +56,7 @@ const toStringValue = (value: unknown): string => String(value);
 const toInstant = (value: unknown): string => (value instanceof Date ? value : new Date(String(value))).toISOString();
 
 const mapAdvice = (row: DbPayload): ScheduleAdviceEntity => {
-  const input = generatedAdviceInputSchema.parse({
+  const input = storedGeneratedAdviceInputSchema.parse({
     eventId: row.eventId ?? null,
     planId: row.planId ?? null,
     triggerType: row.triggerType,
@@ -192,8 +193,20 @@ export const createPrismaPlannerRepository = (
     findActivePlan: async () => {
       const plan = await client.sleepPlan.findFirst({
         where: { userId: scope.userId, status: "active" },
+        select: {
+          id: true,
+          status: true,
+          activeKey: true,
+          revisions: { orderBy: { createdAt: "desc" }, take: 1, select: { id: true } },
+        },
       });
-      return plan ? { id: toStringValue(plan.id), status: "active" } satisfies SleepPlanEntity : null;
+      const revision = Array.isArray(plan?.revisions) ? plan.revisions[0] as DbPayload | undefined : undefined;
+      return plan ? {
+        id: toStringValue(plan.id),
+        status: "active",
+        activeKey: plan.activeKey === null || plan.activeKey === undefined ? null : toStringValue(plan.activeKey),
+        revisionId: revision ? toStringValue(revision.id) : null,
+      } satisfies SleepPlanEntity : null;
     },
     listActiveDays: async (planId) => {
       const rows = await client.planDay.findMany({
@@ -206,10 +219,11 @@ export const createPrismaPlannerRepository = (
       const events = await client.specialEvent.findMany({
         where: { userId: scope.userId },
         orderBy: { startsAt: "asc" },
-        select: { id: true, type: true, startsAt: true },
+        select: { id: true, title: true, type: true, startsAt: true },
       });
       return events.map((event) => ({
         id: toStringValue(event.id),
+        title: toStringValue(event.title),
         type: toStringValue(event.type),
         startsAt: toInstant(event.startsAt),
       }));
@@ -232,7 +246,7 @@ export const createPrismaPlannerRepository = (
       const revision = await client.planRevision.findFirst({
         where: { userId: scope.userId, triggerEntityType: "special-event", triggerEntityId: eventId },
         orderBy: { createdAt: "desc" },
-        select: { planId: true },
+        select: { id: true, planId: true },
       });
       if (!revision) {
         return null;
@@ -243,6 +257,8 @@ export const createPrismaPlannerRepository = (
       return plan ? {
         id: toStringValue(plan.id),
         status: toStringValue(plan.status) as SleepPlanEntity["status"],
+        activeKey: plan.activeKey === null || plan.activeKey === undefined ? null : toStringValue(plan.activeKey),
+        revisionId: toStringValue(revision.id),
       } : null;
     },
     acceptAdvice: async (input) => {

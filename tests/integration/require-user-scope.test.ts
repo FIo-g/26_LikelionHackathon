@@ -3,15 +3,17 @@ import { OnboardingIncompleteError, UnauthorizedError } from "@/shared/auth/erro
 import { requireSessionUserId } from "@/shared/auth/require-session-user";
 import { requireUserScope } from "@/shared/auth/require-user-scope";
 
+type GetSession = (input: Readonly<{ headers: unknown }>) => Promise<unknown>;
+
 const { mockGetSession, mockFindUnique, mockCookieGet, authContainer } = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
+  mockGetSession: vi.fn<GetSession>(),
   mockFindUnique: vi.fn(),
   mockCookieGet: vi.fn(),
-  authContainer: { api: { getSession: vi.fn() } as { getSession?: typeof mockGetSession } },
+  authContainer: { api: { getSession: undefined as GetSession | undefined } },
 }));
 
 vi.mock("@/shared/auth/auth", () => ({
-  auth: authContainer,
+  getAuth: () => authContainer,
 }));
 
 vi.mock("@/shared/db/prisma", () => ({

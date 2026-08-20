@@ -3,11 +3,13 @@
 import { useEffect, useRef } from "react";
 
 import type { ScheduleDiff } from "../domain/diff-schedule-proposal";
+import { formatPlanDateTime } from "./format-plan-time";
 import styles from "./plan.module.css";
 
 type ScheduleConfirmationDialogProps = Readonly<{
   title: string;
   changes: readonly ScheduleDiff[];
+  timezone: string;
   confirmLabel: string;
   pending?: boolean;
   error?: string | null;
@@ -15,16 +17,8 @@ type ScheduleConfirmationDialogProps = Readonly<{
   onConfirm: () => void;
 }>;
 
-const formatInstant = (value: string): string => new Intl.DateTimeFormat("ko-KR", {
-  month: "numeric",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-}).format(new Date(value));
-
-const targetSummary = (target: ScheduleDiff["after"]): string => (
-  `취침 ${formatInstant(target.targetBedAt)} / 기상 ${formatInstant(target.targetWakeAt)}`
+const targetSummary = (target: ScheduleDiff["after"], timezone: string): string => (
+  `취침 ${formatPlanDateTime(target.targetBedAt, timezone)} / 기상 ${formatPlanDateTime(target.targetWakeAt, timezone)}`
 );
 
 const FOCUSABLE_SELECTOR = "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
@@ -32,6 +26,7 @@ const FOCUSABLE_SELECTOR = "button:not([disabled]), [href], input:not([disabled]
 export const ScheduleConfirmationDialog = ({
   title,
   changes,
+  timezone,
   confirmLabel,
   pending = false,
   error = null,
@@ -51,6 +46,11 @@ export const ScheduleConfirmationDialog = ({
       (first ?? dialogRef.current)?.focus();
     };
     const trapFocus = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !pending) {
+        event.preventDefault();
+        onCancel();
+        return;
+      }
       if (event.key !== "Tab") return;
       const dialog = dialogRef.current;
       if (!dialog) return;
@@ -79,7 +79,7 @@ export const ScheduleConfirmationDialog = ({
       document.removeEventListener("keydown", trapFocus);
       if (initiatingElement?.isConnected) initiatingElement.focus();
     };
-  }, []);
+  }, [onCancel, pending]);
 
   return (
   <div className={styles.dialogBackdrop} role="presentation">
@@ -95,15 +95,15 @@ export const ScheduleConfirmationDialog = ({
         {changes.map((change) => (
           <li key={change.localDate}>
             <strong>{change.localDate}</strong>
-            <p><span>기존</span>{change.before ? targetSummary(change.before) : "기존 계획 없음"}</p>
-            <p><span>변경</span>{targetSummary(change.after)}</p>
+            <p><span>기존</span>{change.before ? targetSummary(change.before, timezone) : "기존 계획 없음"}</p>
+            <p><span>변경</span>{targetSummary(change.after, timezone)}</p>
             <details>
               <summary>준비 마감 시각 보기</summary>
               <dl>
-                <div><dt>카페인</dt><dd>{formatInstant(change.after.caffeineCutoffAt)}</dd></div>
-                <div><dt>운동</dt><dd>{formatInstant(change.after.exerciseCutoffAt)}</dd></div>
-                <div><dt>식사</dt><dd>{formatInstant(change.after.mealCutoffAt)}</dd></div>
-                <div><dt>디지털 디톡스</dt><dd>{formatInstant(change.after.windDownAt)}</dd></div>
+                <div><dt>카페인</dt><dd>{formatPlanDateTime(change.after.caffeineCutoffAt, timezone)}</dd></div>
+                <div><dt>운동</dt><dd>{formatPlanDateTime(change.after.exerciseCutoffAt, timezone)}</dd></div>
+                <div><dt>식사</dt><dd>{formatPlanDateTime(change.after.mealCutoffAt, timezone)}</dd></div>
+                <div><dt>디지털 디톡스</dt><dd>{formatPlanDateTime(change.after.windDownAt, timezone)}</dd></div>
               </dl>
             </details>
           </li>

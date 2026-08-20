@@ -55,6 +55,7 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  RateLimit: 'RateLimit',
   UserProfile: 'UserProfile',
   SleepGoal: 'SleepGoal',
   UserHabit: 'UserHabit',
@@ -89,6 +90,9 @@ export type ModelName = (typeof ModelName)[keyof typeof ModelName]
  */
 
 export const TransactionIsolationLevel = runtime.makeStrictEnum({
+  ReadUncommitted: 'ReadUncommitted',
+  ReadCommitted: 'ReadCommitted',
+  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 } as const)
 
@@ -124,6 +128,7 @@ export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeo
 
 export const AccountScalarFieldEnum = {
   id: 'id',
+  issuer: 'issuer',
   accountId: 'accountId',
   providerId: 'providerId',
   userId: 'userId',
@@ -153,11 +158,25 @@ export const VerificationScalarFieldEnum = {
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
 
 
+export const RateLimitScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  count: 'count',
+  lastRequest: 'lastRequest'
+} as const
+
+export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
+
+
 export const UserProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   nickname: 'nickname',
   timezone: 'timezone',
+  age: 'age',
+  gender: 'gender',
+  heightCm: 'heightCm',
+  weightKg: 'weightKg',
   onboardingCompletedAt: 'onboardingCompletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -185,6 +204,7 @@ export const UserHabitScalarFieldEnum = {
   caffeine: 'caffeine',
   exercise: 'exercise',
   meal: 'meal',
+  alcohol: 'alcohol',
   phoneUsage: 'phoneUsage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -389,6 +409,7 @@ export type AnalysisSnapshotScalarFieldEnum = (typeof AnalysisSnapshotScalarFiel
 
 export const ImpactFactorScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   analysisSnapshotId: 'analysisSnapshotId',
   factor: 'factor',
   exposedCount: 'exposedCount',
@@ -558,6 +579,14 @@ export const JsonNullValueInput = {
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
@@ -573,12 +602,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 

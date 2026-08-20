@@ -2,7 +2,14 @@ import { z } from "zod";
 
 import { versionedPayloadSchema } from "@/shared/validation/versioned-json";
 import type { ConfidenceLevel, Evidence } from "@/shared/domain/contracts";
-import type { AnalysisResult, DataBasis, ReadinessComponent } from "./types";
+import { READINESS_FIELD_ORDER } from "./types";
+import type {
+  AnalysisEnvelope,
+  AnalysisResult,
+  BaselineEnvelope,
+  BaselineResult,
+  DataBasis,
+} from "./types";
 
 const confidenceLevelSchema = z.enum([
   "insufficient",
@@ -40,7 +47,10 @@ export const evidenceSchema = z.object({
   count: z.number().int().min(0).nullable(),
 }).strict() satisfies z.ZodType<Omit<Evidence, "count"> & { count: Evidence["count"] }>;
 
-const orderedUniqueStrings = (schema: z.ZodType<string>) => z
+const orderedUniqueStrings = <T extends string>(
+  schema: z.ZodType<T>,
+  order?: readonly T[],
+) => z
   .array(schema)
   .superRefine((items, context) => {
     const uniqueCount = new Set(items).size;
@@ -52,10 +62,17 @@ const orderedUniqueStrings = (schema: z.ZodType<string>) => z
     }
 
     for (let index = 1; index < items.length; index += 1) {
-      if (items[index - 1] > items[index]) {
+      const previous = items[index - 1] ?? "";
+      const current = items[index] ?? "";
+      const outOfOrder = order
+        ? order.indexOf(previous) > order.indexOf(current)
+        : previous > current;
+      if (outOfOrder) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "missingFields must be sorted",
+          message: order
+            ? "missingFields must follow readiness field order"
+            : "missingFields must be sorted",
         });
       }
     }
@@ -106,21 +123,26 @@ export const analysisResultSchema = z.object({
   }).strict(),
   dataBasis: dataBasisSchema,
   evidence: z.array(evidenceSchema),
-  missingFields: orderedUniqueStrings(z.enum([
-    "sleepDuration",
-    "regularity",
-    "caffeine",
-    "phone",
-    "mealExercise",
-  ] as const)),
+  missingFields: orderedUniqueStrings(z.enum(READINESS_FIELD_ORDER), READINESS_FIELD_ORDER),
 }).strict() satisfies z.ZodType<AnalysisResult>;
 
+export const baselineResultSchema = z.object({
+  baselineSleepMinutes: z.number().finite().min(0).nullable(),
+  baselineBedMinuteOfDay: z.number().int().min(0).max(1439).nullable(),
+  baselineWakeMinuteOfDay: z.number().int().min(0).max(1439).nullable(),
+  sampleCount: z.number().int().min(0),
+  excludedCount: z.number().int().min(0),
+  confidence: confidenceLevelSchema,
+}).strict() satisfies z.ZodType<BaselineResult>;
+
+export const baselineResultSchemaEnvelope = versionedPayloadSchema({
+  baseline: baselineResultSchema,
+}) as unknown as z.ZodType<BaselineEnvelope>;
+
 export const analysisResultSchemaEnvelope = versionedPayloadSchema({
+  baselineSnapshotId: z.string().min(1),
   analysisResult: analysisResultSchema,
-}) as unknown as z.ZodType<Readonly<{
-  schemaVersion: 1;
-  analysisResult: AnalysisResult;
-}>>;
+}) as unknown as z.ZodType<AnalysisEnvelope>;
 
 export const isConfidenceLevel = (value: string): value is "insufficient" | "low" | "medium" | "high" => (
   value === "insufficient" || value === "low" || value === "medium" || value === "high"

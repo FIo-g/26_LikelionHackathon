@@ -23,4 +23,49 @@ describe("validateNarrationAgainstFacts", () => {
       facts,
     )).toEqual({ valid: true });
   });
+
+  it("rejects a metric label paired with another metric's value", () => {
+    const multipleMetrics: NarrationFacts = {
+      ...facts,
+      metrics: [
+        { id: "readiness", value: 72, band: "보통" },
+        { id: "caffeine-signal", value: 55, band: "보통" },
+      ],
+    };
+
+    expect(validateNarrationAgainstFacts(
+      { headline: "카페인 점수는 72점입니다.", body: "", bullets: [] },
+      multipleMetrics,
+    )).toEqual({ valid: false, code: "UNSUPPORTED_CLAIM" });
+  });
+
+  it("rejects another metric's value when it appears before the metric label", () => {
+    const multipleMetrics: NarrationFacts = {
+      ...facts,
+      metrics: [
+        { id: "readiness", value: 72, band: "보통" },
+        { id: "caffeine-signal", value: 55, band: "보통" },
+      ],
+    };
+
+    expect(validateNarrationAgainstFacts(
+      { headline: "72점인 카페인 점수", body: "", bullets: [] },
+      multipleMetrics,
+    )).toEqual({ valid: false, code: "UNSUPPORTED_CLAIM" });
+  });
+
+  it("accepts a metric's own value before its label", () => {
+    const multipleMetrics: NarrationFacts = {
+      ...facts,
+      metrics: [
+        { id: "readiness", value: 72, band: "보통" },
+        { id: "caffeine-signal", value: 55, band: "보통" },
+      ],
+    };
+
+    expect(validateNarrationAgainstFacts(
+      { headline: "55점인 카페인 점수", body: "", bullets: [] },
+      multipleMetrics,
+    )).toEqual({ valid: true });
+  });
 });

@@ -24,15 +24,13 @@ export const DataStatusCard = ({ viewModel }: DataStatusCardProps) => {
 
   return (
     <section className={`${styles.regionCard} ${stateClassName[viewModel.state]}`}>
-      <h2 className={styles.regionTitle}>데이터 기준</h2>
+      <h2 className={styles.regionTitle}>오늘의 데이터 상태</h2>
 
       {viewModel.data === null ? (
         <p className={styles.regionMessage}>{viewModel.message ?? "데이터 기준이 부족합니다"}</p>
       ) : (
         <>
-          <p className={styles.regionValue}>
-            {completed}/{total} 항목 기준 충족
-          </p>
+          <p className={styles.dataStatusPill}>{completed}/{total} 항목 기준 충족</p>
           {missing.length > 0 ? (
             <ul className={styles.missingList}>
               {missing.map((label) => (
@@ -43,7 +41,7 @@ export const DataStatusCard = ({ viewModel }: DataStatusCardProps) => {
         </>
       )}
 
-      {viewModel.message ? <p className={styles.regionMessage}>{viewModel.message}</p> : null}
+      {viewModel.message && viewModel.data !== null ? <p className={styles.regionMessage}>{viewModel.message}</p> : null}
       {viewModel.action ? (
         <Link href={viewModel.action.href} className={styles.linkButton}>
           {viewModel.action.label}

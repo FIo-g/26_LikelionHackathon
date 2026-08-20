@@ -12,7 +12,15 @@ const caffeine = (caffeineMg: number) => ({ type: "caffeine" as const, brand: "�
 describe("RecordService rerouting", () => {
   it("recomputes from listOwnedRecords after a batch save and a delete", async () => {
     const records: RecordEntity[] = [];
-    const saved: Array<{ inputSnapshot: { rerouteRecords: readonly { id: string }[] } }> = [];
+    const saved: Array<{
+      inputSnapshot: {
+        rerouteRecords: readonly {
+          id: string;
+          type: string;
+          input: Record<string, string | number | null>;
+        }[];
+      };
+    }> = [];
     let listCalls = 0;
     const recordRepository: RecordRepository = {
       findById: async (_type, id) => records.find((record) => record.id === id) ?? null,
@@ -48,6 +56,17 @@ describe("RecordService rerouting", () => {
     await service.delete({ idempotencyKey: "delete-1", recordId: batch.records[0]!.recordId, recordType: "caffeine" });
 
     expect(listCalls).toBe(2);
-    expect(saved.at(-1)?.inputSnapshot.rerouteRecords).toEqual([{ id: batch.records[1]!.recordId }]);
+    expect(saved.at(-1)?.inputSnapshot.rerouteRecords).toEqual([{
+      id: batch.records[1]!.recordId,
+      type: "caffeine",
+      input: {
+        type: "caffeine",
+        brand: "테스트",
+        product: "커피",
+        caffeineMg: 180,
+        consumedAt: "2026-08-22T12:30:00.000Z",
+        timezone: "Asia/Seoul",
+      },
+    }]);
   });
 });

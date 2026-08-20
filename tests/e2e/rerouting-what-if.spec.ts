@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, setupE2eUser, test, visibleText } from "./fixtures";
 
 const toDateTimeLocal = (instant: Date): string => {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -14,8 +14,8 @@ const toDateTimeLocal = (instant: Date): string => {
   return `${value("year")}-${value("month")}-${value("day")}T${value("hour")}:${value("minute")}`;
 };
 
-test("creates reroute advice only after saving a cutoff-crossing caffeine record", async ({ page }) => {
-  await page.request.post("/__e2e/setup?seedPlan=1");
+test("creates reroute advice only after saving a cutoff-crossing caffeine record", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo, { seedPlan: true });
   await page.goto("/plan");
   const planStrip = page.getByTestId("plan-strip");
   const snapshotDays = async () => planStrip.getByTestId("plan-day").evaluateAll((items) => items.map((item) => ({
@@ -26,8 +26,13 @@ test("creates reroute advice only after saving a cutoff-crossing caffeine record
     text: item.textContent ?? "",
   })));
   const beforeDays = await snapshotDays();
-  expect(beforeDays.filter((day) => new Date(day.bedAt).getTime() < Date.now())).toHaveLength(1);
-  expect(beforeDays.filter((day) => new Date(day.bedAt).getTime() > Date.now())).toHaveLength(2);
+  const beforeCapturedAt = Date.now();
+  const pastDays = (days: typeof beforeDays) => days.filter((day) => new Date(day.bedAt).getTime() < beforeCapturedAt);
+  const futureDays = (days: typeof beforeDays) => days.filter((day) => new Date(day.bedAt).getTime() > beforeCapturedAt);
+  const beforePastDays = pastDays(beforeDays);
+  const beforeFutureDays = futureDays(beforeDays);
+  expect(beforePastDays).toHaveLength(1);
+  expect(beforeFutureDays).toHaveLength(2);
   const triggerDay = beforeDays.find((day) => (
     new Date(day.cutoffAt).getTime() < Date.now()
       && Date.now() < new Date(day.wakeAt).getTime()
@@ -41,17 +46,27 @@ test("creates reroute advice only after saving a cutoff-crossing caffeine record
 
   await page.goto("/plan");
   await expect(page.getByText("계획 조정 제안")).not.toBeVisible();
-  await page.goto(`/record/caffeine?step=confirm&brand=%ED%85%8C%EC%8A%A4%ED%8A%B8&product=%EC%BB%A4%ED%94%BC&caffeineMg=120&consumedAt=${encodeURIComponent(caffeineAt)}`);
+  await page.goto("/record/caffeine");
+  await page.getByLabel("브랜드", { exact: true }).fill("테스트");
+  await page.getByRole("button", { name: "메뉴 선택하기" }).click();
+  await page.getByLabel("제품명", { exact: true }).fill("커피");
+  await page.getByLabel("카페인(mg)", { exact: true }).fill("120");
+  await page.getByLabel("마신 시각", { exact: true }).fill(caffeineAt);
+  await page.getByRole("button", { name: "수치 확인하기" }).click();
   await page.getByRole("button", { name: "카페인 저장" }).click();
+  await expect(page).toHaveURL(/\/record$/);
   await page.goto("/plan");
-  await expect(page.getByText("계획 조정 제안")).toBeVisible();
+  await expect(visibleText(page, "계획 조정 제안")).toBeVisible();
   await page.getByRole("button", { name: "계획에 반영" }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("button", { name: "취소" }).click();
+  const confirmDialog = page.getByRole("dialog");
+  await expect(confirmDialog).toBeVisible();
+  await confirmDialog.getByRole("button", { name: "취소", exact: true }).click();
   expect(await snapshotDays()).toEqual(beforeDays);
   await page.getByRole("button", { name: "계획에 반영" }).click();
   await page.getByRole("button", { name: "변경 확인 및 반영" }).click();
+  await expect(confirmDialog).toHaveCount(0);
+  await expect.poll(async () => futureDays(await snapshotDays())).not.toEqual(beforeFutureDays);
   const afterDays = await snapshotDays();
-  expect(afterDays.filter((day) => new Date(day.bedAt).getTime() < Date.now())).toEqual(beforeDays.filter((day) => new Date(day.bedAt).getTime() < Date.now()));
-  expect(afterDays.filter((day) => new Date(day.bedAt).getTime() > Date.now())).not.toEqual(beforeDays.filter((day) => new Date(day.bedAt).getTime() > Date.now()));
+  expect(pastDays(afterDays)).toEqual(beforePastDays);
+  expect(futureDays(afterDays)).not.toEqual(beforeFutureDays);
 });

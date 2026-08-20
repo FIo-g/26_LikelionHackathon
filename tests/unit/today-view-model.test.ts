@@ -27,28 +27,28 @@ const createPrisma = (entries: {
     })),
   },
   planDay: {
-    findFirst: async () => entries.planDay ?? null,
+    findFirst: vi.fn(async () => entries.planDay ?? null),
   },
   caffeineEntry: {
     findFirst: vi.fn(async () => (entries.caffeine ? { id: "caffeine-id" } : null)),
   },
   alcoholEntry: {
-    findFirst: async () => (entries.alcohol ? { id: "alcohol-id" } : null),
+    findFirst: vi.fn(async () => (entries.alcohol ? { id: "alcohol-id" } : null)),
   },
   mealEntry: {
-    findFirst: async () => (entries.meal ? { id: "meal-id", dailyLog: { localDate: "2026-08-20" } } : null),
+    findFirst: vi.fn(async () => (entries.meal ? { id: "meal-id", dailyLog: { localDate: "2026-08-20" } } : null)),
   },
   exerciseEntry: {
-    findFirst: async () => (entries.exercise ? { id: "exercise-id", dailyLog: { localDate: "2026-08-20" } } : null),
+    findFirst: vi.fn(async () => (entries.exercise ? { id: "exercise-id", dailyLog: { localDate: "2026-08-20" } } : null)),
   },
   sleepSession: {
-    findFirst: async () => (entries.sleep ? { id: "sleep-id", sleepDate: "2026-08-20" } : null),
+    findFirst: vi.fn(async () => (entries.sleep ? { id: "sleep-id", sleepDate: "2026-08-20" } : null)),
   },
   phoneUsageEntry: {
-    findFirst: async () => (entries.phone ? { id: "phone-id", localDate: "2026-08-20" } : null),
+    findFirst: vi.fn(async () => (entries.phone ? { id: "phone-id", localDate: "2026-08-20" } : null)),
   },
   wellnessEntry: {
-    findFirst: async () => (entries.wellness ? { id: "wellness-id", localDate: "2026-08-20" } : null),
+    findFirst: vi.fn(async () => (entries.wellness ? { id: "wellness-id", localDate: "2026-08-20" } : null)),
   },
 });
 
@@ -92,6 +92,7 @@ const sleepFoundation = {
 
 const fallbackSnapshot = {
   id: "snapshot-id",
+  baselineSnapshotId: "baseline-id",
   localDate: "2026-08-20",
   timezone: "Asia/Seoul",
   status: "current" as const,
@@ -115,6 +116,9 @@ describe("getTodayViewModel", () => {
       loadWindow: async () => {
         throw new Error("not expected");
       },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
       supersedeCurrent: async () => {},
       saveCurrent: async () => ({ snapshotId: "noop" }),
     });
@@ -133,9 +137,76 @@ describe("getTodayViewModel", () => {
     });
 
     expect(model.readiness.state).toBe("stale");
+    expect(model.readiness.data?.score).toBe(76);
     expect(model.readiness.message).toBe("마지막 정상 분석을 표시합니다");
     expect(model.recordSummary.state).toBe("ready");
     expect(model.recordSummary.message).toBe("오늘 기록 4개 완료");
+  });
+
+  it("reads a parsed result from a ready snapshot entity", async () => {
+    createAnalysisRepositoryMock.mockReturnValue({
+      findCurrent: async () => ({ ok: true, value: fallbackSnapshot }),
+      findLastSuccessful: async () => null,
+      loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
+      supersedeCurrent: async () => {},
+      saveCurrent: async () => ({ snapshotId: "noop" }),
+    });
+
+    const model = await getTodayViewModel(scope, {
+      clock,
+      getPrisma: () => createPrisma({
+        caffeine: false,
+        alcohol: false,
+        meal: false,
+        exercise: false,
+        sleep: false,
+        phone: false,
+        wellness: false,
+      }),
+    });
+
+    expect(model.readiness).toMatchObject({
+      state: "ready",
+      data: { score: 76, confidence: "high" },
+    });
+  });
+
+  it("uses error for a corrupt current snapshot without a valid fallback", async () => {
+    createAnalysisRepositoryMock.mockReturnValue({
+      findCurrent: async () => ({
+        ok: false,
+        failure: { code: "CORRUPT_ANALYSIS_SNAPSHOT", snapshotId: "snapshot-corrupt" },
+      }),
+      findLastSuccessful: async () => null,
+      loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
+      supersedeCurrent: async () => {},
+      saveCurrent: async () => ({ snapshotId: "noop" }),
+    });
+
+    const model = await getTodayViewModel(scope, {
+      clock,
+      getPrisma: () => createPrisma({
+        caffeine: false,
+        alcohol: false,
+        meal: false,
+        exercise: false,
+        sleep: false,
+        phone: false,
+        wellness: false,
+      }),
+    });
+
+    expect(model.readiness).toMatchObject({
+      state: "error",
+      data: null,
+      message: "분석 데이터가 손상되어 다시 계산해야 합니다",
+    });
   });
 
   it("exposes readiness score as missing only when score is missing", async () => {
@@ -143,6 +214,9 @@ describe("getTodayViewModel", () => {
       loadWindow: async () => {
         throw new Error("not expected");
       },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
       supersedeCurrent: async () => {},
       saveCurrent: async () => ({ snapshotId: "noop" }),
       findCurrent: async () => ({
@@ -153,7 +227,7 @@ describe("getTodayViewModel", () => {
             ...sleepFoundation,
             readiness: null,
             confidence: "low",
-            missingFields: ["sleep"],
+            missingFields: ["sleepDuration"],
             dataBasis: {
               ...sleepFoundation.dataBasis,
               missingFields: ["sleep", "phone", "meal", "exercise", "caffeine", "alcohol", "wellness"],
@@ -177,10 +251,9 @@ describe("getTodayViewModel", () => {
       }),
     });
 
-    expect(model.readiness.state).toBe("ready");
-    expect(model.readiness.data?.score).toBeNull();
-    expect(model.readiness.data?.label).toContain("점수 산출 불가");
-    expect(model.readiness.data?.label).toContain("낮음");
+    expect(model.readiness.state).toBe("insufficient");
+    expect(model.readiness.data).toBeNull();
+    expect(model.readiness.message).toBe("오늘 분석에 필요한 기록이 부족해요");
   });
 
   it("uses the active plan day cutoffs for today instead of the goal fallback", async () => {
@@ -188,26 +261,98 @@ describe("getTodayViewModel", () => {
       findCurrent: async () => ({ ok: true, value: fallbackSnapshot }),
       findLastSuccessful: async () => null,
       loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
+      supersedeCurrent: async () => {},
+      saveCurrent: async () => ({ snapshotId: "noop" }),
+    });
+
+    const db = createPrisma({
+      caffeine: false, alcohol: false, meal: false, exercise: false, sleep: false, phone: false, wellness: false,
+      planDay: {
+        id: "plan-day-1",
+        targetBedAt: new Date("2026-08-20T12:00:00.000Z"),
+        caffeineCutoffAt: new Date("2026-08-20T06:00:00.000Z"),
+        exerciseCutoffAt: new Date("2026-08-20T09:00:00.000Z"),
+        mealCutoffAt: new Date("2026-08-20T08:00:00.000Z"),
+        windDownAt: new Date("2026-08-20T11:00:00.000Z"),
+      },
+    });
+    const model = await getTodayViewModel(scope, {
+      clock,
+      getPrisma: () => db,
+    });
+
+    expect(model.preparationTimeline.message).toBe("오늘 목표 취침 21:00 기준");
+    expect(model.preparationTimeline.data?.find((step) => step.key === "caffeine")?.scheduledAt).toBe("15:00");
+    expect(model.preparationTimeline.data?.at(-1)).toMatchObject({
+      key: "target-bed",
+      label: "취침 준비",
+      scheduledAt: "21:00",
+    });
+    expect(db.planDay.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        userId: scope.userId,
+        localDate: "2026-08-20",
+        timezone: scope.timezone,
+        status: "active",
+      },
+    }));
+    expect(db.mealEntry.findFirst).toHaveBeenCalledWith({
+      where: {
+        userId: scope.userId,
+        timezone: scope.timezone,
+        dailyLog: {
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate: "2026-08-20",
+          },
+        },
+      },
+      select: { id: true },
+    });
+    expect(db.mealEntry.findFirst).toHaveBeenCalledWith(expect.not.objectContaining({
+      include: expect.anything(),
+    }));
+  });
+
+  it("keeps a post-midnight goal as the final preparation step", async () => {
+    createAnalysisRepositoryMock.mockReturnValue({
+      findCurrent: async () => ({ ok: true, value: fallbackSnapshot }),
+      findLastSuccessful: async () => null,
+      loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
       supersedeCurrent: async () => {},
       saveCurrent: async () => ({ snapshotId: "noop" }),
     });
 
     const model = await getTodayViewModel(scope, {
       clock,
-      getPrisma: () => createPrisma({
-        caffeine: false, alcohol: false, meal: false, exercise: false, sleep: false, phone: false, wellness: false,
-        planDay: {
-          id: "plan-day-1",
-          targetBedAt: new Date("2026-08-20T12:00:00.000Z"),
-          caffeineCutoffAt: new Date("2026-08-20T06:00:00.000Z"),
-          exerciseCutoffAt: new Date("2026-08-20T09:00:00.000Z"),
-          mealCutoffAt: new Date("2026-08-20T08:00:00.000Z"),
-          windDownAt: new Date("2026-08-20T11:00:00.000Z"),
+      getPrisma: () => ({
+        ...createPrisma({
+          caffeine: false, alcohol: false, meal: false, exercise: false, sleep: false, phone: false, wellness: false,
+        }),
+        sleepGoal: {
+          findUnique: vi.fn(async () => ({
+            targetBedTime: "00:30",
+            targetWakeTime: "08:30",
+            targetDurationMinutes: 480,
+          })),
         },
       }),
     });
 
-    expect(model.preparationTimeline.message).toBe("오늘 목표 취침 21:00 기준");
-    expect(model.preparationTimeline.data?.find((step) => step.key === "caffeine")?.scheduledAt).toBe("15:00");
+    expect(model.preparationTimeline.data?.map((step) => step.key)).toEqual([
+      "caffeine",
+      "meal",
+      "exercise",
+      "windDown",
+      "target-bed",
+    ]);
+    expect(model.preparationTimeline.data?.at(-1)?.scheduledAt).toBe("00:30");
   });
 });

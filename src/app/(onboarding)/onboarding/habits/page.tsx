@@ -1,30 +1,26 @@
-import Link from "next/link";
+import Image from "next/image";
 import { OnboardingProgress } from "@/modules/onboarding/ui/onboarding-progress";
 import { createOnboardingRepository } from "@/modules/onboarding/infrastructure/prisma-onboarding-repository";
 import { requireSessionUserId } from "@/shared/auth/require-session-user";
 import styles from "@/modules/onboarding/ui/onboarding.module.css";
 import { submitHabitsAction } from "./actions";
+import { redirectIfOnboardingPrerequisiteIsMissing } from "../flow";
 
 const HABIT_OPTIONS = {
   caffeine: [
-    { label: "없음", value: "none" },
-    { label: "가끔", value: "sometimes" },
-    { label: "매일", value: "daily" },
-  ],
-  exercise: [
-    { label: "거의 없음", value: "rare" },
-    { label: "주 1~2회", value: "weekly" },
-    { label: "자주 함", value: "frequent" },
+    { label: "거의 안 마심", value: "none" },
+    { label: "1잔 내외", value: "sometimes" },
+    { label: "2잔 이상", value: "daily" },
   ],
   meal: [
-    { label: "빨리 끝", value: "early" },
-    { label: "보통", value: "mixed" },
-    { label: "늦게", value: "late" },
+    { label: "1회 이하", value: "early" },
+    { label: "2회", value: "mixed" },
+    { label: "3회 이상", value: "late" },
   ],
-  phoneUsage: [
-    { label: "낮음", value: "low" },
-    { label: "보통", value: "medium" },
-    { label: "높음", value: "high" },
+  exercise: [
+    { label: "0~1회", value: "rare" },
+    { label: "2~3회", value: "weekly" },
+    { label: "4회 이상", value: "frequent" },
   ],
 } as const;
 
@@ -32,51 +28,61 @@ export default async function HabitsPage() {
   const userId = await requireSessionUserId();
   const repository = createOnboardingRepository(userId);
   const progress = await repository.getProgress();
+  redirectIfOnboardingPrerequisiteIsMissing(progress, "habits");
 
   const habits = progress.habits;
+  // The Figma layer has one middle frequency choice. Keep a pre-existing
+  // monthly value on resume instead of silently coercing it to weekly.
+  const alcoholOptions = [
+    { label: "0회", value: "none" },
+    { label: "1~2회", value: habits?.alcohol === "monthly" ? "monthly" : "weekly" },
+    { label: "3회 이상", value: "frequent" },
+  ] as const;
 
   return (
     <main className={styles.onboardingLayout}>
       <section className={styles.onboardingCard}>
-        <h1>현재 습관</h1>
-        <OnboardingProgress currentStep={3} />
-        <form action={submitHabitsAction} className={styles.onboardingForm}>
-          <label className={styles.field}>
-            커피/카페인
-            <select name="caffeine" defaultValue={habits?.caffeine ?? "none"} required>
-              {HABIT_OPTIONS.caffeine.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-            </select>
-          </label>
+        <OnboardingProgress currentStep={2} previousHref="/onboarding/profile" />
+        <div className={styles.onboardingBody}>
+          <h1>평소 습관을 골라주세요</h1>
+          <p className={styles.lead}>여기부터는 객관식으로 간단히 선택해요.</p>
+          <form action={submitHabitsAction} className={styles.onboardingForm}>
+            <HabitChoice name="caffeine" legend="하루 평균 카페인 섭취량" options={HABIT_OPTIONS.caffeine} selected={habits?.caffeine} />
+            <HabitChoice name="meal" legend="하루 평균 식사 횟수" options={HABIT_OPTIONS.meal} selected={habits?.meal} />
+            <HabitChoice name="alcohol" legend="일주일 평균 음주 횟수" options={alcoholOptions} selected={habits?.alcohol ?? undefined} />
+            <HabitChoice name="exercise" legend="일주일 평균 운동 횟수" options={HABIT_OPTIONS.exercise} selected={habits?.exercise} />
+            <input name="phoneUsage" type="hidden" value={habits?.phoneUsage ?? "low"} />
 
-          <label className={styles.field}>
-            운동 빈도
-            <select name="exercise" defaultValue={habits?.exercise ?? "rare"} required>
-              {HABIT_OPTIONS.exercise.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-            </select>
-          </label>
+            <aside className={`${styles.rabbitNote} ${styles.habitReassurance}`}>
+              <p>대략적인 평균으로 시작해도 괜찮아요.<br />기록이 쌓이면 실제 패턴으로 보정됩니다.</p>
+              <span><Image src="/assets/lunar-rabbit/care-rabbit.png" alt="" width={78} height={78} /></span>
+            </aside>
 
-          <label className={styles.field}>
-            식사 패턴
-            <select name="meal" defaultValue={habits?.meal ?? "mixed"} required>
-              {HABIT_OPTIONS.meal.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-            </select>
-          </label>
-
-          <label className={styles.field}>
-            휴대폰 사용
-            <select name="phoneUsage" defaultValue={habits?.phoneUsage ?? "low"} required>
-              {HABIT_OPTIONS.phoneUsage.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-            </select>
-          </label>
-
-          <button type="submit" className={styles.cta}>다음</button>
-        </form>
-
-        <p className={styles.nav}>
-          <Link href="/onboarding/sleep-goal">이전</Link>
-        </p>
+            <button type="submit" className={styles.cta}>다음</button>
+          </form>
+        </div>
       </section>
     </main>
   );
 }
 
+type HabitChoiceProps = Readonly<{
+  name: "caffeine" | "meal" | "alcohol" | "exercise";
+  legend: string;
+  options: ReadonlyArray<Readonly<{ label: string; value: string }>>;
+  selected?: string | null;
+}>;
+
+const HabitChoice = ({ name, legend, options, selected }: HabitChoiceProps) => (
+  <fieldset className={styles.choiceFieldset}>
+    <legend>{legend}</legend>
+    <div className={styles.choiceRow}>
+      {options.map((item) => (
+        <label className={styles.choiceChip} key={item.value}>
+          <input type="radio" name={name} value={item.value} defaultChecked={item.value === selected} required />
+          <span>{item.label}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+);

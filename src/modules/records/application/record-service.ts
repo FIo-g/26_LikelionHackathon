@@ -10,20 +10,20 @@ import type { Clock, UserScope } from "@/shared/domain/contracts";
 import type { TransactionClient } from "@/shared/db/transaction";
 import { getPrismaClient } from "@/shared/db/prisma";
 import {
-  createMutationReceiptRepository,
-  createRecordRepository,
+  MutationReceiptRaceError,
   type CreateMutationReceiptRepository,
   type CreateRecordRepository,
+  type RecordRepository,
 } from "./ports";
+import { createMutationReceiptRepository } from "../infrastructure/prisma-mutation-receipt-repository";
+import { createRecordRepository } from "../infrastructure/prisma-record-repository";
 import {
   buildRecordTypeSchema,
   parseCreateRecordInput,
   parseUpdateRecordInput,
-  type CreateRecordInput,
-  type UpdateRecordInput,
 } from "../domain/schemas";
 import { affectedAnalysisDates } from "./affected-analysis-dates";
-import type { RecordType } from "../domain/types";
+import type { CreateRecordInput, RecordType, UpdateRecordInput } from "../domain/types";
 import { serializeRecordPayload } from "../infrastructure/prisma-record-repository";
 import { generateNarration, type NarrationDependencies, type NarrationRequest } from "@/modules/narration/application/generate-narration";
 import type { NarrationRepository } from "@/modules/narration/application/ports";
@@ -129,6 +129,21 @@ const collectAffectedDates = (
 
 const sortAffectedDates = (dates: Iterable<string>): string[] => [...dates].sort();
 
+const normalizeReceiptValue = (value: unknown): unknown => {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    return value.map(normalizeReceiptValue);
+  }
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, normalizeReceiptValue(item)]),
+    );
+  }
+  return value;
+};
+
 const normalizeSaveBatchItems = (clock: Clock, command: SaveRecordBatchCommand): SaveRecordItem[] => {
   if (command.items.length < MIN_BATCH_SIZE || command.items.length > MAX_BATCH_SIZE) {
     throw new Error("INVALID_BATCH_SIZE");
@@ -165,11 +180,11 @@ const normalizeDeleteBatchItems = (command: DeleteRecordBatchCommand): DeleteRec
 const executeSaveMutationWithoutReceipt = async (
   scope: UserScope,
   items: readonly SaveRecordItem[],
-  repositories: { recordRepository: CreateRecordRepository },
+  repositories: { recordRepository: RecordRepository },
   clock: Clock,
 ): Promise<BatchRecordMutationResult> => {
   const impacted = new Set<string>();
-  const records = [] as BatchRecordMutationResult["records"];
+  const records: Array<{ clientKey: string; recordId: string; recordType: RecordType; localDate: string }> = [];
   const changedAt = clock.now();
 
   for (const item of items) {
@@ -202,6 +217,7 @@ const executeSaveMutationWithoutReceipt = async (
 
     const before = serializeRecordPayload(existing);
     const updated = await repositories.recordRepository.update(item.input.type, item.recordId, item.input);
+    collectAffectedDates(impacted, existing.localDate, scope, clock);
     collectAffectedDates(impacted, updated.localDate, scope, clock);
     await repositories.recordRepository.appendRevision({
       entityType: updated.type,
@@ -229,11 +245,11 @@ const executeSaveMutationWithoutReceipt = async (
 const executeDeleteMutationWithoutReceipt = async (
   scope: UserScope,
   items: readonly { recordId: string; recordType: RecordType }[],
-  repositories: { recordRepository: CreateRecordRepository },
+  repositories: { recordRepository: RecordRepository },
   clock: Clock,
 ): Promise<BatchRecordMutationResult> => {
   const impacted = new Set<string>();
-  const records = [] as BatchRecordMutationResult["records"];
+  const records: Array<{ clientKey: string; recordId: string; recordType: RecordType; localDate: string }> = [];
   const snapshots = [] as Array<{ type: RecordType; id: string; before: ReturnType<typeof serializeRecordPayload>; localDate: string }>;
 
   for (const item of items) {
@@ -298,61 +314,81 @@ export const createRecordService = (
   const mutationReceiptRepositoryFactory = dependencies?.mutationReceiptRepositoryFactory ?? createMutationReceiptRepository;
   const narrationRepositoryFactory = dependencies?.narrationRepositoryFactory ?? createPrismaNarrationRepository;
 
-  const runWithReceipt = async <T>(
+  const runWithReceipt = async (
     operation: string,
-    payload: { idempotencyKey: string },
-    rerouteInputs: readonly { clientKey: string; input: CreateRecordInput | null }[],
+    idempotencyKey: string,
+    normalizedCommand: unknown,
     runner: (repositories: {
-      recordRepository: CreateRecordRepository;
+      recordRepository: RecordRepository;
     }, fixedClock: Clock) => Promise<BatchRecordMutationResult>,
   ): Promise<BatchRecordMutationResult> => {
     const now = clock.now();
     const fixedClock: Clock = { now: () => now };
 
-    const requestHash = hashCanonicalJson({ operation, ...payload });
+    const requestHash = hashCanonicalJson({
+      operation,
+      idempotencyKey,
+      command: normalizeReceiptValue(normalizedCommand),
+    });
+    const receiptCommand = { operation, idempotencyKey, requestHash };
 
     const prisma = getPrisma() as TransactionRunner;
 
-    const committed = await prisma.$transaction(async (tx) => {
-      const recordRepository = recordRepositoryFactory(tx, scope);
-      const analysisRepository = analysisRepositoryFactory
-        ? analysisRepositoryFactory(tx, scope, { now: fixedClock.now })
-        : null;
-      const mutationReceiptRepository = mutationReceiptRepositoryFactory(tx, scope, fixedClock);
-      const narrationRepository: NarrationRepository | null = hasNarrationModel(tx)
-        ? narrationRepositoryFactory(tx, scope)
-        : null;
-      const pendingNarration: NarrationRequest[] = [];
+    let committed: { result: BatchRecordMutationResult; pendingNarration: NarrationRequest[] };
+    try {
+      committed = await prisma.$transaction(async (tx) => {
+        const recordRepository = recordRepositoryFactory(tx, scope);
+        const analysisRepository = analysisRepositoryFactory
+          ? analysisRepositoryFactory(tx, scope, { now: fixedClock.now })
+          : null;
+        const mutationReceiptRepository = mutationReceiptRepositoryFactory(tx, scope, fixedClock);
+        const narrationRepository: NarrationRepository | null = hasNarrationModel(tx)
+          ? narrationRepositoryFactory(tx, scope)
+          : null;
+        const pendingNarration: NarrationRequest[] = [];
 
-      const result = await mutationReceiptRepository.execute(
-        {
-          operation,
-          idempotencyKey: payload.idempotencyKey,
-          requestHash,
-        },
-        async () => {
-          const result = await runner({ recordRepository }, fixedClock);
+        const result = await mutationReceiptRepository.execute(receiptCommand, async () => {
+          const mutationResult = await runner({ recordRepository }, fixedClock);
 
           if (analysisRepository) {
-            const recalculated = await recalculateAnalysis(analysisRepository, result.affectedLocalDates, fixedClock, narrationRepository);
+            const recalculated = await recalculateAnalysis(analysisRepository, mutationResult.affectedLocalDates, fixedClock, narrationRepository);
             pendingNarration.push(...recalculated.flatMap((snapshot) => snapshot.pendingNarration ? [snapshot.pendingNarration] : []));
           }
 
           if ("sleepPlan" in tx) {
             const plannerRepository = plannerRepositoryFactory(tx, scope);
             const rerouteMutations: ReroutingMutation[] = (await recordRepository.listOwnedRecords()).map((record) => {
-              const { id, userId: _userId, localDate: _localDate, ...input } = record;
-              return { recordId: id, input };
+              const input = Object.fromEntries(
+                Object.entries(record).filter(([key]) => key !== "id" && key !== "userId" && key !== "localDate"),
+              ) as CreateRecordInput;
+              return { recordId: record.id, input };
             });
             const reroute = await evaluateRerouting(scope, plannerRepository, rerouteMutations, { clock: fixedClock, narrationRepository });
             if (reroute?.pendingNarration) pendingNarration.push(reroute.pendingNarration);
           }
 
-          return result;
-        },
+          return mutationResult;
+        });
+        return { result, pendingNarration };
+      });
+    } catch (error) {
+      if (!(error instanceof MutationReceiptRaceError) && (error as { code?: string })?.code !== "MUTATION_RECEIPT_RACE") {
+        throw error;
+      }
+
+      const outerReceipts = mutationReceiptRepositoryFactory(
+        getPrisma() as TransactionClient,
+        scope,
+        fixedClock,
       );
-      return { result, pendingNarration };
-    });
+      if (!outerReceipts.resolve) {
+        throw error;
+      }
+      committed = {
+        result: await outerReceipts.resolve<BatchRecordMutationResult>(receiptCommand),
+        pendingNarration: [],
+      };
+    }
     const narrationDependencies = dependencies?.narrationDependencies
       ?? (hasNarrationModel(getPrisma() as TransactionClient)
         ? { provider: createOpenAiNarrationProvider(), repository: narrationRepositoryFactory(getPrisma() as TransactionClient, scope) }
@@ -366,7 +402,7 @@ export const createRecordService = (
   const saveBatch = async (command: SaveRecordBatchCommand): Promise<BatchRecordMutationResult> => {
     const normalizedItems = normalizeSaveBatchItems(clock, command);
 
-    return runWithReceipt("record.saveBatch", { idempotencyKey: command.idempotencyKey }, normalizedItems, async ({ recordRepository }, fixedClock) => (
+    return runWithReceipt("record.saveBatch", command.idempotencyKey, { items: normalizedItems }, async ({ recordRepository }, fixedClock) => (
       executeSaveMutationWithoutReceipt(scope, normalizedItems, { recordRepository }, fixedClock)
     ));
   };
@@ -374,7 +410,7 @@ export const createRecordService = (
   const deleteBatch = async (command: DeleteRecordBatchCommand): Promise<BatchRecordMutationResult> => {
     const normalizedItems = normalizeDeleteBatchItems(command);
 
-    return runWithReceipt("record.deleteBatch", { idempotencyKey: command.idempotencyKey }, normalizedItems.map((item) => ({ clientKey: `${item.recordType}:${item.recordId}`, input: null })), async ({ recordRepository }, fixedClock) => (
+    return runWithReceipt("record.deleteBatch", command.idempotencyKey, { items: normalizedItems }, async ({ recordRepository }, fixedClock) => (
       executeDeleteMutationWithoutReceipt(scope, normalizedItems, { recordRepository }, fixedClock)
     ));
   };
@@ -390,7 +426,7 @@ export const createRecordService = (
       }],
     };
 
-    const result = await runWithReceipt("record.create", request, request.items, async ({ recordRepository }, fixedClock) => (
+    const result = await runWithReceipt("record.create", command.idempotencyKey, { input: parsedInput }, async ({ recordRepository }, fixedClock) => (
       executeSaveMutationWithoutReceipt(
         scope,
         request.items,
@@ -423,7 +459,7 @@ export const createRecordService = (
       }],
     };
 
-    const result = await runWithReceipt("record.update", request, request.items, async ({ recordRepository }, fixedClock) => (
+    const result = await runWithReceipt("record.update", command.idempotencyKey, { recordId: command.recordId, input: parsedInput }, async ({ recordRepository }, fixedClock) => (
       executeSaveMutationWithoutReceipt(
         scope,
         request.items,
@@ -455,7 +491,7 @@ export const createRecordService = (
       }],
     };
 
-    const result = await runWithReceipt("record.delete", request, request.items.map((item) => ({ clientKey: `${item.recordType}:${item.recordId}`, input: null })), async ({ recordRepository }, fixedClock) => (
+    const result = await runWithReceipt("record.delete", command.idempotencyKey, { recordId: command.recordId, recordType: parsedType }, async ({ recordRepository }, fixedClock) => (
       executeDeleteMutationWithoutReceipt(
         scope,
         request.items,

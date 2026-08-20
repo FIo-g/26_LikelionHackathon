@@ -601,6 +601,7 @@ export type PlanRevisionCreateOrConnectWithoutUserInput = {
 
 export type PlanRevisionCreateManyUserInputEnvelope = {
   data: Prisma.PlanRevisionCreateManyUserInput | Prisma.PlanRevisionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type PlanRevisionUpsertWithWhereUniqueWithoutUserInput = {
@@ -734,6 +735,7 @@ export type PlanRevisionCreateOrConnectWithoutPlanInput = {
 
 export type PlanRevisionCreateManyPlanInputEnvelope = {
   data: Prisma.PlanRevisionCreateManyPlanInput | Prisma.PlanRevisionCreateManyPlanInput[]
+  skipDuplicates?: boolean
 }
 
 export type PlanRevisionUpsertWithWhereUniqueWithoutPlanInput = {
@@ -1627,6 +1629,7 @@ export type PlanRevisionCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many PlanRevisions.
    */
   data: Prisma.PlanRevisionCreateManyInput | Prisma.PlanRevisionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1645,6 +1648,7 @@ export type PlanRevisionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many PlanRevisions.
    */
   data: Prisma.PlanRevisionCreateManyInput | Prisma.PlanRevisionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

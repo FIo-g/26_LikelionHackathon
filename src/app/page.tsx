@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/shared/auth/auth";
+import { getAuth } from "@/shared/auth/auth";
 import { getPrismaClient } from "@/shared/db/prisma";
 import { resolveEntryPath } from "@/shared/auth/entry-path";
 
 export default async function HomePage() {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
   const userId = session?.user?.id ?? null;

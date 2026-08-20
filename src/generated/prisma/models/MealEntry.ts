@@ -520,6 +520,7 @@ export type MealEntryCreateOrConnectWithoutUserInput = {
 
 export type MealEntryCreateManyUserInputEnvelope = {
   data: Prisma.MealEntryCreateManyUserInput | Prisma.MealEntryCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type MealEntryUpsertWithWhereUniqueWithoutUserInput = {
@@ -581,6 +582,7 @@ export type MealEntryCreateOrConnectWithoutDailyLogInput = {
 
 export type MealEntryCreateManyDailyLogInputEnvelope = {
   data: Prisma.MealEntryCreateManyDailyLogInput | Prisma.MealEntryCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type MealEntryUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1438,6 +1440,7 @@ export type MealEntryCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many MealEntries.
    */
   data: Prisma.MealEntryCreateManyInput | Prisma.MealEntryCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1456,6 +1459,7 @@ export type MealEntryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many MealEntries.
    */
   data: Prisma.MealEntryCreateManyInput | Prisma.MealEntryCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

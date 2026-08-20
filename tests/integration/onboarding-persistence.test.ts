@@ -1,163 +1,59 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
 import { createOnboardingRepository } from "@/modules/onboarding/infrastructure/prisma-onboarding-repository";
+import { createTestPrismaClient } from "../support/prisma-client";
 
-type MockConnection = {
-  userId: string;
-  selected: string;
-  mode: string;
-  availability: string;
-  state: string;
-  lastSyncedAt: null;
-};
+const databaseUrl = process.env.DATABASE_URL ?? "";
+const isDedicatedOnboardingDatabase = databaseUrl.startsWith("file:")
+  && /(?:contract|onboarding|test)/i.test(databaseUrl)
+  && !/(?:prod(?:uction)?|dev(?:elopment)?|shared|staging|main|default)/i.test(databaseUrl);
+const describeSqlite = isDedicatedOnboardingDatabase ? describe : describe.skip;
+const prisma = createTestPrismaClient(databaseUrl || "file:./prisma/unused-onboarding.sqlite");
+const userId = "onboarding-concurrency-user";
 
-type MockSleepGoal = {
-  userId: string;
-  targetBedTime: string;
-  targetWakeTime: string;
-  targetDurationMinutes: number;
-};
+type Repository = ReturnType<typeof createOnboardingRepository>;
+type RepositoryFactory = (ownedUserId: string, client: typeof prisma) => Repository;
+const repositoryFor = createOnboardingRepository as RepositoryFactory;
 
-type MockHabits = {
-  userId: string;
-  caffeine: string;
-  exercise: string;
-  meal: string;
-  phoneUsage: string;
-};
-
-type MockProfile = {
-  userId: string;
-  nickname: string;
-  timezone: string;
-  onboardingCompletedAt: Date | null;
-};
-
-type MockDb = {
-  connection: MockConnection | null;
-  sleepGoal: MockSleepGoal | null;
-  userHabit: MockHabits | null;
-  userProfile: MockProfile | null;
-};
-
-const createPrisma = (store: MockDb) => ({
-  connection: {
-    upsert: async ({ create, update }: { create: MockConnection; update: Partial<MockConnection> }) => {
-      store.connection = {
-        ...store.connection,
-        ...create,
-        ...update,
-        userId: create.userId,
-      } as MockConnection;
-      return store.connection;
+const seedUser = async (): Promise<void> => {
+  await prisma.user.create({
+    data: {
+      id: userId,
+      email: `${userId}@example.invalid`,
     },
-    findUnique: async () => store.connection,
-  },
-  sleepGoal: {
-    upsert: async ({ create, update }: { create: MockSleepGoal; update: Partial<MockSleepGoal> }) => {
-      store.sleepGoal = {
-        ...store.sleepGoal,
-        ...create,
-        ...update,
-        userId: create.userId,
-      } as MockSleepGoal;
-      return store.sleepGoal;
-    },
-    findUnique: async () => store.sleepGoal,
-  },
-  userHabit: {
-    upsert: async ({ create, update }: { create: MockHabits; update: Partial<MockHabits> }) => {
-      store.userHabit = {
-        ...store.userHabit,
-        ...create,
-        ...update,
-        userId: create.userId,
-      } as MockHabits;
-      return store.userHabit;
-    },
-    findUnique: async () => store.userHabit,
-  },
-  userProfile: {
-    upsert: async ({ create, update }: { create: MockProfile; update: Partial<MockProfile> }) => {
-      if (!store.userProfile) {
-        store.userProfile = create;
-      } else {
-        store.userProfile = {
-          ...store.userProfile,
-          ...update,
-        };
-      }
-
-      return store.userProfile;
-    },
-    findUnique: async () => ({
-      nickname: store.userProfile?.nickname ?? null,
-      timezone: store.userProfile?.timezone ?? null,
-      onboardingCompletedAt: store.userProfile?.onboardingCompletedAt ?? null,
-    }),
-  },
-  $transaction: async <T>(callback: (tx: any) => Promise<T>): Promise<T> => {
-    return callback(createPrisma(store));
-  },
-});
-
-const database: MockDb = {
-  connection: null,
-  sleepGoal: null,
-  userHabit: null,
-  userProfile: null,
+  });
 };
 
-vi.mock("@/shared/db/prisma", () => ({
-  getPrismaClient: () => createPrisma(database),
-}));
+const cleanUser = async (): Promise<void> => {
+  await prisma.connection.deleteMany({ where: { userId } });
+  await prisma.userHabit.deleteMany({ where: { userId } });
+  await prisma.sleepGoal.deleteMany({ where: { userId } });
+  await prisma.userProfile.deleteMany({ where: { userId } });
+  await prisma.user.deleteMany({ where: { id: userId } });
+};
 
-describe("prisma onboarding repository persistence", () => {
-  const userId = "user-1";
+describeSqlite("prisma onboarding repository persistence", () => {
+  beforeEach(async () => {
+    await cleanUser();
+    await seedUser();
+  });
 
-  beforeEach(() => {
-    database.connection = null;
-    database.sleepGoal = null;
-    database.userHabit = null;
-    database.userProfile = null;
+  afterAll(async () => {
+    await cleanUser();
+    await prisma.$disconnect();
   });
 
   it("stores each onboarding step and returns resumable progress", async () => {
-    const repository = createOnboardingRepository(userId);
+    const repository = repositoryFor(userId, prisma);
 
-    await repository.saveConnect({ selected: "manual" });
-    await repository.saveSleepGoal({
-      targetBedTime: "23:00",
-      targetWakeTime: "07:00",
-      targetDurationMinutes: 480,
-    });
-    await repository.replaceHabits({
-      caffeine: "none",
-      exercise: "rare",
-      meal: "mixed",
-      phoneUsage: "low",
-    });
-
-    const progress = await repository.getProgress();
-
-    expect(progress.connect).toEqual({ selected: "manual" });
-    expect(progress.sleepGoal?.targetDurationMinutes).toBe(480);
-    expect(progress.habits).toEqual({
-      caffeine: "none",
-      exercise: "rare",
-      meal: "mixed",
-      phoneUsage: "low",
-    });
-  });
-
-  it("requires complete steps before final completion", async () => {
-    const repository = createOnboardingRepository(userId);
-
-    await expect(repository.complete({
+    await repository.saveProfile({
       nickname: "tester",
       timezone: "Asia/Seoul",
-    })).rejects.toThrow("INCOMPLETE_ONBOARDING");
-
+      age: 26,
+      gender: "prefer-not-to-say",
+      heightCm: 172,
+      weightKg: 63.5,
+    });
     await repository.saveConnect({ selected: "manual" });
     await repository.saveSleepGoal({
       targetBedTime: "23:00",
@@ -168,19 +64,100 @@ describe("prisma onboarding repository persistence", () => {
       caffeine: "none",
       exercise: "rare",
       meal: "mixed",
+      alcohol: "monthly",
       phoneUsage: "low",
     });
 
-    await expect(
-      repository.complete({
+    await expect(repository.getProgress()).resolves.toEqual({
+      connect: { selected: "manual" },
+      sleepGoal: {
+        targetBedTime: "23:00",
+        targetWakeTime: "07:00",
+        targetDurationMinutes: 480,
+      },
+      habits: {
+        caffeine: "none",
+        exercise: "rare",
+        meal: "mixed",
+        alcohol: "monthly",
+        phoneUsage: "low",
+      },
+      profile: {
         nickname: "tester",
         timezone: "Asia/Seoul",
-      }),
-    ).resolves.toBeUndefined();
+        age: 26,
+        gender: "prefer-not-to-say",
+        heightCm: 172,
+        weightKg: 63.5,
+      },
+    });
+    await expect(prisma.userProfile.findUnique({ where: { userId } })).resolves.toMatchObject({
+      onboardingCompletedAt: null,
+    });
+  });
 
-    expect(database.userProfile?.onboardingCompletedAt).toBeInstanceOf(Date);
-    expect(database.userProfile?.nickname).toBe("tester");
-    expect(database.userProfile?.timezone).toBe("Asia/Seoul");
+  it("requires the persisted profile and every other owned step before final completion", async () => {
+    const repository = repositoryFor(userId, prisma);
+
+    await expect(repository.complete())
+      .rejects.toThrow("INCOMPLETE_ONBOARDING");
+
+    await repository.saveProfile({ nickname: "tester", timezone: "Asia/Seoul" });
+    await repository.saveConnect({ selected: "manual" });
+    await repository.saveSleepGoal({
+      targetBedTime: "23:00",
+      targetWakeTime: "07:00",
+      targetDurationMinutes: 480,
+    });
+    await repository.replaceHabits({
+      caffeine: "none",
+      exercise: "rare",
+      meal: "mixed",
+      alcohol: "none",
+      phoneUsage: "low",
+    });
+
+    await expect(repository.complete())
+      .resolves.toBeUndefined();
+    const profile = await prisma.userProfile.findUnique({ where: { userId } });
+    expect(profile).toMatchObject({
+      nickname: "tester",
+      timezone: "Asia/Seoul",
+    });
+    expect(profile?.onboardingCompletedAt).toBeInstanceOf(Date);
+  });
+
+  it("leaves one complete onboarding state after concurrent writes", async () => {
+    const repository = repositoryFor(userId, prisma);
+    await repository.saveProfile({ nickname: "first", timezone: "Asia/Seoul", age: 24, gender: "female", heightCm: 165, weightKg: 55 });
+    await repository.saveConnect({ selected: "manual" });
+    await repository.saveSleepGoal({
+      targetBedTime: "23:00",
+      targetWakeTime: "07:00",
+      targetDurationMinutes: 480,
+    });
+    await repository.replaceHabits({
+      caffeine: "none",
+      exercise: "rare",
+      meal: "mixed",
+      alcohol: "weekly",
+      phoneUsage: "low",
+    });
+
+    await Promise.all([
+      repository.complete(),
+      repository.complete(),
+    ]);
+
+    await expect(prisma.userProfile.count({ where: { userId } })).resolves.toBe(1);
+    const profile = await prisma.userProfile.findUniqueOrThrow({ where: { userId } });
+    expect(profile).toMatchObject({
+      nickname: "first",
+      age: 24,
+      gender: "female",
+      heightCm: 165,
+      weightKg: 55,
+    });
+    expect(profile.onboardingCompletedAt).toBeInstanceOf(Date);
   });
 });
-

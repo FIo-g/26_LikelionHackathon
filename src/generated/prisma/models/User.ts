@@ -200,6 +200,10 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  profile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
+  sleepGoal?: Prisma.XOR<Prisma.SleepGoalNullableScalarRelationFilter, Prisma.SleepGoalWhereInput> | null
+  habit?: Prisma.XOR<Prisma.UserHabitNullableScalarRelationFilter, Prisma.UserHabitWhereInput> | null
+  connection?: Prisma.XOR<Prisma.ConnectionNullableScalarRelationFilter, Prisma.ConnectionWhereInput> | null
   dailyLogs?: Prisma.DailyLogListRelationFilter
   sleepSessions?: Prisma.SleepSessionListRelationFilter
   caffeineEntries?: Prisma.CaffeineEntryListRelationFilter
@@ -212,6 +216,7 @@ export type UserWhereInput = {
   mutationReceipts?: Prisma.MutationReceiptListRelationFilter
   baselineSnapshots?: Prisma.BaselineSnapshotListRelationFilter
   analysisSnapshots?: Prisma.AnalysisSnapshotListRelationFilter
+  impactFactors?: Prisma.ImpactFactorListRelationFilter
   specialEvents?: Prisma.SpecialEventListRelationFilter
   scheduleAdvice?: Prisma.ScheduleAdviceListRelationFilter
   narrations?: Prisma.NarrationListRelationFilter
@@ -232,6 +237,10 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
+  profile?: Prisma.UserProfileOrderByWithRelationInput
+  sleepGoal?: Prisma.SleepGoalOrderByWithRelationInput
+  habit?: Prisma.UserHabitOrderByWithRelationInput
+  connection?: Prisma.ConnectionOrderByWithRelationInput
   dailyLogs?: Prisma.DailyLogOrderByRelationAggregateInput
   sleepSessions?: Prisma.SleepSessionOrderByRelationAggregateInput
   caffeineEntries?: Prisma.CaffeineEntryOrderByRelationAggregateInput
@@ -244,6 +253,7 @@ export type UserOrderByWithRelationInput = {
   mutationReceipts?: Prisma.MutationReceiptOrderByRelationAggregateInput
   baselineSnapshots?: Prisma.BaselineSnapshotOrderByRelationAggregateInput
   analysisSnapshots?: Prisma.AnalysisSnapshotOrderByRelationAggregateInput
+  impactFactors?: Prisma.ImpactFactorOrderByRelationAggregateInput
   specialEvents?: Prisma.SpecialEventOrderByRelationAggregateInput
   scheduleAdvice?: Prisma.ScheduleAdviceOrderByRelationAggregateInput
   narrations?: Prisma.NarrationOrderByRelationAggregateInput
@@ -267,6 +277,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  profile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
+  sleepGoal?: Prisma.XOR<Prisma.SleepGoalNullableScalarRelationFilter, Prisma.SleepGoalWhereInput> | null
+  habit?: Prisma.XOR<Prisma.UserHabitNullableScalarRelationFilter, Prisma.UserHabitWhereInput> | null
+  connection?: Prisma.XOR<Prisma.ConnectionNullableScalarRelationFilter, Prisma.ConnectionWhereInput> | null
   dailyLogs?: Prisma.DailyLogListRelationFilter
   sleepSessions?: Prisma.SleepSessionListRelationFilter
   caffeineEntries?: Prisma.CaffeineEntryListRelationFilter
@@ -279,6 +293,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   mutationReceipts?: Prisma.MutationReceiptListRelationFilter
   baselineSnapshots?: Prisma.BaselineSnapshotListRelationFilter
   analysisSnapshots?: Prisma.AnalysisSnapshotListRelationFilter
+  impactFactors?: Prisma.ImpactFactorListRelationFilter
   specialEvents?: Prisma.SpecialEventListRelationFilter
   scheduleAdvice?: Prisma.ScheduleAdviceListRelationFilter
   narrations?: Prisma.NarrationListRelationFilter
@@ -325,6 +340,10 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -337,6 +356,7 @@ export type UserCreateInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -357,6 +377,10 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -369,6 +393,7 @@ export type UserUncheckedCreateInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -389,6 +414,10 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -401,6 +430,7 @@ export type UserUpdateInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -421,6 +451,10 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -433,6 +467,7 @@ export type UserUncheckedUpdateInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -550,6 +585,62 @@ export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
   upsert?: Prisma.UserUpsertWithoutAccountsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountsInput, Prisma.UserUpdateWithoutAccountsInput>, Prisma.UserUncheckedUpdateWithoutAccountsInput>
+}
+
+export type UserCreateNestedOneWithoutProfileInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProfileInput, Prisma.UserUncheckedCreateWithoutProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutProfileNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProfileInput, Prisma.UserUncheckedCreateWithoutProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProfileInput
+  upsert?: Prisma.UserUpsertWithoutProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProfileInput, Prisma.UserUpdateWithoutProfileInput>, Prisma.UserUncheckedUpdateWithoutProfileInput>
+}
+
+export type UserCreateNestedOneWithoutSleepGoalInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSleepGoalInput, Prisma.UserUncheckedCreateWithoutSleepGoalInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSleepGoalInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSleepGoalNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSleepGoalInput, Prisma.UserUncheckedCreateWithoutSleepGoalInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSleepGoalInput
+  upsert?: Prisma.UserUpsertWithoutSleepGoalInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSleepGoalInput, Prisma.UserUpdateWithoutSleepGoalInput>, Prisma.UserUncheckedUpdateWithoutSleepGoalInput>
+}
+
+export type UserCreateNestedOneWithoutHabitInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHabitInput, Prisma.UserUncheckedCreateWithoutHabitInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHabitInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutHabitNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHabitInput, Prisma.UserUncheckedCreateWithoutHabitInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHabitInput
+  upsert?: Prisma.UserUpsertWithoutHabitInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutHabitInput, Prisma.UserUpdateWithoutHabitInput>, Prisma.UserUncheckedUpdateWithoutHabitInput>
+}
+
+export type UserCreateNestedOneWithoutConnectionInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutConnectionInput, Prisma.UserUncheckedCreateWithoutConnectionInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConnectionInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutConnectionNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutConnectionInput, Prisma.UserUncheckedCreateWithoutConnectionInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConnectionInput
+  upsert?: Prisma.UserUpsertWithoutConnectionInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutConnectionInput, Prisma.UserUpdateWithoutConnectionInput>, Prisma.UserUncheckedUpdateWithoutConnectionInput>
 }
 
 export type UserCreateNestedOneWithoutDailyLogsInput = {
@@ -720,6 +811,20 @@ export type UserUpdateOneRequiredWithoutAnalysisSnapshotsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnalysisSnapshotsInput, Prisma.UserUpdateWithoutAnalysisSnapshotsInput>, Prisma.UserUncheckedUpdateWithoutAnalysisSnapshotsInput>
 }
 
+export type UserCreateNestedOneWithoutImpactFactorsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutImpactFactorsInput, Prisma.UserUncheckedCreateWithoutImpactFactorsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutImpactFactorsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutImpactFactorsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutImpactFactorsInput, Prisma.UserUncheckedCreateWithoutImpactFactorsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutImpactFactorsInput
+  upsert?: Prisma.UserUpsertWithoutImpactFactorsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutImpactFactorsInput, Prisma.UserUpdateWithoutImpactFactorsInput>, Prisma.UserUncheckedUpdateWithoutImpactFactorsInput>
+}
+
 export type UserCreateNestedOneWithoutSpecialEventsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutSpecialEventsInput, Prisma.UserUncheckedCreateWithoutSpecialEventsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutSpecialEventsInput
@@ -841,6 +946,10 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -853,6 +962,7 @@ export type UserCreateWithoutSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -872,6 +982,10 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -884,6 +998,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -919,6 +1034,10 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -931,6 +1050,7 @@ export type UserUpdateWithoutSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -950,6 +1070,10 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -962,6 +1086,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -981,6 +1106,10 @@ export type UserCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -993,6 +1122,7 @@ export type UserCreateWithoutAccountsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1012,6 +1142,10 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1024,6 +1158,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1059,6 +1194,10 @@ export type UserUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -1071,6 +1210,7 @@ export type UserUpdateWithoutAccountsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1090,6 +1230,10 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1102,6 +1246,647 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUncheckedUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUncheckedUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutProfileInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutProfileInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryUncheckedCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanUncheckedCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayUncheckedCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutProfileInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProfileInput, Prisma.UserUncheckedCreateWithoutProfileInput>
+}
+
+export type UserUpsertWithoutProfileInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProfileInput, Prisma.UserUncheckedUpdateWithoutProfileInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProfileInput, Prisma.UserUncheckedCreateWithoutProfileInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProfileInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProfileInput, Prisma.UserUncheckedUpdateWithoutProfileInput>
+}
+
+export type UserUpdateWithoutProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUncheckedUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUncheckedUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUncheckedUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSleepGoalInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSleepGoalInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryUncheckedCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanUncheckedCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayUncheckedCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSleepGoalInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSleepGoalInput, Prisma.UserUncheckedCreateWithoutSleepGoalInput>
+}
+
+export type UserUpsertWithoutSleepGoalInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSleepGoalInput, Prisma.UserUncheckedUpdateWithoutSleepGoalInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSleepGoalInput, Prisma.UserUncheckedCreateWithoutSleepGoalInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSleepGoalInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSleepGoalInput, Prisma.UserUncheckedUpdateWithoutSleepGoalInput>
+}
+
+export type UserUpdateWithoutSleepGoalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSleepGoalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUncheckedUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUncheckedUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUncheckedUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutHabitInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutHabitInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryUncheckedCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanUncheckedCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayUncheckedCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutHabitInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutHabitInput, Prisma.UserUncheckedCreateWithoutHabitInput>
+}
+
+export type UserUpsertWithoutHabitInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutHabitInput, Prisma.UserUncheckedUpdateWithoutHabitInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutHabitInput, Prisma.UserUncheckedCreateWithoutHabitInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutHabitInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutHabitInput, Prisma.UserUncheckedUpdateWithoutHabitInput>
+}
+
+export type UserUpdateWithoutHabitInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutHabitInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUncheckedUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUncheckedUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUncheckedUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutConnectionInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutConnectionInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryUncheckedCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanUncheckedCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayUncheckedCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutConnectionInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutConnectionInput, Prisma.UserUncheckedCreateWithoutConnectionInput>
+}
+
+export type UserUpsertWithoutConnectionInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutConnectionInput, Prisma.UserUncheckedUpdateWithoutConnectionInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutConnectionInput, Prisma.UserUncheckedCreateWithoutConnectionInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutConnectionInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutConnectionInput, Prisma.UserUncheckedUpdateWithoutConnectionInput>
+}
+
+export type UserUpdateWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUncheckedUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1122,6 +1907,10 @@ export type UserCreateWithoutDailyLogsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
   alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
@@ -1133,6 +1922,7 @@ export type UserCreateWithoutDailyLogsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1153,6 +1943,10 @@ export type UserUncheckedCreateWithoutDailyLogsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
   alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1164,6 +1958,7 @@ export type UserUncheckedCreateWithoutDailyLogsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1200,6 +1995,10 @@ export type UserUpdateWithoutDailyLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
   alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
@@ -1211,6 +2010,7 @@ export type UserUpdateWithoutDailyLogsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1231,6 +2031,10 @@ export type UserUncheckedUpdateWithoutDailyLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
   alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1242,6 +2046,7 @@ export type UserUncheckedUpdateWithoutDailyLogsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1262,6 +2067,10 @@ export type UserCreateWithoutSleepSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
   alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
@@ -1273,6 +2082,7 @@ export type UserCreateWithoutSleepSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1293,6 +2103,10 @@ export type UserUncheckedCreateWithoutSleepSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
   alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1304,6 +2118,7 @@ export type UserUncheckedCreateWithoutSleepSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1340,6 +2155,10 @@ export type UserUpdateWithoutSleepSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
   alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
@@ -1351,6 +2170,7 @@ export type UserUpdateWithoutSleepSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1371,6 +2191,10 @@ export type UserUncheckedUpdateWithoutSleepSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
   alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1382,6 +2206,7 @@ export type UserUncheckedUpdateWithoutSleepSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1402,6 +2227,10 @@ export type UserCreateWithoutCaffeineEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
@@ -1413,6 +2242,7 @@ export type UserCreateWithoutCaffeineEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1433,6 +2263,10 @@ export type UserUncheckedCreateWithoutCaffeineEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1444,6 +2278,7 @@ export type UserUncheckedCreateWithoutCaffeineEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1480,6 +2315,10 @@ export type UserUpdateWithoutCaffeineEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
@@ -1491,6 +2330,7 @@ export type UserUpdateWithoutCaffeineEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1511,6 +2351,10 @@ export type UserUncheckedUpdateWithoutCaffeineEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1522,6 +2366,7 @@ export type UserUncheckedUpdateWithoutCaffeineEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1542,6 +2387,10 @@ export type UserCreateWithoutAlcoholEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -1553,6 +2402,7 @@ export type UserCreateWithoutAlcoholEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1573,6 +2423,10 @@ export type UserUncheckedCreateWithoutAlcoholEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1584,6 +2438,7 @@ export type UserUncheckedCreateWithoutAlcoholEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1620,6 +2475,10 @@ export type UserUpdateWithoutAlcoholEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -1631,6 +2490,7 @@ export type UserUpdateWithoutAlcoholEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1651,6 +2511,10 @@ export type UserUncheckedUpdateWithoutAlcoholEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1662,6 +2526,7 @@ export type UserUncheckedUpdateWithoutAlcoholEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1682,6 +2547,10 @@ export type UserCreateWithoutMealEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -1693,6 +2562,7 @@ export type UserCreateWithoutMealEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1713,6 +2583,10 @@ export type UserUncheckedCreateWithoutMealEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1724,6 +2598,7 @@ export type UserUncheckedCreateWithoutMealEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1760,6 +2635,10 @@ export type UserUpdateWithoutMealEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -1771,6 +2650,7 @@ export type UserUpdateWithoutMealEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1791,6 +2671,10 @@ export type UserUncheckedUpdateWithoutMealEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1802,6 +2686,7 @@ export type UserUncheckedUpdateWithoutMealEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1822,6 +2707,10 @@ export type UserCreateWithoutExerciseEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -1833,6 +2722,7 @@ export type UserCreateWithoutExerciseEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1853,6 +2743,10 @@ export type UserUncheckedCreateWithoutExerciseEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -1864,6 +2758,7 @@ export type UserUncheckedCreateWithoutExerciseEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -1900,6 +2795,10 @@ export type UserUpdateWithoutExerciseEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -1911,6 +2810,7 @@ export type UserUpdateWithoutExerciseEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -1931,6 +2831,10 @@ export type UserUncheckedUpdateWithoutExerciseEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -1942,6 +2846,7 @@ export type UserUncheckedUpdateWithoutExerciseEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1962,6 +2867,10 @@ export type UserCreateWithoutPhoneUsageEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -1973,6 +2882,7 @@ export type UserCreateWithoutPhoneUsageEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -1993,6 +2903,10 @@ export type UserUncheckedCreateWithoutPhoneUsageEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2004,6 +2918,7 @@ export type UserUncheckedCreateWithoutPhoneUsageEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -2040,6 +2955,10 @@ export type UserUpdateWithoutPhoneUsageEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2051,6 +2970,7 @@ export type UserUpdateWithoutPhoneUsageEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -2071,6 +2991,10 @@ export type UserUncheckedUpdateWithoutPhoneUsageEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2082,6 +3006,7 @@ export type UserUncheckedUpdateWithoutPhoneUsageEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2102,6 +3027,10 @@ export type UserCreateWithoutWellnessEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2113,6 +3042,7 @@ export type UserCreateWithoutWellnessEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -2133,6 +3063,10 @@ export type UserUncheckedCreateWithoutWellnessEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2144,6 +3078,7 @@ export type UserUncheckedCreateWithoutWellnessEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -2180,6 +3115,10 @@ export type UserUpdateWithoutWellnessEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2191,6 +3130,7 @@ export type UserUpdateWithoutWellnessEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -2211,6 +3151,10 @@ export type UserUncheckedUpdateWithoutWellnessEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2222,6 +3166,7 @@ export type UserUncheckedUpdateWithoutWellnessEntriesInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2242,6 +3187,10 @@ export type UserCreateWithoutRecordRevisionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2253,6 +3202,7 @@ export type UserCreateWithoutRecordRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -2273,6 +3223,10 @@ export type UserUncheckedCreateWithoutRecordRevisionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2284,6 +3238,7 @@ export type UserUncheckedCreateWithoutRecordRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -2320,6 +3275,10 @@ export type UserUpdateWithoutRecordRevisionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2331,6 +3290,7 @@ export type UserUpdateWithoutRecordRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -2351,6 +3311,10 @@ export type UserUncheckedUpdateWithoutRecordRevisionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2362,6 +3326,7 @@ export type UserUncheckedUpdateWithoutRecordRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2382,6 +3347,10 @@ export type UserCreateWithoutMutationReceiptsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2393,6 +3362,7 @@ export type UserCreateWithoutMutationReceiptsInput = {
   recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -2413,6 +3383,10 @@ export type UserUncheckedCreateWithoutMutationReceiptsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2424,6 +3398,7 @@ export type UserUncheckedCreateWithoutMutationReceiptsInput = {
   recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -2460,6 +3435,10 @@ export type UserUpdateWithoutMutationReceiptsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2471,6 +3450,7 @@ export type UserUpdateWithoutMutationReceiptsInput = {
   recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -2491,6 +3471,10 @@ export type UserUncheckedUpdateWithoutMutationReceiptsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2502,6 +3486,7 @@ export type UserUncheckedUpdateWithoutMutationReceiptsInput = {
   recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2522,6 +3507,10 @@ export type UserCreateWithoutBaselineSnapshotsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2533,6 +3522,7 @@ export type UserCreateWithoutBaselineSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -2553,6 +3543,10 @@ export type UserUncheckedCreateWithoutBaselineSnapshotsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2564,6 +3558,7 @@ export type UserUncheckedCreateWithoutBaselineSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -2600,6 +3595,10 @@ export type UserUpdateWithoutBaselineSnapshotsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2611,6 +3610,7 @@ export type UserUpdateWithoutBaselineSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -2631,6 +3631,10 @@ export type UserUncheckedUpdateWithoutBaselineSnapshotsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2642,6 +3646,7 @@ export type UserUncheckedUpdateWithoutBaselineSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2662,6 +3667,10 @@ export type UserCreateWithoutAnalysisSnapshotsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2673,6 +3682,7 @@ export type UserCreateWithoutAnalysisSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -2693,6 +3703,10 @@ export type UserUncheckedCreateWithoutAnalysisSnapshotsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2704,6 +3718,7 @@ export type UserUncheckedCreateWithoutAnalysisSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -2740,6 +3755,10 @@ export type UserUpdateWithoutAnalysisSnapshotsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2751,6 +3770,7 @@ export type UserUpdateWithoutAnalysisSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -2771,6 +3791,10 @@ export type UserUncheckedUpdateWithoutAnalysisSnapshotsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2782,6 +3806,167 @@ export type UserUncheckedUpdateWithoutAnalysisSnapshotsInput = {
   recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUncheckedUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUncheckedUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutImpactFactorsInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutImpactFactorsInput = {
+  id: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
+  dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedCreateNestedManyWithoutUserInput
+  mealEntries?: Prisma.MealEntryUncheckedCreateNestedManyWithoutUserInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedCreateNestedManyWithoutUserInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedCreateNestedManyWithoutUserInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedCreateNestedManyWithoutUserInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedCreateNestedManyWithoutUserInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
+  narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
+  routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
+  careToolSessions?: Prisma.CareToolSessionUncheckedCreateNestedManyWithoutUserInput
+  sleepPlans?: Prisma.SleepPlanUncheckedCreateNestedManyWithoutUserInput
+  planDays?: Prisma.PlanDayUncheckedCreateNestedManyWithoutUserInput
+  planRevisions?: Prisma.PlanRevisionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutImpactFactorsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutImpactFactorsInput, Prisma.UserUncheckedCreateWithoutImpactFactorsInput>
+}
+
+export type UserUpsertWithoutImpactFactorsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutImpactFactorsInput, Prisma.UserUncheckedUpdateWithoutImpactFactorsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutImpactFactorsInput, Prisma.UserUncheckedCreateWithoutImpactFactorsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutImpactFactorsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutImpactFactorsInput, Prisma.UserUncheckedUpdateWithoutImpactFactorsInput>
+}
+
+export type UserUpdateWithoutImpactFactorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
+  scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
+  narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
+  routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
+  careToolSessions?: Prisma.CareToolSessionUpdateManyWithoutUserNestedInput
+  sleepPlans?: Prisma.SleepPlanUpdateManyWithoutUserNestedInput
+  planDays?: Prisma.PlanDayUpdateManyWithoutUserNestedInput
+  planRevisions?: Prisma.PlanRevisionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutImpactFactorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
+  dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
+  caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
+  alcoholEntries?: Prisma.AlcoholEntryUncheckedUpdateManyWithoutUserNestedInput
+  mealEntries?: Prisma.MealEntryUncheckedUpdateManyWithoutUserNestedInput
+  exerciseEntries?: Prisma.ExerciseEntryUncheckedUpdateManyWithoutUserNestedInput
+  phoneUsageEntries?: Prisma.PhoneUsageEntryUncheckedUpdateManyWithoutUserNestedInput
+  wellnessEntries?: Prisma.WellnessEntryUncheckedUpdateManyWithoutUserNestedInput
+  recordRevisions?: Prisma.RecordRevisionUncheckedUpdateManyWithoutUserNestedInput
+  mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2802,6 +3987,10 @@ export type UserCreateWithoutSpecialEventsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2814,6 +4003,7 @@ export type UserCreateWithoutSpecialEventsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
   routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
@@ -2833,6 +4023,10 @@ export type UserUncheckedCreateWithoutSpecialEventsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2845,6 +4039,7 @@ export type UserUncheckedCreateWithoutSpecialEventsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
   routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
@@ -2880,6 +4075,10 @@ export type UserUpdateWithoutSpecialEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -2892,6 +4091,7 @@ export type UserUpdateWithoutSpecialEventsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
   routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
@@ -2911,6 +4111,10 @@ export type UserUncheckedUpdateWithoutSpecialEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -2923,6 +4127,7 @@ export type UserUncheckedUpdateWithoutSpecialEventsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
   routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
@@ -2942,6 +4147,10 @@ export type UserCreateWithoutScheduleAdviceInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -2954,6 +4163,7 @@ export type UserCreateWithoutScheduleAdviceInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
   routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
@@ -2973,6 +4183,10 @@ export type UserUncheckedCreateWithoutScheduleAdviceInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -2985,6 +4199,7 @@ export type UserUncheckedCreateWithoutScheduleAdviceInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
   routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
@@ -3020,6 +4235,10 @@ export type UserUpdateWithoutScheduleAdviceInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3032,6 +4251,7 @@ export type UserUpdateWithoutScheduleAdviceInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
   routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
@@ -3051,6 +4271,10 @@ export type UserUncheckedUpdateWithoutScheduleAdviceInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3063,6 +4287,7 @@ export type UserUncheckedUpdateWithoutScheduleAdviceInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
   routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
@@ -3082,6 +4307,10 @@ export type UserCreateWithoutNarrationsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -3094,6 +4323,7 @@ export type UserCreateWithoutNarrationsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   routineCompletions?: Prisma.RoutineCompletionCreateNestedManyWithoutUserInput
@@ -3113,6 +4343,10 @@ export type UserUncheckedCreateWithoutNarrationsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -3125,6 +4359,7 @@ export type UserUncheckedCreateWithoutNarrationsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   routineCompletions?: Prisma.RoutineCompletionUncheckedCreateNestedManyWithoutUserInput
@@ -3160,6 +4395,10 @@ export type UserUpdateWithoutNarrationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3172,6 +4411,7 @@ export type UserUpdateWithoutNarrationsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   routineCompletions?: Prisma.RoutineCompletionUpdateManyWithoutUserNestedInput
@@ -3191,6 +4431,10 @@ export type UserUncheckedUpdateWithoutNarrationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3203,6 +4447,7 @@ export type UserUncheckedUpdateWithoutNarrationsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   routineCompletions?: Prisma.RoutineCompletionUncheckedUpdateManyWithoutUserNestedInput
@@ -3222,6 +4467,10 @@ export type UserCreateWithoutRoutineCompletionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -3234,6 +4483,7 @@ export type UserCreateWithoutRoutineCompletionsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -3253,6 +4503,10 @@ export type UserUncheckedCreateWithoutRoutineCompletionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -3265,6 +4519,7 @@ export type UserUncheckedCreateWithoutRoutineCompletionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -3300,6 +4555,10 @@ export type UserUpdateWithoutRoutineCompletionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3312,6 +4571,7 @@ export type UserUpdateWithoutRoutineCompletionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -3331,6 +4591,10 @@ export type UserUncheckedUpdateWithoutRoutineCompletionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3343,6 +4607,7 @@ export type UserUncheckedUpdateWithoutRoutineCompletionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3362,6 +4627,10 @@ export type UserCreateWithoutCareToolSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -3374,6 +4643,7 @@ export type UserCreateWithoutCareToolSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -3393,6 +4663,10 @@ export type UserUncheckedCreateWithoutCareToolSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -3405,6 +4679,7 @@ export type UserUncheckedCreateWithoutCareToolSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -3440,6 +4715,10 @@ export type UserUpdateWithoutCareToolSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3452,6 +4731,7 @@ export type UserUpdateWithoutCareToolSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -3471,6 +4751,10 @@ export type UserUncheckedUpdateWithoutCareToolSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3483,6 +4767,7 @@ export type UserUncheckedUpdateWithoutCareToolSessionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3502,6 +4787,10 @@ export type UserCreateWithoutSleepPlansInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -3514,6 +4803,7 @@ export type UserCreateWithoutSleepPlansInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -3533,6 +4823,10 @@ export type UserUncheckedCreateWithoutSleepPlansInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -3545,6 +4839,7 @@ export type UserUncheckedCreateWithoutSleepPlansInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -3580,6 +4875,10 @@ export type UserUpdateWithoutSleepPlansInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3592,6 +4891,7 @@ export type UserUpdateWithoutSleepPlansInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -3611,6 +4911,10 @@ export type UserUncheckedUpdateWithoutSleepPlansInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3623,6 +4927,7 @@ export type UserUncheckedUpdateWithoutSleepPlansInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3642,6 +4947,10 @@ export type UserCreateWithoutPlanDaysInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -3654,6 +4963,7 @@ export type UserCreateWithoutPlanDaysInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -3673,6 +4983,10 @@ export type UserUncheckedCreateWithoutPlanDaysInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -3685,6 +4999,7 @@ export type UserUncheckedCreateWithoutPlanDaysInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -3720,6 +5035,10 @@ export type UserUpdateWithoutPlanDaysInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3732,6 +5051,7 @@ export type UserUpdateWithoutPlanDaysInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -3751,6 +5071,10 @@ export type UserUncheckedUpdateWithoutPlanDaysInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3763,6 +5087,7 @@ export type UserUncheckedUpdateWithoutPlanDaysInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3782,6 +5107,10 @@ export type UserCreateWithoutPlanRevisionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryCreateNestedManyWithoutUserInput
@@ -3794,6 +5123,7 @@ export type UserCreateWithoutPlanRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationCreateNestedManyWithoutUserInput
@@ -3813,6 +5143,10 @@ export type UserUncheckedCreateWithoutPlanRevisionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sleepGoal?: Prisma.SleepGoalUncheckedCreateNestedOneWithoutUserInput
+  habit?: Prisma.UserHabitUncheckedCreateNestedOneWithoutUserInput
+  connection?: Prisma.ConnectionUncheckedCreateNestedOneWithoutUserInput
   dailyLogs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
   sleepSessions?: Prisma.SleepSessionUncheckedCreateNestedManyWithoutUserInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedCreateNestedManyWithoutUserInput
@@ -3825,6 +5159,7 @@ export type UserUncheckedCreateWithoutPlanRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedCreateNestedManyWithoutUserInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedCreateNestedManyWithoutUserInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedCreateNestedManyWithoutUserInput
+  impactFactors?: Prisma.ImpactFactorUncheckedCreateNestedManyWithoutUserInput
   specialEvents?: Prisma.SpecialEventUncheckedCreateNestedManyWithoutUserInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedCreateNestedManyWithoutUserInput
   narrations?: Prisma.NarrationUncheckedCreateNestedManyWithoutUserInput
@@ -3860,6 +5195,10 @@ export type UserUpdateWithoutPlanRevisionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUpdateManyWithoutUserNestedInput
@@ -3872,6 +5211,7 @@ export type UserUpdateWithoutPlanRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUpdateManyWithoutUserNestedInput
@@ -3891,6 +5231,10 @@ export type UserUncheckedUpdateWithoutPlanRevisionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  sleepGoal?: Prisma.SleepGoalUncheckedUpdateOneWithoutUserNestedInput
+  habit?: Prisma.UserHabitUncheckedUpdateOneWithoutUserNestedInput
+  connection?: Prisma.ConnectionUncheckedUpdateOneWithoutUserNestedInput
   dailyLogs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
   sleepSessions?: Prisma.SleepSessionUncheckedUpdateManyWithoutUserNestedInput
   caffeineEntries?: Prisma.CaffeineEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -3903,6 +5247,7 @@ export type UserUncheckedUpdateWithoutPlanRevisionsInput = {
   mutationReceipts?: Prisma.MutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   baselineSnapshots?: Prisma.BaselineSnapshotUncheckedUpdateManyWithoutUserNestedInput
   analysisSnapshots?: Prisma.AnalysisSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  impactFactors?: Prisma.ImpactFactorUncheckedUpdateManyWithoutUserNestedInput
   specialEvents?: Prisma.SpecialEventUncheckedUpdateManyWithoutUserNestedInput
   scheduleAdvice?: Prisma.ScheduleAdviceUncheckedUpdateManyWithoutUserNestedInput
   narrations?: Prisma.NarrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3932,6 +5277,7 @@ export type UserCountOutputType = {
   mutationReceipts: number
   baselineSnapshots: number
   analysisSnapshots: number
+  impactFactors: number
   specialEvents: number
   scheduleAdvice: number
   narrations: number
@@ -3957,6 +5303,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   mutationReceipts?: boolean | UserCountOutputTypeCountMutationReceiptsArgs
   baselineSnapshots?: boolean | UserCountOutputTypeCountBaselineSnapshotsArgs
   analysisSnapshots?: boolean | UserCountOutputTypeCountAnalysisSnapshotsArgs
+  impactFactors?: boolean | UserCountOutputTypeCountImpactFactorsArgs
   specialEvents?: boolean | UserCountOutputTypeCountSpecialEventsArgs
   scheduleAdvice?: boolean | UserCountOutputTypeCountScheduleAdviceArgs
   narrations?: boolean | UserCountOutputTypeCountNarrationsArgs
@@ -4078,6 +5425,13 @@ export type UserCountOutputTypeCountAnalysisSnapshotsArgs<ExtArgs extends runtim
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountImpactFactorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ImpactFactorWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountSpecialEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SpecialEventWhereInput
 }
@@ -4142,6 +5496,10 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  profile?: boolean | Prisma.User$profileArgs<ExtArgs>
+  sleepGoal?: boolean | Prisma.User$sleepGoalArgs<ExtArgs>
+  habit?: boolean | Prisma.User$habitArgs<ExtArgs>
+  connection?: boolean | Prisma.User$connectionArgs<ExtArgs>
   dailyLogs?: boolean | Prisma.User$dailyLogsArgs<ExtArgs>
   sleepSessions?: boolean | Prisma.User$sleepSessionsArgs<ExtArgs>
   caffeineEntries?: boolean | Prisma.User$caffeineEntriesArgs<ExtArgs>
@@ -4154,6 +5512,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   mutationReceipts?: boolean | Prisma.User$mutationReceiptsArgs<ExtArgs>
   baselineSnapshots?: boolean | Prisma.User$baselineSnapshotsArgs<ExtArgs>
   analysisSnapshots?: boolean | Prisma.User$analysisSnapshotsArgs<ExtArgs>
+  impactFactors?: boolean | Prisma.User$impactFactorsArgs<ExtArgs>
   specialEvents?: boolean | Prisma.User$specialEventsArgs<ExtArgs>
   scheduleAdvice?: boolean | Prisma.User$scheduleAdviceArgs<ExtArgs>
   narrations?: boolean | Prisma.User$narrationsArgs<ExtArgs>
@@ -4199,6 +5558,10 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  profile?: boolean | Prisma.User$profileArgs<ExtArgs>
+  sleepGoal?: boolean | Prisma.User$sleepGoalArgs<ExtArgs>
+  habit?: boolean | Prisma.User$habitArgs<ExtArgs>
+  connection?: boolean | Prisma.User$connectionArgs<ExtArgs>
   dailyLogs?: boolean | Prisma.User$dailyLogsArgs<ExtArgs>
   sleepSessions?: boolean | Prisma.User$sleepSessionsArgs<ExtArgs>
   caffeineEntries?: boolean | Prisma.User$caffeineEntriesArgs<ExtArgs>
@@ -4211,6 +5574,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   mutationReceipts?: boolean | Prisma.User$mutationReceiptsArgs<ExtArgs>
   baselineSnapshots?: boolean | Prisma.User$baselineSnapshotsArgs<ExtArgs>
   analysisSnapshots?: boolean | Prisma.User$analysisSnapshotsArgs<ExtArgs>
+  impactFactors?: boolean | Prisma.User$impactFactorsArgs<ExtArgs>
   specialEvents?: boolean | Prisma.User$specialEventsArgs<ExtArgs>
   scheduleAdvice?: boolean | Prisma.User$scheduleAdviceArgs<ExtArgs>
   narrations?: boolean | Prisma.User$narrationsArgs<ExtArgs>
@@ -4229,6 +5593,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
+    profile: Prisma.$UserProfilePayload<ExtArgs> | null
+    sleepGoal: Prisma.$SleepGoalPayload<ExtArgs> | null
+    habit: Prisma.$UserHabitPayload<ExtArgs> | null
+    connection: Prisma.$ConnectionPayload<ExtArgs> | null
     dailyLogs: Prisma.$DailyLogPayload<ExtArgs>[]
     sleepSessions: Prisma.$SleepSessionPayload<ExtArgs>[]
     caffeineEntries: Prisma.$CaffeineEntryPayload<ExtArgs>[]
@@ -4241,6 +5609,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     mutationReceipts: Prisma.$MutationReceiptPayload<ExtArgs>[]
     baselineSnapshots: Prisma.$BaselineSnapshotPayload<ExtArgs>[]
     analysisSnapshots: Prisma.$AnalysisSnapshotPayload<ExtArgs>[]
+    impactFactors: Prisma.$ImpactFactorPayload<ExtArgs>[]
     specialEvents: Prisma.$SpecialEventPayload<ExtArgs>[]
     scheduleAdvice: Prisma.$ScheduleAdvicePayload<ExtArgs>[]
     narrations: Prisma.$NarrationPayload<ExtArgs>[]
@@ -4654,6 +6023,10 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  profile<T extends Prisma.User$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$profileArgs<ExtArgs>>): Prisma.Prisma__UserProfileClient<runtime.Types.Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  sleepGoal<T extends Prisma.User$sleepGoalArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sleepGoalArgs<ExtArgs>>): Prisma.Prisma__SleepGoalClient<runtime.Types.Result.GetResult<Prisma.$SleepGoalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  habit<T extends Prisma.User$habitArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$habitArgs<ExtArgs>>): Prisma.Prisma__UserHabitClient<runtime.Types.Result.GetResult<Prisma.$UserHabitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  connection<T extends Prisma.User$connectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$connectionArgs<ExtArgs>>): Prisma.Prisma__ConnectionClient<runtime.Types.Result.GetResult<Prisma.$ConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   dailyLogs<T extends Prisma.User$dailyLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dailyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sleepSessions<T extends Prisma.User$sleepSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sleepSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SleepSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   caffeineEntries<T extends Prisma.User$caffeineEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$caffeineEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CaffeineEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4666,6 +6039,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   mutationReceipts<T extends Prisma.User$mutationReceiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   baselineSnapshots<T extends Prisma.User$baselineSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$baselineSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BaselineSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   analysisSnapshots<T extends Prisma.User$analysisSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$analysisSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnalysisSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  impactFactors<T extends Prisma.User$impactFactorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$impactFactorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImpactFactorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   specialEvents<T extends Prisma.User$specialEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$specialEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpecialEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scheduleAdvice<T extends Prisma.User$scheduleAdviceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$scheduleAdviceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleAdvicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   narrations<T extends Prisma.User$narrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$narrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NarrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4944,6 +6318,7 @@ export type UserCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * The data used to create many Users.
    */
   data: Prisma.UserCreateManyInput | Prisma.UserCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -4962,6 +6337,7 @@ export type UserCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many Users.
    */
   data: Prisma.UserCreateManyInput | Prisma.UserCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -5146,6 +6522,82 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.profile
+ */
+export type User$profileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserProfile
+   */
+  select?: Prisma.UserProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserProfile
+   */
+  omit?: Prisma.UserProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserProfileInclude<ExtArgs> | null
+  where?: Prisma.UserProfileWhereInput
+}
+
+/**
+ * User.sleepGoal
+ */
+export type User$sleepGoalArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SleepGoal
+   */
+  select?: Prisma.SleepGoalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SleepGoal
+   */
+  omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
+  where?: Prisma.SleepGoalWhereInput
+}
+
+/**
+ * User.habit
+ */
+export type User$habitArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserHabit
+   */
+  select?: Prisma.UserHabitSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserHabit
+   */
+  omit?: Prisma.UserHabitOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserHabitInclude<ExtArgs> | null
+  where?: Prisma.UserHabitWhereInput
+}
+
+/**
+ * User.connection
+ */
+export type User$connectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Connection
+   */
+  select?: Prisma.ConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Connection
+   */
+  omit?: Prisma.ConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectionInclude<ExtArgs> | null
+  where?: Prisma.ConnectionWhereInput
 }
 
 /**
@@ -5434,6 +6886,30 @@ export type User$analysisSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.AnalysisSnapshotScalarFieldEnum | Prisma.AnalysisSnapshotScalarFieldEnum[]
+}
+
+/**
+ * User.impactFactors
+ */
+export type User$impactFactorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ImpactFactor
+   */
+  select?: Prisma.ImpactFactorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ImpactFactor
+   */
+  omit?: Prisma.ImpactFactorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ImpactFactorInclude<ExtArgs> | null
+  where?: Prisma.ImpactFactorWhereInput
+  orderBy?: Prisma.ImpactFactorOrderByWithRelationInput | Prisma.ImpactFactorOrderByWithRelationInput[]
+  cursor?: Prisma.ImpactFactorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ImpactFactorScalarFieldEnum | Prisma.ImpactFactorScalarFieldEnum[]
 }
 
 /**

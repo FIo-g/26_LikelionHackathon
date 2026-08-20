@@ -6,7 +6,7 @@ import { getPrismaClient } from "@/shared/db/prisma";
 import type { ConfidenceLevel, DisplayState, Clock, UserScope } from "@/shared/domain/contracts";
 import type { AnalysisResult, SleepGoal } from "@/modules/analysis/domain/types";
 import { TransactionClient } from "@/shared/db/transaction";
-import type { AnalysisSnapshotStatus } from "@/modules/analysis/application/ports";
+import type { AnalysisSnapshotEntity } from "@/modules/analysis/application/ports";
 import type { EntryPresence } from "@/modules/records/application/get-record-hub";
 import type { RecordType } from "@/modules/records/domain/types";
 
@@ -51,19 +51,9 @@ export type TodayViewModel = Readonly<{
   localDate: string;
   readiness: RegionViewModel<ReadinessViewModel>;
   dataStatus: RegionViewModel<DataStatusViewModel>;
-  preparationTimeline: RegionViewModel<PreparationStepViewModel[]>;
-  recordSummary: RegionViewModel<RecordSummaryItem[]>;
+  preparationTimeline: RegionViewModel<readonly PreparationStepViewModel[]>;
+  recordSummary: RegionViewModel<readonly RecordSummaryItem[]>;
   hasRerouteAdvice: boolean;
-}>;
-
-type AnalysisSnapshotRow = Readonly<{
-  id: string;
-  localDate: string;
-  timezone: string;
-  status: AnalysisSnapshotStatus;
-  result: unknown;
-  generatedAt: Date;
-  supersededAt: Date | null;
 }>;
 
 type PrismaAnalysisClient = Readonly<{
@@ -83,13 +73,6 @@ type PrismaAnalysisClient = Readonly<{
       mealCutoffAt: Date;
       windDownAt: Date;
     } | null>;
-  };
-  analysisSnapshot: {
-    findMany: (args: {
-      where: { userId: string; timezone: string; localDate: string; status?: string };
-      orderBy: { generatedAt: "desc" };
-      take?: number;
-    }) => Promise<readonly AnalysisSnapshotRow[]>;
   };
   caffeineEntry: {
     findFirst: (args: unknown) => Promise<{ id: string } | null>;
@@ -122,12 +105,11 @@ type GetTodayViewModelDependencies = Readonly<{
   getPrisma?: () => PrismaAnalysisClient;
 }>;
 
-type SnapshotState = Readonly<{
-  state: "ready" | "stale" | "insufficient" | "error";
-  snapshot: AnalysisResult | null;
-  message: string | null;
-  action: { label: string; href: string } | null;
-}>;
+type SnapshotState =
+  | Readonly<{ status: "ready"; entity: AnalysisSnapshotEntity; result: AnalysisResult }>
+  | Readonly<{ status: "stale"; entity: AnalysisSnapshotEntity; result: AnalysisResult }>
+  | Readonly<{ status: "insufficient" }>
+  | Readonly<{ status: "error"; code: "CORRUPT_ANALYSIS_SNAPSHOT" | "ANALYSIS_UNAVAILABLE" }>;
 
 const DEFAULT_GOAL: SleepGoal = {
   targetBedTime: "23:00",
@@ -183,6 +165,9 @@ const parseConfidenceLabel = (confidence: ConfidenceLevel): string => {
   }
   if (confidence === "low") {
     return "낮음";
+  }
+  if (confidence === "insufficient") {
+    return "부족";
   }
   return "낮음";
 };
@@ -248,54 +233,77 @@ const toPlanDayPreparationSource = (planDay: NonNullable<Awaited<ReturnType<Pris
 });
 
 const readinessMessageFromSnapshot = (snapshot: SnapshotState): string | null => {
-  if (snapshot.state === "ready" || snapshot.state === "stale") {
-    return snapshot.state === "stale" ? "마지막 정상 분석을 표시합니다" : null;
+  if (snapshot.status === "ready" || snapshot.status === "stale") {
+    return snapshot.status === "stale" ? "마지막 정상 분석을 표시합니다" : null;
   }
-  return snapshot.message ?? "오늘 분석이 부족해요";
+  return snapshot.status === "error"
+    ? snapshot.code === "CORRUPT_ANALYSIS_SNAPSHOT"
+      ? "분석 데이터가 손상되어 다시 계산해야 합니다"
+      : "오늘 분석을 불러오지 못했어요"
+    : "오늘 분석에 필요한 기록이 부족해요";
 };
 
 const buildReadinessViewModel = (snapshot: SnapshotState): TodayViewModel["readiness"] => {
-  if (!snapshot.snapshot) {
+  if (snapshot.status === "insufficient" || snapshot.status === "error") {
     return {
-      state: snapshot.state,
+      state: snapshot.status,
       data: null,
-      message: snapshot.message ?? "오늘 분석이 부족해요",
-      action: snapshot.action,
+      message: readinessMessageFromSnapshot(snapshot),
+      action: snapshot.status === "error"
+        ? { label: "재계산", href: "/record" }
+        : { label: "기록 시작", href: "/record" },
     };
   }
 
-  const scoreLabel = snapshot.snapshot.readiness === null
-    ? "점수 산출 불가"
-    : `${snapshot.snapshot.readiness}점`;
+  if (snapshot.result.readiness === null) {
+    if (snapshot.status === "stale") {
+      return {
+        state: "stale",
+        data: null,
+        message: readinessMessageFromSnapshot(snapshot),
+        action: null,
+      };
+    }
+
+    return {
+      state: "insufficient",
+      data: null,
+      message: "오늘 분석에 필요한 기록이 부족해요",
+      action: { label: "기록 시작", href: "/record" },
+    };
+  }
 
   return {
-    state: snapshot.state,
+    state: snapshot.status,
     data: {
-      score: snapshot.snapshot.readiness,
-      confidence: snapshot.snapshot.confidence,
-      label: `${scoreLabel} (${parseConfidenceLabel(snapshot.snapshot.confidence)})`.trim(),
+      score: snapshot.result.readiness,
+      confidence: snapshot.result.confidence,
+      label: `${snapshot.result.readiness}점 (${parseConfidenceLabel(snapshot.result.confidence)})`,
     },
     message: readinessMessageFromSnapshot(snapshot),
-    action: snapshot.action,
+    action: null,
   };
 };
 
 const buildDataStatusViewModel = (snapshot: SnapshotState): TodayViewModel["dataStatus"] => {
-  if (!snapshot.snapshot) {
+  if (snapshot.status === "insufficient" || snapshot.status === "error") {
     return {
-      state: snapshot.state,
+      state: snapshot.status,
       data: null,
-      message: snapshot.message ?? "데이터 기준이 부족합니다",
-      action: snapshot.action,
+      message: readinessMessageFromSnapshot(snapshot),
+      action: snapshot.status === "error"
+        ? { label: "재계산", href: "/record" }
+        : { label: "기록 시작", href: "/record" },
     };
   }
 
-  const basis = snapshot.snapshot.dataBasis;
+  const basis = snapshot.result.dataBasis;
   const missing = basis.missingFields.map((field) => missingFieldLabel(field));
   const completedCategories = 7 - missing.length;
+  const state: DisplayState = missing.length > 0 ? "insufficient" : snapshot.status === "stale" ? "stale" : "ready";
 
   return {
-    state: missing.length > 0 ? "insufficient" : "ready",
+    state,
     data: {
       completedCategories,
       totalCategories: 7,
@@ -314,6 +322,7 @@ const buildPreparationTimeline = (
   timezone: string,
 ): TodayViewModel["preparationTimeline"] => {
   const nowMinute = minutesNow(clock, timezone);
+  const targetBedMinute = toMinutes(source.targetBedAt) ?? 0;
   const steps = [
     {
       key: "caffeine",
@@ -339,9 +348,34 @@ const buildPreparationTimeline = (
       scheduledAt: source.windDownAt,
       minute: toMinutes(source.windDownAt) ?? 0,
     },
-  ].sort((left, right) => left.minute - right.minute);
+    {
+      key: "target-bed",
+      label: "취침 준비",
+      scheduledAt: source.targetBedAt,
+      minute: targetBedMinute,
+    },
+  ].sort((left, right) => {
+    const leftPosition = left.key === "target-bed"
+      ? 1440
+      : addMinutes(left.minute - targetBedMinute);
+    const rightPosition = right.key === "target-bed"
+      ? 1440
+      : addMinutes(right.minute - targetBedMinute);
+    return leftPosition - rightPosition;
+  });
 
-  const firstUpcoming = nowMinute === null ? 0 : steps.findIndex((step) => addMinutes(step.minute) > nowMinute);
+  // Calculate the current point within the goal-to-goal cycle rather than
+  // comparing clock values directly. This keeps a post-midnight goal ordered
+  // after its preceding cutoffs (for example, 00:30 after 23:30).
+  const nowPosition = nowMinute === null ? null : addMinutes(nowMinute - targetBedMinute);
+  const firstUpcoming = nowPosition === null
+    ? 0
+    : steps.findIndex((step) => {
+      const position = step.key === "target-bed"
+        ? 1440
+        : addMinutes(step.minute - targetBedMinute);
+      return position > nowPosition;
+    });
   const timeline = steps.map((step, index) => ({
     key: step.key,
     label: step.label,
@@ -380,7 +414,11 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
+          },
         },
       },
       select: {
@@ -392,7 +430,11 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
+          },
         },
       },
       select: {
@@ -402,14 +444,12 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
     db.mealEntry.findFirst({
       where: {
         userId: scope.userId,
+        timezone: scope.timezone,
         dailyLog: {
-          localDate,
-        },
-      },
-      include: {
-        dailyLog: {
-          select: {
-            localDate: true,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
           },
         },
       },
@@ -420,14 +460,12 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
     db.exerciseEntry.findFirst({
       where: {
         userId: scope.userId,
+        timezone: scope.timezone,
         dailyLog: {
-          localDate,
-        },
-      },
-      include: {
-        dailyLog: {
-          select: {
-            localDate: true,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
           },
         },
       },
@@ -492,84 +530,61 @@ const resolveAnalysisState = async (
   analysisRepository: ReturnType<typeof createAnalysisRepository>,
   localDate: string,
 ): Promise<SnapshotState> => {
-  const current = await analysisRepository.findCurrent(localDate);
+  let current: Awaited<ReturnType<typeof analysisRepository.findCurrent>>;
+  try {
+    current = await analysisRepository.findCurrent(localDate);
+  } catch {
+    return { status: "error", code: "ANALYSIS_UNAVAILABLE" };
+  }
   if (!current) {
-    const fallback = await analysisRepository.findLastSuccessful(localDate);
+    let fallback: Awaited<ReturnType<typeof analysisRepository.findLastSuccessful>>;
+    try {
+      fallback = await analysisRepository.findLastSuccessful(localDate);
+    } catch {
+      return { status: "error", code: "ANALYSIS_UNAVAILABLE" };
+    }
     if (!fallback) {
-      return {
-        state: "insufficient",
-        snapshot: null,
-        message: "오늘 분석에 필요한 기록이 부족해요",
-        action: {
-          label: "기록 시작",
-          href: "/record",
-        },
-      };
+      return { status: "insufficient" };
     }
 
     if (fallback.ok) {
       return {
-        state: "stale",
-        snapshot: fallback.value,
-        message: "마지막 정상 분석을 표시합니다",
-        action: null,
+        status: "stale",
+        entity: fallback.value,
+        result: fallback.value.result,
       };
     }
 
-    return {
-      state: "insufficient",
-      snapshot: null,
-      message: "분석 데이터가 손상되어 다시 계산해야 합니다",
-      action: {
-        label: "재계산",
-        href: "/record",
-      },
-    };
+    return { status: "error", code: "CORRUPT_ANALYSIS_SNAPSHOT" };
   }
 
   if (current.ok) {
     return {
-      state: "ready",
-      snapshot: current.value,
-      message: null,
-      action: null,
+      status: "ready",
+      entity: current.value,
+      result: current.value.result,
     };
   }
 
-  const fallback = await analysisRepository.findLastSuccessful(localDate);
+  let fallback: Awaited<ReturnType<typeof analysisRepository.findLastSuccessful>>;
+  try {
+    fallback = await analysisRepository.findLastSuccessful(localDate);
+  } catch {
+    return { status: "error", code: "ANALYSIS_UNAVAILABLE" };
+  }
   if (!fallback) {
-    return {
-      state: "insufficient",
-      snapshot: null,
-      message: "분석 데이터가 손상되어 다시 계산해야 합니다",
-      action: {
-        label: "재계산",
-        href: "/record",
-      },
-    };
+    return { status: "error", code: "CORRUPT_ANALYSIS_SNAPSHOT" };
   }
 
   if (fallback.ok) {
     return {
-      state: "stale",
-      snapshot: fallback.value,
-      message: "마지막 정상 분석을 표시합니다",
-      action: {
-        label: "재계산",
-        href: "/record",
-      },
+      status: "stale",
+      entity: fallback.value,
+      result: fallback.value.result,
     };
   }
 
-  return {
-    state: "insufficient",
-    snapshot: null,
-    message: "분석 데이터가 손상되어 다시 계산해야 합니다",
-    action: {
-      label: "재계산",
-      href: "/record",
-    },
-  };
+  return { status: "error", code: "CORRUPT_ANALYSIS_SNAPSHOT" };
 };
 
 const getSleepGoal = async (db: PrismaAnalysisClient, userId: string): Promise<SleepGoal> => {
@@ -610,7 +625,7 @@ export const getTodayViewModel = async (
     resolveAnalysisState(analysisRepository, localDate),
     getSleepGoal(prisma, scope.userId),
     prisma.planDay.findFirst({
-      where: { userId: scope.userId, localDate, status: "active" },
+      where: { userId: scope.userId, localDate, timezone: scope.timezone, status: "active" },
       select: { id: true, targetBedAt: true, caffeineCutoffAt: true, exerciseCutoffAt: true, mealCutoffAt: true, windDownAt: true },
     }),
     prisma.scheduleAdvice
@@ -621,7 +636,7 @@ export const getTodayViewModel = async (
 
   const recordSummary = await buildRecordSummary(prisma, scope, localDate).catch(() => ({
     state: "error" as const,
-    data: null as const,
+    data: null,
     message: "오늘 기록을 불러오지 못했어요",
     action: null,
   }));

@@ -34,7 +34,7 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         colorScheme: "light",
-        reducedMotion: "reduce",
+        contextOptions: { reducedMotion: "reduce" },
         timezoneId: "Asia/Seoul",
       },
     },

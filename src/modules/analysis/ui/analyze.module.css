@@ -10,20 +10,46 @@
 .metricCard, .priorityDetail { min-height: 120px; padding: 16px; border-radius: 14px; background: #f4f6ff; }
 .metricCard p, .priorityDetail p { margin: 0; color: #65708d; font-size: 14px; }
 .metricCard strong, .priorityDetail strong { display: block; margin: 15px 0 8px; font-size: 24px; }
+.metricCardHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.metricTag { display: inline-block; flex: 0 0 auto; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; white-space: nowrap; }
+.metricTag_positive { background: #e5f0fa; color: #3d6798; }
+.metricTag_neutral { background: #f0e9f5; color: #5f346f; }
+.metricTag_caution { background: #fff0dd; color: #a5631f; }
+.metricTag_muted { background: #eef0f4; color: #5d6680; }
+.metricNote { margin: 0; color: #766982; font-size: 10px; line-height: 1.5; }
+.metricState {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.metricMobileLabel { display: none; }
 .status_ready { color: #207657; font-size: 13px; font-weight: 700; }
 .status_stale { color: #8b6615; font-size: 13px; font-weight: 700; }
-.status_insufficient, .status_error { color: #6b7280; font-size: 13px; font-weight: 700; }
+.status_insufficient, .status_error { color: #687189; font-size: 13px; font-weight: 700; }
 .reportSection p { color: #59627e; line-height: 1.6; }
+.reportBasis { display: none; }
+.reportAiSource { display: inline-block; margin-right: 6px; padding: 6px 12px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 11px; font-weight: 800; }
 .reportSection li { margin: 8px 0; }
 .disclaimer { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e4e8f5; font-size: 13px; }
 .desktopDetails { max-width: 1080px; margin: 18px auto 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .sectionHeading { margin-bottom: 16px; }
 .chart { width: 100%; min-height: 180px; overflow: visible; }
+.chartDescription { margin: -7px 0 12px; color: #766982; font-size: 12px; line-height: 1.5; }
 .chartAxis { stroke: #cbd3ea; stroke-width: 1; }
 .goalLine { stroke: #8792c7; stroke-dasharray: 4 3; stroke-width: 2; }
-.sleepPoint { fill: #6d67df; stroke: white; stroke-width: 2; }
-.sleepPoint:focus, .chart g:focus { outline: 2px solid #212a75; outline-offset: 3px; }
-.missingLabel { fill: #8189a2; font-size: 9px; text-anchor: middle; }
+.goalLabel { fill: #a5631f; font-size: 10px; font-weight: 800; text-anchor: end; }
+.sleepBar { fill: #f0e9f5; }
+.latestSleepBar { fill: #5f346f; }
+.missingBar { fill: #f6f1f8; stroke: #cdbbdd; stroke-dasharray: 2 2; }
+.chart g:focus rect { stroke: #21152e; stroke-width: 2; }
+.missingLabel { fill: #656d87; font-size: 9px; text-anchor: middle; }
+.chartDateLabel { fill: #766982; font-size: 10px; text-anchor: middle; }
 .srOnlyTable { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .signalValue { margin: 0 0 8px; font-size: 28px; font-weight: 800; }
 .caffeineSection > p { color: #59627e; }
@@ -44,19 +70,365 @@
 .dataBasisList dt { color: #65708d; font-size: 13px; }
 .dataBasisList dd { margin: 4px 0 0; font-weight: 700; }
 .emptyState { color: #66718e; }
-.mobileDetails { display: none; }
+.mobileDetails, .mobileExplainabilityVisual, .mobileAnalysisState { display: none; }
+.dataBasisControl { display: none; }
+.desktopAnalysisState {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.semanticHeroTitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.scheduleAdviceSlot { max-width: 1080px; margin: 18px auto 0; }
+
+@media (min-width: 768px) {
+  .page {
+    display: grid;
+    grid-template-areas:
+      "hero hero"
+      "basis basis"
+      "metrics metrics"
+      "trend caffeine"
+      "report advice"
+      "explain explain";
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    gap: 28px 18px;
+    min-height: 100%;
+    padding: 0 50px 22px;
+    background: #f4eef8;
+  }
+
+  .hero {
+    position: relative;
+    grid-area: hero;
+    min-height: 206px;
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0 -50px;
+    padding: 43px 50px;
+    border: 0;
+    border-radius: 0;
+    background: #301b44 url("/assets/lunar-rabbit/night-header.svg") center / cover no-repeat;
+    box-shadow: none;
+    color: #ffffff;
+  }
+
+  .hero .eyebrow { margin-bottom: 11px; color: #e7d8f2; font-size: 11px; letter-spacing: 0; }
+  .hero h1 { color: #ffffff; font-size: 28px; line-height: 1.35; letter-spacing: -.045em; }
+  .hero p:not(.eyebrow) { margin: 8px 0 0; color: #d9c8e5; font-size: 14px; }
+  .dataBasisControl {
+    display: inline-block;
+    position: absolute;
+    top: 90px;
+    right: 100px;
+    min-width: 190px;
+    box-sizing: border-box;
+    padding: 13px 18px;
+    border: 1px solid #8e68a1;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #5f346f;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+  }
+  .dataBasisControl:focus-visible { outline: 3px solid #d8eaf8; outline-offset: 3px; }
+
+  .primaryLayout, .desktopDetails { display: contents; }
+
+  .primaryLayout .metricSection {
+    grid-area: metrics;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .primaryLayout .metricSection .sectionHeading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .primaryLayout .metricGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; }
+  .primaryLayout .metricCard {
+    min-height: 132px;
+    box-sizing: border-box;
+    padding: 18px 19px;
+    border: 1px solid #e2d6e9;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(38, 18, 56, .05);
+  }
+  .primaryLayout .metricCard p { color: #73647b; font-size: 11px; }
+  .primaryLayout .metricCard strong { margin: 12px 0 8px; color: #21152e; font-size: 20px; }
+  .primaryLayout .metricCard .metricNote { color: #766982; font-size: 10px; }
+  .primaryLayout .metricGrid > [data-metric-key="sleep-goal"] { order: 1; }
+  .primaryLayout .metricGrid > [data-metric-key="caffeine-signal"] { order: 2; }
+  .primaryLayout .metricGrid > [data-metric-key="phone-wind-down"] { order: 3; }
+  .primaryLayout .metricGrid > [data-metric-key="sleep-rhythm"] { order: 4; }
+
+  .dataBasisSection {
+    grid-area: basis;
+    display: grid;
+    grid-template-columns: minmax(230px, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 18px;
+    min-height: 74px;
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0;
+    padding: 14px 24px;
+    border: 0;
+    border-radius: 18px;
+    background: #e5f0fa;
+    box-shadow: none;
+    scroll-margin-top: 24px;
+  }
+  .dataBasisSection .sectionHeading { display: flex; align-items: center; gap: 18px; margin: 0; }
+  .dataBasisSection .eyebrow { margin: 0; padding: 6px 12px; border-radius: 999px; background: #d8eaf8; color: #3d6798; font-size: 11px; letter-spacing: 0; white-space: nowrap; }
+  .dataBasisSection h2 { margin: 0; font-size: 14px; white-space: nowrap; }
+  .dataBasisSection .dataBasisList { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .dataBasisSection .dataBasisList div { padding: 6px 8px; background: rgba(255, 255, 255, .42); }
+  .dataBasisSection .dataBasisList dt { font-size: 10px; }
+  .dataBasisSection .dataBasisList dd { font-size: 11px; }
+
+  .chartSection {
+    grid-area: trend;
+    min-height: 344px;
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0;
+    padding: 26px;
+    border-color: #e2d6e9;
+    border-radius: 22px;
+    box-shadow: 0 6px 20px rgba(38, 18, 56, .06);
+  }
+  .chartSection h2 { margin: 0; color: #21152e; font-size: 20px; }
+  .chartSection .eyebrow { color: #73647b; letter-spacing: 0; }
+  .chartAxis { stroke: #e2d6e9; }
+  .goalLine { stroke: #e69a33; }
+  .sleepBar { fill: #f0e9f5; }
+  .latestSleepBar { fill: #5f346f; }
+
+  .caffeineSection {
+    grid-area: caffeine;
+    min-height: 344px;
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0;
+    padding: 25px;
+    border-color: #7b548b;
+    border-radius: 22px;
+    background: radial-gradient(circle at 92% -6%, #7b4b8a 0 28%, transparent 28.5%), #5f346f;
+    box-shadow: 0 10px 26px rgba(38, 18, 56, .1);
+    color: #ffffff;
+  }
+  .caffeineSection h2, .caffeineSection .signalValue { color: #ffffff; }
+  .caffeineSection .eyebrow, .caffeineSection > p { color: #f0e4f5; }
+  .caffeineSection .whatIfForm label { color: #ffffff; }
+  .caffeineSection .whatIfForm button { background: #ffffff; color: #5f346f; }
+  .caffeineSection .emptyState { color: #f0e4f5; }
+
+  .reportSection {
+    grid-area: report;
+    min-height: 304px;
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0;
+    padding: 26px;
+    border-color: #e2d6e9;
+    border-radius: 22px;
+    box-shadow: 0 6px 20px rgba(38, 18, 56, .06);
+  }
+  .reportSection h2 { color: #21152e; font-size: 20px; }
+  .reportSection .eyebrow { color: #5f346f; font-size: 11px; letter-spacing: 0; }
+  .reportSection .reportAiSource { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 11px; font-weight: 800; }
+  .reportSection .reportBasis { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #e5f0fa; color: #3d6798; font-size: 11px; font-weight: 800; }
+
+  .scheduleAdviceSlot {
+    grid-area: advice;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+  }
+  .scheduleAdviceSlot > section {
+    min-height: 304px;
+    box-sizing: border-box;
+    margin: 0;
+    border: 1px solid #f0ddaa;
+    border-radius: 22px;
+    background: #fff4d9;
+    box-shadow: 0 6px 20px rgba(38, 18, 56, .06);
+  }
+
+  .explainabilitySection {
+    grid-area: explain;
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    align-items: center;
+    gap: 18px;
+    min-height: 54px;
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0;
+    padding: 10px 22px;
+    border-color: #e2d6e9;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+  .explainabilitySection .sectionHeading { margin: 0; }
+  .explainabilitySection .eyebrow { display: none; }
+  .explainabilitySection h2 { margin: 0; font-size: 12px; }
+  .explainabilitySection .evidenceList { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+  .explainabilitySection .evidenceList li { flex: 1 1 180px; padding: 7px 9px; }
+  .explainabilitySection .emptyState { margin: 0; font-size: 11px; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page {
+    grid-template-areas:
+      "hero"
+      "basis"
+      "metrics"
+      "trend"
+      "caffeine"
+      "report"
+      "advice"
+      "explain";
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 28px;
+  }
+  .hero { margin-inline: -28px; padding-inline: 28px; }
+  .dataBasisControl { right: 28px; min-width: 160px; }
+  .primaryLayout .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dataBasisSection { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media (max-width: 767px) {
-  .page { padding: var(--space-2); padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }
-  .hero { padding: 22px; }
-  .primaryLayout { display: block; }
-  .primaryLayout > * { margin-bottom: 14px; }
-  .metricGrid { grid-template-columns: repeat(2, 1fr); }
-  .priorityDetail { display: none; }
+  .page {
+    position: relative;
+    min-height: 100%;
+    padding: 0 0 calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+    background: #f4eef8;
+    color: #21152e;
+  }
+  .hero {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .primaryLayout { display: grid; grid-template-columns: 1fr; gap: 30px; padding: 14px 24px 0; }
+  .metricSection {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .metricSection .sectionHeading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+  .metricCard {
+    min-height: 108px;
+    box-sizing: border-box;
+    padding: 16px 17px;
+    border: 1px solid #e2d6e9;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 3px 10px rgba(38, 18, 56, .04);
+  }
+  .metricCard p { color: #73647b; font-size: 11px; }
+  .metricCard strong { margin: 11px 0 0; color: #21152e; font-size: 20px; letter-spacing: -0.05em; }
+  .mobileSummaryMetrics .metricCard .status_ready,
+  .mobileSummaryMetrics .metricCard .status_stale,
+  .mobileSummaryMetrics .metricCard .status_insufficient,
+  .mobileSummaryMetrics .metricCard .status_error { display: none; }
+  .mobileSummaryMetrics .metricTag,
+  .mobileSummaryMetrics .metricNote { display: none; }
+  .mobileSummaryMetrics .metricGrid > [data-metric-key="sleep-rhythm"],
+  .mobileSummaryMetrics .metricGrid > [data-metric-key="phone-wind-down"] { display: none; }
+  .mobileSummaryMetrics .metricGrid > [data-metric-key="caffeine-signal"] { display: block; order: 2; }
+  .mobileSummaryMetrics .metricGrid > [data-metric-key="sleep-goal"] { display: block; order: 1; }
+  .mobileSummaryMetrics .metricDesktopLabel { display: none; }
+  .mobileSummaryMetrics .metricMobileLabel { display: inline; }
+  .mobileAnalysisState {
+    position: absolute;
+    z-index: 2;
+    top: 48px;
+    right: 24px;
+    display: inline-block;
+    padding: 2px 0;
+    color: #e8d9f2;
+    font-size: 11px;
+  }
+  .mobileAnalysisState.status_ready,
+  .mobileAnalysisState.status_stale,
+  .mobileAnalysisState.status_insufficient,
+  .mobileAnalysisState.status_error { color: #e8d9f2; }
+  .reportSection {
+    margin: 0;
+    min-height: 258px;
+    box-sizing: border-box;
+    padding: 17px 19px 18px;
+    border: 1px solid #6c417d;
+    border-radius: 20px;
+    background: #5f346f;
+    box-shadow: 0 8px 20px rgba(38, 18, 56, .12);
+    color: #ffffff;
+  }
+  .reportSection .eyebrow { margin-bottom: 12px; color: #ffffff; font-size: 11px; letter-spacing: -0.02em; }
+  .reportSection h2 { color: #ffffff; font-size: 20px; line-height: 1.45; letter-spacing: -0.055em; }
+  .reportSection p { color: #f0e4f5; font-size: 11px; line-height: 1.55; }
+  .reportSection .reportBasis { display: inline-block; margin-top: 10px; padding: 5px 18px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 11px; font-weight: 800; }
+  .reportSection .reportAiSource { display: inline-block; margin-top: 10px; padding: 5px 18px; border-radius: 999px; background: rgba(255, 255, 255, .18); color: #ffffff; font-size: 11px; font-weight: 800; }
+  .reportSection ul { margin: 10px 0 0; padding-left: 18px; color: #eee3f3; font-size: 11px; line-height: 1.5; }
+  .reportSection .disclaimer { color: #e8ddea; border-color: rgba(255, 255, 255, .18); }
+  .mobileExplainabilityVisual {
+    position: relative;
+    display: block;
+    min-height: 116px;
+    box-sizing: border-box;
+    margin: 16px 24px 0;
+    padding: 19px 84px 18px 18px;
+    border-radius: 18px;
+    background: #e5f0fa;
+    color: #21152e;
+  }
+  .mobileExplainabilityVisual img {
+    position: absolute;
+    right: 18px;
+    top: 24px;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+  .mobileExplainabilityVisual strong { display: block; font-size: 12px; letter-spacing: -0.04em; }
+  .mobileExplainabilityVisual p { margin: 14px 0 0; color: #73647b; font-size: 11px; line-height: 1.45; }
   .desktopDetails { display: none; }
-  .mobileDetails { display: block; max-width: 1080px; margin: 14px auto 0; border: 1px solid #d7dcf3; border-radius: 16px; background: white; }
-  .mobileDetails summary { padding: 18px; cursor: pointer; color: #34317e; font-weight: 800; }
+  .mobileDetails { display: block; max-width: none; margin: 16px 24px 0; border: 1px solid #e2d6e9; border-radius: 18px; background: white; }
+  .mobileDetails summary { padding: 18px; cursor: pointer; color: #5f346f; font-weight: 800; }
   .mobileDetails > * { margin: 0 14px 14px; }
-  .mobileDetails .priorityDetail { display: block; }
+  .scheduleAdviceSlot { max-width: none; margin: 16px 24px 0; }
+  .scheduleAdviceSlot > section { margin: 0; }
   .whatIfForm { grid-template-columns: 1fr; }
   .dataBasisList { grid-template-columns: 1fr; }
 }

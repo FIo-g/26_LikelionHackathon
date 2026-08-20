@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PrismaClient } from "@/generated/prisma/client";
+import type { PrismaClient } from "@/generated/prisma/client";
+import { createTestPrismaClient } from "../support/prisma-client";
 import { createPrismaNarrationRepository } from "@/modules/narration/infrastructure/prisma-narration-repository";
 import type { NarrationFacts } from "@/modules/narration/domain/types";
 
@@ -17,7 +18,7 @@ type NarrationPrisma = PrismaClient & { narration: {
   updateMany: (args: unknown) => Promise<unknown>;
   findFirst: (args: unknown) => Promise<{ status: string; retryCount: number } | null>;
 } };
-const prisma = new PrismaClient() as NarrationPrisma;
+const prisma = createTestPrismaClient(sqliteUrl ?? "file:./prisma/unused-narration.sqlite") as NarrationPrisma;
 
 describeSqlite("Narration SQLite contract", () => {
   beforeAll(async () => {

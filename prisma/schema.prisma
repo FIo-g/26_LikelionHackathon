@@ -8,35 +8,40 @@ datasource db {
 }
 
 model User {
-  id              String @id
-  name            String?
-  email           String? @unique
-  emailVerified   Boolean @default(false)
-  image           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  accounts        Account[]
-  sessions        Session[]
-  dailyLogs       DailyLog[]
-  sleepSessions   SleepSession[]
-  caffeineEntries CaffeineEntry[]
-  alcoholEntries  AlcoholEntry[]
-  mealEntries     MealEntry[]
-  exerciseEntries ExerciseEntry[]
-  phoneUsageEntries PhoneUsageEntry[]
-  wellnessEntries WellnessEntry[]
-  recordRevisions RecordRevision[]
-  mutationReceipts MutationReceipt[]
-  baselineSnapshots BaselineSnapshot[]
-  analysisSnapshots AnalysisSnapshot[]
-  specialEvents   SpecialEvent[]
-  scheduleAdvice  ScheduleAdvice[]
-  narrations      Narration[]
+  id                 String              @id
+  name               String?
+  email              String?             @unique
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  accounts           Account[]
+  sessions           Session[]
+  profile            UserProfile?
+  sleepGoal          SleepGoal?
+  habit              UserHabit?
+  connection         Connection?
+  dailyLogs          DailyLog[]
+  sleepSessions      SleepSession[]
+  caffeineEntries    CaffeineEntry[]
+  alcoholEntries     AlcoholEntry[]
+  mealEntries        MealEntry[]
+  exerciseEntries    ExerciseEntry[]
+  phoneUsageEntries  PhoneUsageEntry[]
+  wellnessEntries    WellnessEntry[]
+  recordRevisions    RecordRevision[]
+  mutationReceipts   MutationReceipt[]
+  baselineSnapshots  BaselineSnapshot[]
+  analysisSnapshots  AnalysisSnapshot[]
+  impactFactors      ImpactFactor[]
+  specialEvents      SpecialEvent[]
+  scheduleAdvice     ScheduleAdvice[]
+  narrations         Narration[]
   routineCompletions RoutineCompletion[]
-  careToolSessions CareToolSession[]
-  sleepPlans      SleepPlan[]
-  planDays        PlanDay[]
-  planRevisions   PlanRevision[]
+  careToolSessions   CareToolSession[]
+  sleepPlans         SleepPlan[]
+  planDays           PlanDay[]
+  planRevisions      PlanRevision[]
 }
 
 model Session {
@@ -54,7 +59,8 @@ model Session {
 }
 
 model Account {
-  id                    String   @id
+  id                    String    @id
+  issuer                String    @default("local:credential")
   accountId             String
   providerId            String
   userId                String
@@ -65,10 +71,11 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([issuer, accountId], map: "account_issuer_accountId_uidx")
   @@index([userId])
 }
 
@@ -91,46 +98,55 @@ model RateLimit {
 }
 
 model UserProfile {
-  id                   String   @id @default(cuid())
-  userId               String   @unique
-  nickname             String?
-  timezone             String?
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  nickname              String?
+  timezone              String?
+  age                   Int?
+  gender                String?
+  heightCm              Int?
+  weightKg              Float?
   onboardingCompletedAt DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SleepGoal {
-  id                    String @id @default(cuid())
-  userId                String @unique
+  id                    String   @id @default(cuid())
+  userId                String   @unique
   targetBedTime         String
   targetWakeTime        String
   targetDurationMinutes Int
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserHabit {
-  id         String @id @default(cuid())
-  userId     String @unique
+  id         String   @id @default(cuid())
+  userId     String   @unique
   caffeine   String
   exercise   String
   meal       String
+  alcohol    String?
   phoneUsage String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Connection {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  selected       String
-  mode           String
-  availability   String
-  state          String
-  lastSyncedAt   DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  selected     String
+  mode         String
+  availability String
+  state        String
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DailyLog {
@@ -140,13 +156,13 @@ model DailyLog {
   timezone  String
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  sleepSession  SleepSession[]
-  caffeineEntry CaffeineEntry[]
-  alcoholEntry  AlcoholEntry[]
-  mealEntry     MealEntry[]
-  exerciseEntry ExerciseEntry[]
+  sleepSession    SleepSession[]
+  caffeineEntry   CaffeineEntry[]
+  alcoholEntry    AlcoholEntry[]
+  mealEntry       MealEntry[]
+  exerciseEntry   ExerciseEntry[]
   phoneUsageEntry PhoneUsageEntry[]
-  wellnessEntry WellnessEntry[]
+  wellnessEntry   WellnessEntry[]
 
   @@unique([userId, localDate, timezone])
   @@unique([id, userId])
@@ -154,114 +170,114 @@ model DailyLog {
 }
 
 model SleepSession {
-  id           String   @id @default(uuid())
-  userId       String
-  dailyLogId   String
-  sleepDate    String
-  startedAt    DateTime
-  endedAt      DateTime
+  id             String   @id @default(uuid())
+  userId         String
+  dailyLogId     String
+  sleepDate      String
+  startedAt      DateTime
+  endedAt        DateTime
   morningFatigue Int
-  timezone     String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+  timezone       String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog       DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, sleepDate])
 }
 
 model CaffeineEntry {
-  id           String   @id @default(uuid())
-  userId       String
-  dailyLogId   String
-  brand        String
-  product      String
-  caffeineMg   Int
-  consumedAt   DateTime
-  timezone     String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+  id         String   @id @default(uuid())
+  userId     String
+  dailyLogId String
+  brand      String
+  product    String
+  caffeineMg Int
+  consumedAt DateTime
+  timezone   String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog   DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AlcoholEntry {
-  id           String   @id @default(uuid())
-  userId       String
-  dailyLogId   String
-  alcoholType  String
-  servings     Float
-  consumedAt   DateTime
-  timezone     String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+  id          String   @id @default(uuid())
+  userId      String
+  dailyLogId  String
+  alcoholType String
+  servings    Float
+  consumedAt  DateTime
+  timezone    String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog    DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MealEntry {
-  id           String   @id @default(uuid())
-  userId       String
-  dailyLogId   String
-  size         String
-  eatenAt      DateTime
-  notes        String?
-  timezone     String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+  id         String   @id @default(uuid())
+  userId     String
+  dailyLogId String
+  size       String
+  eatenAt    DateTime
+  notes      String?
+  timezone   String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog   DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ExerciseEntry {
+  id               String   @id @default(uuid())
+  userId           String
+  dailyLogId       String
+  exerciseType     String
+  intensity        String
+  startedAt        DateTime
+  endedAt          DateTime
+  averageHeartRate Int?
+  timezone         String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog         DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PhoneUsageEntry {
   id              String   @id @default(uuid())
   userId          String
   dailyLogId      String
-  exerciseType    String
-  intensity       String
-  startedAt       DateTime
-  endedAt         DateTime
-  averageHeartRate Int?
+  localDate       String
+  lastUseAt       DateTime
+  durationMinutes Int
   timezone        String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   dailyLog        DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model PhoneUsageEntry {
-  id             String   @id @default(uuid())
-  userId         String
-  dailyLogId     String
-  localDate      String
-  lastUseAt      DateTime
-  durationMinutes Int
-  timezone       String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog       DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model WellnessEntry {
-  id             String   @id @default(uuid())
-  userId         String
-  dailyLogId     String
-  localDate      String
-  fatigueLevel   Int
-  stressLevel    Int
-  timezone       String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyLog       DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+  id           String   @id @default(uuid())
+  userId       String
+  dailyLogId   String
+  localDate    String
+  fatigueLevel Int
+  stressLevel  Int
+  timezone     String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RecordRevision {
@@ -274,7 +290,7 @@ model RecordRevision {
   after      Json?
   changedAt  DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, entityType, entityId])
 }
@@ -288,7 +304,7 @@ model MutationReceipt {
   status         String
   resourceType   String?
   resourceId     String?
-  responseJson    Json?
+  responseJson   Json?
   expiresAt      DateTime
   createdAt      DateTime @default(now())
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -298,57 +314,60 @@ model MutationReceipt {
 }
 
 model BaselineSnapshot {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
   timezone     String
   status       String
   result       Json
-  generatedAt  DateTime @default(now())
+  generatedAt  DateTime  @default(now())
   supersededAt DateTime?
-  currentKey   String?  @unique
+  currentKey   String?   @unique
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, timezone, status, generatedAt])
 }
 
 model AnalysisSnapshot {
-  id          String   @id @default(cuid())
-  userId      String
-  localDate   String
-  timezone    String
-  status      String
-  result      Json
-  generatedAt DateTime @default(now())
+  id           String    @id @default(cuid())
+  userId       String
+  localDate    String
+  timezone     String
+  status       String
+  result       Json
+  generatedAt  DateTime  @default(now())
   supersededAt DateTime?
-  currentKey  String?  @unique
+  currentKey   String?   @unique
 
-  factors ImpactFactor[]
+  factors    ImpactFactor[]
   narrations Narration[]
-  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([id, userId])
   @@index([userId, timezone, status, generatedAt])
   @@index([userId, timezone, localDate, status])
   @@index([userId, timezone, localDate])
 }
 
 model ImpactFactor {
-  id                String   @id @default(cuid())
+  id                 String @id @default(cuid())
+  userId             String
   analysisSnapshotId String
-  factor            String
-  exposedCount      Int
-  unexposedCount    Int
-  deltaMinutes      Float?
-  confidence        String
-  evidence          Json
+  factor             String
+  exposedCount       Int
+  unexposedCount     Int
+  deltaMinutes       Float?
+  confidence         String
+  evidence           Json
 
-  analysisSnapshot AnalysisSnapshot @relation(fields: [analysisSnapshotId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisSnapshot AnalysisSnapshot @relation(fields: [analysisSnapshotId, userId], references: [id, userId], onDelete: Cascade)
 
-  @@index([analysisSnapshotId])
+  @@index([userId, analysisSnapshotId])
 }
 
 model SpecialEvent {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   userId        String
   title         String
   type          String
@@ -357,11 +376,11 @@ model SpecialEvent {
   desiredWakeAt DateTime?
   notes         String?
   timezone      String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  advice        ScheduleAdvice[]
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  advice ScheduleAdvice[]
 
   @@unique([id, userId])
   @@index([userId, startsAt])
@@ -381,11 +400,11 @@ model ScheduleAdvice {
   confidence       String
   generatedAt      DateTime @default(now())
 
-  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event            SpecialEvent? @relation(fields: [eventId, userId], references: [id, userId])
-  plan             SleepPlan?    @relation("AdvicePlan", fields: [planId, userId], references: [id, userId])
-  sourceRevision   PlanRevision? @relation("AdviceRevision")
-  narrations       Narration[]
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event          SpecialEvent? @relation(fields: [eventId, userId], references: [id, userId])
+  plan           SleepPlan?    @relation("AdvicePlan", fields: [planId, userId], references: [id, userId])
+  sourceRevision PlanRevision? @relation("AdviceRevision")
+  narrations     Narration[]
 
   @@unique([id, userId])
   @@unique([userId, triggerType, inputHash])
@@ -409,12 +428,12 @@ model Narration {
   updatedAt          DateTime @updatedAt
 
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  analysisSnapshot AnalysisSnapshot? @relation(fields: [analysisSnapshotId], references: [id], onDelete: Cascade)
-  scheduleAdvice   ScheduleAdvice?   @relation(fields: [scheduleAdviceId], references: [id], onDelete: Cascade)
+  analysisSnapshot AnalysisSnapshot? @relation(fields: [analysisSnapshotId, userId], references: [id, userId], onDelete: Cascade)
+  scheduleAdvice   ScheduleAdvice?   @relation(fields: [scheduleAdviceId, userId], references: [id, userId], onDelete: Cascade)
 
-  @@index([userId, status, generatedAt])
   @@unique([analysisSnapshotId])
   @@unique([scheduleAdviceId])
+  @@index([userId, status, generatedAt])
 }
 
 model RoutineCompletion {
@@ -428,21 +447,21 @@ model RoutineCompletion {
   createdAt          DateTime @default(now())
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  planDay PlanDay? @relation(fields: [planDayId], references: [id], onDelete: Cascade)
+  planDay PlanDay? @relation(fields: [planDayId, userId], references: [id, userId], onDelete: Cascade)
 
   @@unique([userId, localDate, routineRevisionKey, stepKey])
   @@index([userId, localDate])
 }
 
 model CareToolSession {
-  id                     String   @id @default(cuid())
+  id                     String    @id @default(cuid())
   userId                 String
   localDate              String
   toolKey                String
   startedAt              DateTime
   plannedDurationSeconds Int
   completedAt            DateTime?
-  createdAt              DateTime @default(now())
+  createdAt              DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -469,24 +488,24 @@ model SleepPlan {
 }
 
 model PlanDay {
-  id                String   @id @default(uuid())
-  userId            String
-  planId            String
-  localDate         String
-  timezone          String
-  targetBedAt       DateTime
-  targetWakeAt      DateTime
-  caffeineCutoffAt  DateTime
-  exerciseCutoffAt  DateTime
-  mealCutoffAt      DateTime
-  windDownAt        DateTime
-  status            String
-  activeKey         String?  @unique
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default(uuid())
+  userId           String
+  planId           String
+  localDate        String
+  timezone         String
+  targetBedAt      DateTime
+  targetWakeAt     DateTime
+  caffeineCutoffAt DateTime
+  exerciseCutoffAt DateTime
+  mealCutoffAt     DateTime
+  windDownAt       DateTime
+  status           String
+  activeKey        String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan              SleepPlan @relation(fields: [planId, userId], references: [id, userId], onDelete: Cascade)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan               SleepPlan           @relation(fields: [planId, userId], references: [id, userId], onDelete: Cascade)
   routineCompletions RoutineCompletion[]
 
   @@unique([id, userId])
@@ -506,9 +525,9 @@ model PlanRevision {
   reason            String
   createdAt         DateTime @default(now())
 
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan              SleepPlan        @relation(fields: [planId, userId], references: [id, userId], onDelete: Cascade)
-  sourceAdvice      ScheduleAdvice?  @relation("AdviceRevision", fields: [sourceAdviceId, userId], references: [id, userId])
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan         SleepPlan       @relation(fields: [planId, userId], references: [id, userId], onDelete: Cascade)
+  sourceAdvice ScheduleAdvice? @relation("AdviceRevision", fields: [sourceAdviceId, userId], references: [id, userId])
 
   @@unique([sourceAdviceId, userId])
   @@index([userId, planId, createdAt])

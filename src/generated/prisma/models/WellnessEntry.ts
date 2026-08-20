@@ -570,6 +570,7 @@ export type WellnessEntryCreateOrConnectWithoutUserInput = {
 
 export type WellnessEntryCreateManyUserInputEnvelope = {
   data: Prisma.WellnessEntryCreateManyUserInput | Prisma.WellnessEntryCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type WellnessEntryUpsertWithWhereUniqueWithoutUserInput = {
@@ -631,6 +632,7 @@ export type WellnessEntryCreateOrConnectWithoutDailyLogInput = {
 
 export type WellnessEntryCreateManyDailyLogInputEnvelope = {
   data: Prisma.WellnessEntryCreateManyDailyLogInput | Prisma.WellnessEntryCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type WellnessEntryUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1488,6 +1490,7 @@ export type WellnessEntryCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many WellnessEntries.
    */
   data: Prisma.WellnessEntryCreateManyInput | Prisma.WellnessEntryCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1506,6 +1509,7 @@ export type WellnessEntryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * The data used to create many WellnessEntries.
    */
   data: Prisma.WellnessEntryCreateManyInput | Prisma.WellnessEntryCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

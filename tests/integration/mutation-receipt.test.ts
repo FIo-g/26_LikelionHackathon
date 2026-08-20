@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createMutationReceiptRepository } from "@/modules/records/infrastructure/prisma-mutation-receipt-repository";
 import type { MutationReceiptCommand } from "@/modules/records/application/ports";
+import type { TransactionClient } from "@/shared/db/transaction";
 
 type MutationReceiptRow = {
   id: string;
@@ -100,7 +101,7 @@ describe("mutation receipt repository", () => {
     const clockNow = new Date("2026-08-20T00:00:00.000Z");
     const clock = { now: () => clockNow };
     const fixture = createMockDb();
-    const receipts = createMutationReceiptRepository(fixture.db as never, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
+    const receipts = createMutationReceiptRepository(fixture.db as unknown as TransactionClient, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
     const command: MutationReceiptCommand = {
       operation: "record.create",
       idempotencyKey: "same-key",
@@ -121,7 +122,7 @@ describe("mutation receipt repository", () => {
     const clockNow = new Date("2026-08-20T00:00:00.000Z");
     const clock = { now: () => clockNow };
     const fixture = createMockDb();
-    const receipts = createMutationReceiptRepository(fixture.db as never, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
+    const receipts = createMutationReceiptRepository(fixture.db as unknown as TransactionClient, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
     const first: MutationReceiptCommand = {
       operation: "record.update",
       idempotencyKey: "same-key",
@@ -141,7 +142,7 @@ describe("mutation receipt repository", () => {
     const clockNow = new Date("2026-08-20T00:00:00.000Z");
     const clock = { now: () => clockNow };
     const fixture = createMockDb();
-    const receipts = createMutationReceiptRepository(fixture.db as never, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
+    const receipts = createMutationReceiptRepository(fixture.db as unknown as TransactionClient, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
 
     const command: MutationReceiptCommand = {
       operation: "record.create",
@@ -149,7 +150,7 @@ describe("mutation receipt repository", () => {
       requestHash: "hash-parallel",
     };
 
-    let release: (() => void) | null = null;
+    let release!: () => void;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
@@ -167,9 +168,7 @@ describe("mutation receipt repository", () => {
     await expect(second).rejects.toThrow("IDEMPOTENCY_IN_PROGRESS");
     expect(firstWork).toHaveBeenCalledTimes(1);
 
-    if (release) {
-      release();
-    }
+    release();
 
     await first;
   });
@@ -178,7 +177,7 @@ describe("mutation receipt repository", () => {
     const now = new Date("2026-08-20T00:00:00.000Z");
     const clock = { now: () => now };
     const fixture = createMockDb();
-    const receipts = createMutationReceiptRepository(fixture.db as never, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
+    const receipts = createMutationReceiptRepository(fixture.db as unknown as TransactionClient, { userId: "u-1", timezone: "Asia/Seoul" }, clock);
 
     const command: MutationReceiptCommand = {
       operation: "record.create",
@@ -192,5 +191,38 @@ describe("mutation receipt repository", () => {
     now.setTime(now.getTime() + 25 * 60 * 60 * 1000);
     const second = await receipts.execute(command, async () => ({ step: 2 }));
     expect(second).toEqual({ step: 2 });
+  });
+
+  it("does not read a winner through a PostgreSQL transaction aborted by P2002", async () => {
+    let transactionAborted = false;
+    const findUnique = vi.fn(async () => {
+      if (transactionAborted) {
+        throw new Error("POSTGRES_TRANSACTION_ABORTED");
+      }
+      return null;
+    });
+    const db = {
+      mutationReceipt: {
+        deleteMany: async () => ({ count: 0 }),
+        create: async () => {
+          transactionAborted = true;
+          throw { code: "P2002" };
+        },
+        findUnique,
+        update: async () => ({}),
+      },
+    };
+    const receipts = createMutationReceiptRepository(
+      db as unknown as TransactionClient,
+      { userId: "u-1", timezone: "Asia/Seoul" },
+      { now: () => new Date("2026-08-20T00:00:00.000Z") },
+    );
+
+    await expect(receipts.execute({
+      operation: "record.create",
+      idempotencyKey: "racing-key",
+      requestHash: "hash-racing",
+    }, async () => ({ ok: true }))).rejects.toThrow("MUTATION_RECEIPT_RACE");
+    expect(findUnique).toHaveBeenCalledOnce();
   });
 });

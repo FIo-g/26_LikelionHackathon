@@ -535,6 +535,7 @@ export type DailyLogCreateOrConnectWithoutUserInput = {
 
 export type DailyLogCreateManyUserInputEnvelope = {
   data: Prisma.DailyLogCreateManyUserInput | Prisma.DailyLogCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type DailyLogUpsertWithWhereUniqueWithoutUserInput = {
@@ -1906,6 +1907,7 @@ export type DailyLogCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many DailyLogs.
    */
   data: Prisma.DailyLogCreateManyInput | Prisma.DailyLogCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1924,6 +1926,7 @@ export type DailyLogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many DailyLogs.
    */
   data: Prisma.DailyLogCreateManyInput | Prisma.DailyLogCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

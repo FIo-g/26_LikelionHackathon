@@ -24,34 +24,44 @@ const stateLabel: Record<DisplayState, string> = {
   error: "재계산 필요",
 };
 
-const Score = ({ value, label }: Readonly<{ value: number; label: string }>) => (
+const confidenceLabel: Readonly<Record<ReadinessViewModel["confidence"], string>> = {
+  high: "높음",
+  medium: "보통",
+  low: "낮음",
+  insufficient: "산출 불가",
+};
+
+const Score = ({ value }: Readonly<{ value: number }>) => (
   <div className={styles.scoreRow}>
-    <span className={styles.scoreValue}>{value}점</span>
-    <span className={styles.scoreLabel}>{label}</span>
-    <progress max={100} value={value} className={styles.progressBar} />
+    <p className={styles.scoreText}>
+      <span>{value}</span>
+      <small>/ 100</small>
+    </p>
+    <progress aria-label={`수면 준비도 ${value}점`} max={100} value={value} className={styles.progressBar} />
   </div>
 );
 
 export const ReadinessCard = ({ viewModel }: ReadinessCardProps) => {
-  const scoreText = viewModel.data?.score === null || !Number.isFinite(viewModel.data.score)
+  const score = viewModel.data?.score;
+  const scoreText = score === null || score === undefined || !Number.isFinite(score)
     ? "점수 산출 불가"
-    : `${viewModel.data.score}점`;
+    : `${score}점`;
   const hasNumericScore = viewModel.data !== null && viewModel.data.score !== null && Number.isFinite(viewModel.data.score);
 
   return (
     <section className={`${styles.regionCard} ${stateClassName[viewModel.state]}`} aria-live="polite">
-      <h2 className={styles.regionTitle}>오늘 준비도</h2>
+      <h2 className={styles.regionTitle}>오늘의 수면 준비도</h2>
       <p className={styles.regionBadge}>{stateLabel[viewModel.state]}</p>
 
       {viewModel.data === null ? (
         <p className={styles.regionMessage}>{viewModel.message ?? "데이터가 없습니다"}</p>
       ) : (
         <>
-          <p className={styles.scoreText}>{scoreText}</p>
-          <p className={styles.regionMessage}>{viewModel.data.label}</p>
-          {hasNumericScore ? <Score value={viewModel.data.score} label={viewModel.data.label} /> : (
+          {hasNumericScore ? <Score value={viewModel.data.score} /> : (
             <p className={styles.noScoreNote}>수치가 충분하지 않아 점수는 표시하지 않습니다.</p>
           )}
+          <p className={styles.readinessInsight}>분석 신뢰도 · {confidenceLabel[viewModel.data.confidence]}</p>
+          {!hasNumericScore ? <p className={styles.regionMessage}>{viewModel.data.label || scoreText}</p> : null}
         </>
       )}
 

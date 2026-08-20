@@ -40,6 +40,7 @@ export type ImpactFactorSumAggregateOutputType = {
 
 export type ImpactFactorMinAggregateOutputType = {
   id: string | null
+  userId: string | null
   analysisSnapshotId: string | null
   factor: string | null
   exposedCount: number | null
@@ -50,6 +51,7 @@ export type ImpactFactorMinAggregateOutputType = {
 
 export type ImpactFactorMaxAggregateOutputType = {
   id: string | null
+  userId: string | null
   analysisSnapshotId: string | null
   factor: string | null
   exposedCount: number | null
@@ -60,6 +62,7 @@ export type ImpactFactorMaxAggregateOutputType = {
 
 export type ImpactFactorCountAggregateOutputType = {
   id: number
+  userId: number
   analysisSnapshotId: number
   factor: number
   exposedCount: number
@@ -85,6 +88,7 @@ export type ImpactFactorSumAggregateInputType = {
 
 export type ImpactFactorMinAggregateInputType = {
   id?: true
+  userId?: true
   analysisSnapshotId?: true
   factor?: true
   exposedCount?: true
@@ -95,6 +99,7 @@ export type ImpactFactorMinAggregateInputType = {
 
 export type ImpactFactorMaxAggregateInputType = {
   id?: true
+  userId?: true
   analysisSnapshotId?: true
   factor?: true
   exposedCount?: true
@@ -105,6 +110,7 @@ export type ImpactFactorMaxAggregateInputType = {
 
 export type ImpactFactorCountAggregateInputType = {
   id?: true
+  userId?: true
   analysisSnapshotId?: true
   factor?: true
   exposedCount?: true
@@ -203,6 +209,7 @@ export type ImpactFactorGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 
 export type ImpactFactorGroupByOutputType = {
   id: string
+  userId: string
   analysisSnapshotId: string
   factor: string
   exposedCount: number
@@ -237,6 +244,7 @@ export type ImpactFactorWhereInput = {
   OR?: Prisma.ImpactFactorWhereInput[]
   NOT?: Prisma.ImpactFactorWhereInput | Prisma.ImpactFactorWhereInput[]
   id?: Prisma.StringFilter<"ImpactFactor"> | string
+  userId?: Prisma.StringFilter<"ImpactFactor"> | string
   analysisSnapshotId?: Prisma.StringFilter<"ImpactFactor"> | string
   factor?: Prisma.StringFilter<"ImpactFactor"> | string
   exposedCount?: Prisma.IntFilter<"ImpactFactor"> | number
@@ -244,11 +252,13 @@ export type ImpactFactorWhereInput = {
   deltaMinutes?: Prisma.FloatNullableFilter<"ImpactFactor"> | number | null
   confidence?: Prisma.StringFilter<"ImpactFactor"> | string
   evidence?: Prisma.JsonFilter<"ImpactFactor">
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   analysisSnapshot?: Prisma.XOR<Prisma.AnalysisSnapshotScalarRelationFilter, Prisma.AnalysisSnapshotWhereInput>
 }
 
 export type ImpactFactorOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   analysisSnapshotId?: Prisma.SortOrder
   factor?: Prisma.SortOrder
   exposedCount?: Prisma.SortOrder
@@ -256,6 +266,7 @@ export type ImpactFactorOrderByWithRelationInput = {
   deltaMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrder
   evidence?: Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
   analysisSnapshot?: Prisma.AnalysisSnapshotOrderByWithRelationInput
 }
 
@@ -264,6 +275,7 @@ export type ImpactFactorWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ImpactFactorWhereInput | Prisma.ImpactFactorWhereInput[]
   OR?: Prisma.ImpactFactorWhereInput[]
   NOT?: Prisma.ImpactFactorWhereInput | Prisma.ImpactFactorWhereInput[]
+  userId?: Prisma.StringFilter<"ImpactFactor"> | string
   analysisSnapshotId?: Prisma.StringFilter<"ImpactFactor"> | string
   factor?: Prisma.StringFilter<"ImpactFactor"> | string
   exposedCount?: Prisma.IntFilter<"ImpactFactor"> | number
@@ -271,11 +283,13 @@ export type ImpactFactorWhereUniqueInput = Prisma.AtLeast<{
   deltaMinutes?: Prisma.FloatNullableFilter<"ImpactFactor"> | number | null
   confidence?: Prisma.StringFilter<"ImpactFactor"> | string
   evidence?: Prisma.JsonFilter<"ImpactFactor">
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   analysisSnapshot?: Prisma.XOR<Prisma.AnalysisSnapshotScalarRelationFilter, Prisma.AnalysisSnapshotWhereInput>
 }, "id">
 
 export type ImpactFactorOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   analysisSnapshotId?: Prisma.SortOrder
   factor?: Prisma.SortOrder
   exposedCount?: Prisma.SortOrder
@@ -295,6 +309,7 @@ export type ImpactFactorScalarWhereWithAggregatesInput = {
   OR?: Prisma.ImpactFactorScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ImpactFactorScalarWhereWithAggregatesInput | Prisma.ImpactFactorScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ImpactFactor"> | string
+  userId?: Prisma.StringWithAggregatesFilter<"ImpactFactor"> | string
   analysisSnapshotId?: Prisma.StringWithAggregatesFilter<"ImpactFactor"> | string
   factor?: Prisma.StringWithAggregatesFilter<"ImpactFactor"> | string
   exposedCount?: Prisma.IntWithAggregatesFilter<"ImpactFactor"> | number
@@ -312,11 +327,13 @@ export type ImpactFactorCreateInput = {
   deltaMinutes?: number | null
   confidence: string
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  user: Prisma.UserCreateNestedOneWithoutImpactFactorsInput
   analysisSnapshot: Prisma.AnalysisSnapshotCreateNestedOneWithoutFactorsInput
 }
 
 export type ImpactFactorUncheckedCreateInput = {
   id?: string
+  userId: string
   analysisSnapshotId: string
   factor: string
   exposedCount: number
@@ -334,11 +351,13 @@ export type ImpactFactorUpdateInput = {
   deltaMinutes?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   confidence?: Prisma.StringFieldUpdateOperationsInput | string
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  user?: Prisma.UserUpdateOneRequiredWithoutImpactFactorsNestedInput
   analysisSnapshot?: Prisma.AnalysisSnapshotUpdateOneRequiredWithoutFactorsNestedInput
 }
 
 export type ImpactFactorUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   analysisSnapshotId?: Prisma.StringFieldUpdateOperationsInput | string
   factor?: Prisma.StringFieldUpdateOperationsInput | string
   exposedCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -350,6 +369,7 @@ export type ImpactFactorUncheckedUpdateInput = {
 
 export type ImpactFactorCreateManyInput = {
   id?: string
+  userId: string
   analysisSnapshotId: string
   factor: string
   exposedCount: number
@@ -371,6 +391,7 @@ export type ImpactFactorUpdateManyMutationInput = {
 
 export type ImpactFactorUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   analysisSnapshotId?: Prisma.StringFieldUpdateOperationsInput | string
   factor?: Prisma.StringFieldUpdateOperationsInput | string
   exposedCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -392,6 +413,7 @@ export type ImpactFactorOrderByRelationAggregateInput = {
 
 export type ImpactFactorCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   analysisSnapshotId?: Prisma.SortOrder
   factor?: Prisma.SortOrder
   exposedCount?: Prisma.SortOrder
@@ -409,6 +431,7 @@ export type ImpactFactorAvgOrderByAggregateInput = {
 
 export type ImpactFactorMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   analysisSnapshotId?: Prisma.SortOrder
   factor?: Prisma.SortOrder
   exposedCount?: Prisma.SortOrder
@@ -419,6 +442,7 @@ export type ImpactFactorMaxOrderByAggregateInput = {
 
 export type ImpactFactorMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   analysisSnapshotId?: Prisma.SortOrder
   factor?: Prisma.SortOrder
   exposedCount?: Prisma.SortOrder
@@ -431,6 +455,48 @@ export type ImpactFactorSumOrderByAggregateInput = {
   exposedCount?: Prisma.SortOrder
   unexposedCount?: Prisma.SortOrder
   deltaMinutes?: Prisma.SortOrder
+}
+
+export type ImpactFactorCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ImpactFactorCreateWithoutUserInput, Prisma.ImpactFactorUncheckedCreateWithoutUserInput> | Prisma.ImpactFactorCreateWithoutUserInput[] | Prisma.ImpactFactorUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ImpactFactorCreateOrConnectWithoutUserInput | Prisma.ImpactFactorCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.ImpactFactorCreateManyUserInputEnvelope
+  connect?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+}
+
+export type ImpactFactorUncheckedCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ImpactFactorCreateWithoutUserInput, Prisma.ImpactFactorUncheckedCreateWithoutUserInput> | Prisma.ImpactFactorCreateWithoutUserInput[] | Prisma.ImpactFactorUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ImpactFactorCreateOrConnectWithoutUserInput | Prisma.ImpactFactorCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.ImpactFactorCreateManyUserInputEnvelope
+  connect?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+}
+
+export type ImpactFactorUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ImpactFactorCreateWithoutUserInput, Prisma.ImpactFactorUncheckedCreateWithoutUserInput> | Prisma.ImpactFactorCreateWithoutUserInput[] | Prisma.ImpactFactorUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ImpactFactorCreateOrConnectWithoutUserInput | Prisma.ImpactFactorCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.ImpactFactorUpsertWithWhereUniqueWithoutUserInput | Prisma.ImpactFactorUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.ImpactFactorCreateManyUserInputEnvelope
+  set?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  disconnect?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  delete?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  connect?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  update?: Prisma.ImpactFactorUpdateWithWhereUniqueWithoutUserInput | Prisma.ImpactFactorUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.ImpactFactorUpdateManyWithWhereWithoutUserInput | Prisma.ImpactFactorUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
+}
+
+export type ImpactFactorUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ImpactFactorCreateWithoutUserInput, Prisma.ImpactFactorUncheckedCreateWithoutUserInput> | Prisma.ImpactFactorCreateWithoutUserInput[] | Prisma.ImpactFactorUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ImpactFactorCreateOrConnectWithoutUserInput | Prisma.ImpactFactorCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.ImpactFactorUpsertWithWhereUniqueWithoutUserInput | Prisma.ImpactFactorUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.ImpactFactorCreateManyUserInputEnvelope
+  set?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  disconnect?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  delete?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  connect?: Prisma.ImpactFactorWhereUniqueInput | Prisma.ImpactFactorWhereUniqueInput[]
+  update?: Prisma.ImpactFactorUpdateWithWhereUniqueWithoutUserInput | Prisma.ImpactFactorUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.ImpactFactorUpdateManyWithWhereWithoutUserInput | Prisma.ImpactFactorUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
 }
 
 export type ImpactFactorCreateNestedManyWithoutAnalysisSnapshotInput = {
@@ -475,12 +541,67 @@ export type ImpactFactorUncheckedUpdateManyWithoutAnalysisSnapshotNestedInput = 
   deleteMany?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type ImpactFactorCreateWithoutUserInput = {
+  id?: string
+  factor: string
+  exposedCount: number
+  unexposedCount: number
+  deltaMinutes?: number | null
+  confidence: string
+  evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  analysisSnapshot: Prisma.AnalysisSnapshotCreateNestedOneWithoutFactorsInput
+}
+
+export type ImpactFactorUncheckedCreateWithoutUserInput = {
+  id?: string
+  analysisSnapshotId: string
+  factor: string
+  exposedCount: number
+  unexposedCount: number
+  deltaMinutes?: number | null
+  confidence: string
+  evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
+}
+
+export type ImpactFactorCreateOrConnectWithoutUserInput = {
+  where: Prisma.ImpactFactorWhereUniqueInput
+  create: Prisma.XOR<Prisma.ImpactFactorCreateWithoutUserInput, Prisma.ImpactFactorUncheckedCreateWithoutUserInput>
+}
+
+export type ImpactFactorCreateManyUserInputEnvelope = {
+  data: Prisma.ImpactFactorCreateManyUserInput | Prisma.ImpactFactorCreateManyUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type ImpactFactorUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.ImpactFactorWhereUniqueInput
+  update: Prisma.XOR<Prisma.ImpactFactorUpdateWithoutUserInput, Prisma.ImpactFactorUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.ImpactFactorCreateWithoutUserInput, Prisma.ImpactFactorUncheckedCreateWithoutUserInput>
+}
+
+export type ImpactFactorUpdateWithWhereUniqueWithoutUserInput = {
+  where: Prisma.ImpactFactorWhereUniqueInput
+  data: Prisma.XOR<Prisma.ImpactFactorUpdateWithoutUserInput, Prisma.ImpactFactorUncheckedUpdateWithoutUserInput>
+}
+
+export type ImpactFactorUpdateManyWithWhereWithoutUserInput = {
+  where: Prisma.ImpactFactorScalarWhereInput
+  data: Prisma.XOR<Prisma.ImpactFactorUpdateManyMutationInput, Prisma.ImpactFactorUncheckedUpdateManyWithoutUserInput>
+}
+
+export type ImpactFactorScalarWhereInput = {
+  AND?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
+  OR?: Prisma.ImpactFactorScalarWhereInput[]
+  NOT?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
+  id?: Prisma.StringFilter<"ImpactFactor"> | string
+  userId?: Prisma.StringFilter<"ImpactFactor"> | string
+  analysisSnapshotId?: Prisma.StringFilter<"ImpactFactor"> | string
+  factor?: Prisma.StringFilter<"ImpactFactor"> | string
+  exposedCount?: Prisma.IntFilter<"ImpactFactor"> | number
+  unexposedCount?: Prisma.IntFilter<"ImpactFactor"> | number
+  deltaMinutes?: Prisma.FloatNullableFilter<"ImpactFactor"> | number | null
+  confidence?: Prisma.StringFilter<"ImpactFactor"> | string
+  evidence?: Prisma.JsonFilter<"ImpactFactor">
 }
 
 export type ImpactFactorCreateWithoutAnalysisSnapshotInput = {
@@ -491,6 +612,7 @@ export type ImpactFactorCreateWithoutAnalysisSnapshotInput = {
   deltaMinutes?: number | null
   confidence: string
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  user: Prisma.UserCreateNestedOneWithoutImpactFactorsInput
 }
 
 export type ImpactFactorUncheckedCreateWithoutAnalysisSnapshotInput = {
@@ -510,6 +632,7 @@ export type ImpactFactorCreateOrConnectWithoutAnalysisSnapshotInput = {
 
 export type ImpactFactorCreateManyAnalysisSnapshotInputEnvelope = {
   data: Prisma.ImpactFactorCreateManyAnalysisSnapshotInput | Prisma.ImpactFactorCreateManyAnalysisSnapshotInput[]
+  skipDuplicates?: boolean
 }
 
 export type ImpactFactorUpsertWithWhereUniqueWithoutAnalysisSnapshotInput = {
@@ -528,18 +651,48 @@ export type ImpactFactorUpdateManyWithWhereWithoutAnalysisSnapshotInput = {
   data: Prisma.XOR<Prisma.ImpactFactorUpdateManyMutationInput, Prisma.ImpactFactorUncheckedUpdateManyWithoutAnalysisSnapshotInput>
 }
 
-export type ImpactFactorScalarWhereInput = {
-  AND?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
-  OR?: Prisma.ImpactFactorScalarWhereInput[]
-  NOT?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
-  id?: Prisma.StringFilter<"ImpactFactor"> | string
-  analysisSnapshotId?: Prisma.StringFilter<"ImpactFactor"> | string
-  factor?: Prisma.StringFilter<"ImpactFactor"> | string
-  exposedCount?: Prisma.IntFilter<"ImpactFactor"> | number
-  unexposedCount?: Prisma.IntFilter<"ImpactFactor"> | number
-  deltaMinutes?: Prisma.FloatNullableFilter<"ImpactFactor"> | number | null
-  confidence?: Prisma.StringFilter<"ImpactFactor"> | string
-  evidence?: Prisma.JsonFilter<"ImpactFactor">
+export type ImpactFactorCreateManyUserInput = {
+  id?: string
+  analysisSnapshotId: string
+  factor: string
+  exposedCount: number
+  unexposedCount: number
+  deltaMinutes?: number | null
+  confidence: string
+  evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
+}
+
+export type ImpactFactorUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  factor?: Prisma.StringFieldUpdateOperationsInput | string
+  exposedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unexposedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deltaMinutes?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  confidence?: Prisma.StringFieldUpdateOperationsInput | string
+  evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  analysisSnapshot?: Prisma.AnalysisSnapshotUpdateOneRequiredWithoutFactorsNestedInput
+}
+
+export type ImpactFactorUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  analysisSnapshotId?: Prisma.StringFieldUpdateOperationsInput | string
+  factor?: Prisma.StringFieldUpdateOperationsInput | string
+  exposedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unexposedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deltaMinutes?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  confidence?: Prisma.StringFieldUpdateOperationsInput | string
+  evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+}
+
+export type ImpactFactorUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  analysisSnapshotId?: Prisma.StringFieldUpdateOperationsInput | string
+  factor?: Prisma.StringFieldUpdateOperationsInput | string
+  exposedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unexposedCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deltaMinutes?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  confidence?: Prisma.StringFieldUpdateOperationsInput | string
+  evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ImpactFactorCreateManyAnalysisSnapshotInput = {
@@ -560,6 +713,7 @@ export type ImpactFactorUpdateWithoutAnalysisSnapshotInput = {
   deltaMinutes?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   confidence?: Prisma.StringFieldUpdateOperationsInput | string
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  user?: Prisma.UserUpdateOneRequiredWithoutImpactFactorsNestedInput
 }
 
 export type ImpactFactorUncheckedUpdateWithoutAnalysisSnapshotInput = {
@@ -586,6 +740,7 @@ export type ImpactFactorUncheckedUpdateManyWithoutAnalysisSnapshotInput = {
 
 export type ImpactFactorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   analysisSnapshotId?: boolean
   factor?: boolean
   exposedCount?: boolean
@@ -593,11 +748,13 @@ export type ImpactFactorSelect<ExtArgs extends runtime.Types.Extensions.Internal
   deltaMinutes?: boolean
   confidence?: boolean
   evidence?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   analysisSnapshot?: boolean | Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["impactFactor"]>
 
 export type ImpactFactorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   analysisSnapshotId?: boolean
   factor?: boolean
   exposedCount?: boolean
@@ -605,11 +762,13 @@ export type ImpactFactorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   deltaMinutes?: boolean
   confidence?: boolean
   evidence?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   analysisSnapshot?: boolean | Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["impactFactor"]>
 
 export type ImpactFactorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   analysisSnapshotId?: boolean
   factor?: boolean
   exposedCount?: boolean
@@ -617,11 +776,13 @@ export type ImpactFactorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   deltaMinutes?: boolean
   confidence?: boolean
   evidence?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   analysisSnapshot?: boolean | Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["impactFactor"]>
 
 export type ImpactFactorSelectScalar = {
   id?: boolean
+  userId?: boolean
   analysisSnapshotId?: boolean
   factor?: boolean
   exposedCount?: boolean
@@ -631,24 +792,29 @@ export type ImpactFactorSelectScalar = {
   evidence?: boolean
 }
 
-export type ImpactFactorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "analysisSnapshotId" | "factor" | "exposedCount" | "unexposedCount" | "deltaMinutes" | "confidence" | "evidence", ExtArgs["result"]["impactFactor"]>
+export type ImpactFactorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "analysisSnapshotId" | "factor" | "exposedCount" | "unexposedCount" | "deltaMinutes" | "confidence" | "evidence", ExtArgs["result"]["impactFactor"]>
 export type ImpactFactorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   analysisSnapshot?: boolean | Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>
 }
 export type ImpactFactorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   analysisSnapshot?: boolean | Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>
 }
 export type ImpactFactorIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   analysisSnapshot?: boolean | Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>
 }
 
 export type $ImpactFactorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ImpactFactor"
   objects: {
+    user: Prisma.$UserPayload<ExtArgs>
     analysisSnapshot: Prisma.$AnalysisSnapshotPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    userId: string
     analysisSnapshotId: string
     factor: string
     exposedCount: number
@@ -1050,6 +1216,7 @@ readonly fields: ImpactFactorFieldRefs;
  */
 export interface Prisma__ImpactFactorClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   analysisSnapshot<T extends Prisma.AnalysisSnapshotDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AnalysisSnapshotDefaultArgs<ExtArgs>>): Prisma.Prisma__AnalysisSnapshotClient<runtime.Types.Result.GetResult<Prisma.$AnalysisSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1081,6 +1248,7 @@ export interface Prisma__ImpactFactorClient<T, Null = never, ExtArgs extends run
  */
 export interface ImpactFactorFieldRefs {
   readonly id: Prisma.FieldRef<"ImpactFactor", 'String'>
+  readonly userId: Prisma.FieldRef<"ImpactFactor", 'String'>
   readonly analysisSnapshotId: Prisma.FieldRef<"ImpactFactor", 'String'>
   readonly factor: Prisma.FieldRef<"ImpactFactor", 'String'>
   readonly exposedCount: Prisma.FieldRef<"ImpactFactor", 'Int'>
@@ -1322,6 +1490,7 @@ export type ImpactFactorCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many ImpactFactors.
    */
   data: Prisma.ImpactFactorCreateManyInput | Prisma.ImpactFactorCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1340,6 +1509,7 @@ export type ImpactFactorCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many ImpactFactors.
    */
   data: Prisma.ImpactFactorCreateManyInput | Prisma.ImpactFactorCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

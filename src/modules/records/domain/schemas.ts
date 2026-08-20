@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Temporal } from "@js-temporal/polyfill";
 
 import type { Clock } from "@/shared/domain/contracts";
 import type { CreateRecordInput, RecordType, UpdateRecordInput } from "./types";
@@ -60,14 +61,14 @@ const isDateAfterClock = (value: Date, clock: Clock): boolean => (
   value.getTime() > (clock.now().getTime() + FIVE_MINUTE_TOLERANCE_MS)
 );
 
-const checkFutureDate = (clock: Clock, value: Date, path: readonly string[], context: z.RefinementCtx) => {
+const checkFutureDate = (clock: Clock, value: Date, path: PropertyKey[], context: z.RefinementCtx) => {
   if (isDateAfterClock(value, clock)) {
     context.addIssue({
       code: z.ZodIssueCode.too_big,
       path,
       maximum: clock.now().getTime() + FIVE_MINUTE_TOLERANCE_MS,
       inclusive: true,
-      type: "date",
+      origin: "date",
       message: "Date must not be more than 5 minutes in the future",
     });
   }
@@ -98,7 +99,7 @@ const durationSchema = (clock: Clock) => z.object({
       path: ["endedAt"],
       maximum: MAX_SESSION_MINUTES,
       inclusive: true,
-      type: "number",
+      origin: "number",
       message: "Duration must not exceed 1440 minutes",
     });
   }
@@ -168,7 +169,7 @@ const exerciseSchema = (clock: Clock) => z.object({
       path: ["endedAt"],
       maximum: MAX_SESSION_MINUTES,
       inclusive: true,
-      type: "number",
+      origin: "number",
       message: "Duration must not exceed 1440 minutes",
     });
   }
@@ -183,7 +184,13 @@ const phoneUsageSchema = (clock: Clock) => z.object({
   checkFutureDate(clock, value.lastUseAt, ["lastUseAt"], context);
 });
 
-const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
+  try {
+    return Temporal.PlainDate.from(value).toString() === value;
+  } catch {
+    return false;
+  }
+}, "INVALID_LOCAL_DATE");
 const wellnessSchema = () => z.object({
   type: z.literal("wellness"),
   localDate: localDateSchema,

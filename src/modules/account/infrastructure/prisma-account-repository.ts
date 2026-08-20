@@ -4,23 +4,27 @@ import { getPrismaClient } from "@/shared/db/prisma";
 import type { TransactionClient } from "@/shared/db/transaction";
 import type { UserScope } from "@/shared/domain/contracts";
 import { wakeLocalDate } from "@/shared/time/local-date";
-import type { AccountConnection, AccountData, AccountRepository, ManualInputCategory } from "../application/ports";
+import { habitsSchema, profileSchema } from "@/modules/onboarding/domain/schemas";
+import type { AccountConnection, AccountRepository, ManualInputCategory } from "../application/ports";
 
-type StoredProfile = Readonly<{ nickname: string | null; timezone: string | null }>;
-type StoredGoal = Readonly<{ targetBedTime: string; targetWakeTime: string; targetDurationMinutes: number }>;
 type StoredConnection = Readonly<{ selected: string; state: string }>;
 
-type AccountPrismaClient = TransactionClient & {
-  userProfile: { findUnique: (args: unknown) => Promise<StoredProfile | null>; updateMany: (args: unknown) => Promise<unknown> };
-  sleepGoal: { findUnique: (args: unknown) => Promise<StoredGoal | null>; updateMany: (args: unknown) => Promise<unknown> };
-  userHabit: { findUnique: (args: unknown) => Promise<unknown> };
-  connection: { findUnique: (args: unknown) => Promise<StoredConnection | null> };
-  sleepPlan: { updateMany: (args: unknown) => Promise<unknown> };
-  planDay: { updateMany: (args: unknown) => Promise<unknown> };
-  scheduleAdvice: { updateMany: (args: unknown) => Promise<unknown> };
-  analysisSnapshot: { updateMany: (args: unknown) => Promise<unknown> };
-  $transaction: <T>(callback: (transaction: AccountPrismaClient) => Promise<T>) => Promise<T>;
-};
+type StoredProfile = Readonly<{
+  nickname: string | null;
+  timezone: string | null;
+  age: number | null;
+  gender: string | null;
+  heightCm: number | null;
+  weightKg: number | null;
+}>;
+
+type StoredHabit = Readonly<{
+  caffeine: string;
+  exercise: string;
+  meal: string;
+  alcohol: string | null;
+  phoneUsage: string;
+}>;
 
 const manualInputCategories: readonly ManualInputCategory[] = [
   { key: "sleep", label: "수면" }, { key: "phone", label: "휴대폰" }, { key: "caffeine", label: "카페인" },
@@ -34,7 +38,7 @@ const plannedConnections = (manual: StoredConnection | null): readonly AccountCo
   { type: "calendar", label: "캘린더", mode: "automatic", availability: "coming-soon", state: "unavailable", lastSyncedAt: null },
 ];
 
-const supersedeAccountDerivedState = async (client: AccountPrismaClient, scope: UserScope, timezone: string, now: Date): Promise<void> => {
+const supersedeAccountDerivedState = async (client: TransactionClient, scope: UserScope, now: Date): Promise<void> => {
   const localDate = wakeLocalDate(now, scope.timezone);
   await client.sleepPlan.updateMany({ where: { userId: scope.userId, timezone: scope.timezone, status: "active" }, data: { status: "superseded", activeKey: null } });
   await client.planDay.updateMany({ where: { userId: scope.userId, timezone: scope.timezone, status: "active", localDate: { gte: localDate } }, data: { status: "superseded", activeKey: null } });
@@ -42,30 +46,34 @@ const supersedeAccountDerivedState = async (client: AccountPrismaClient, scope: 
   await client.analysisSnapshot.updateMany({ where: { userId: scope.userId, timezone: scope.timezone, localDate: { gte: localDate }, status: "current" }, data: { status: "superseded", supersededAt: now, currentKey: null } });
 };
 
-const refreshAnalysis = async (client: AccountPrismaClient, scope: UserScope, now: Date): Promise<void> => {
+const refreshAnalysis = async (client: TransactionClient, scope: UserScope, now: Date): Promise<void> => {
   const localDate = wakeLocalDate(now, scope.timezone);
   await recalculateAnalysis(createAnalysisRepository(client, scope), [localDate], { now: () => now });
 };
 
 export const createPrismaAccountRepository = (
-  db: TransactionClient = getPrismaClient() as TransactionClient,
+  db: TransactionClient = getPrismaClient(),
   options: Readonly<{ now?: () => Date }> = {},
 ): AccountRepository => {
-  const client = db as AccountPrismaClient;
+  const client = db;
   const now = options.now ?? (() => new Date());
   return {
     getViewModelData: async (scope) => {
-      const [profile, sleepGoal, _habits, connection] = await Promise.all([
-        client.userProfile.findUnique({ where: { userId: scope.userId }, select: { nickname: true, timezone: true } }),
+      const [profile, sleepGoal, habits, connection] = await Promise.all([
+        client.userProfile.findUnique({ where: { userId: scope.userId }, select: { nickname: true, timezone: true, age: true, gender: true, heightCm: true, weightKg: true } }) as Promise<StoredProfile | null>,
         client.sleepGoal.findUnique({ where: { userId: scope.userId }, select: { targetBedTime: true, targetWakeTime: true, targetDurationMinutes: true } }),
-        client.userHabit.findUnique({ where: { userId: scope.userId } }),
+        client.userHabit.findUnique({ where: { userId: scope.userId }, select: { caffeine: true, exercise: true, meal: true, alcohol: true, phoneUsage: true } }) as Promise<StoredHabit | null>,
         client.connection.findUnique({ where: { userId: scope.userId }, select: { selected: true, state: true } }),
       ]);
-      void _habits;
       if (!profile?.nickname || !profile.timezone || !sleepGoal) throw new Error("ACCOUNT_SETTINGS_UNAVAILABLE");
+      const normalizedProfile = profileSchema.safeParse(profile);
+      if (!normalizedProfile.success) throw new Error("ACCOUNT_SETTINGS_UNAVAILABLE");
+      const normalizedHabits = habits ? habitsSchema.safeParse(habits) : null;
+      if (normalizedHabits && !normalizedHabits.success) throw new Error("ACCOUNT_SETTINGS_UNAVAILABLE");
       return {
         identity: { email: null },
-        profile: { nickname: profile.nickname, timezone: profile.timezone },
+        profile: normalizedProfile.data,
+        habits: normalizedHabits?.success ? normalizedHabits.data : null,
         sleepGoal,
         connections: plannedConnections(connection?.selected === "manual" ? connection : null),
         manualInputCategories,
@@ -75,10 +83,20 @@ export const createPrismaAccountRepository = (
       await client.$transaction(async (transaction) => {
         const profile = await transaction.userProfile.findUnique({ where: { userId: scope.userId }, select: { timezone: true } });
         if (!profile) throw new Error("ACCOUNT_PROFILE_NOT_FOUND");
-        await transaction.userProfile.updateMany({ where: { userId: scope.userId }, data: input });
+        await transaction.userProfile.updateMany({
+          where: { userId: scope.userId },
+          data: {
+            nickname: input.nickname,
+            timezone: input.timezone,
+            ...(input.age === undefined ? {} : { age: input.age }),
+            ...(input.gender === undefined ? {} : { gender: input.gender }),
+            ...(input.heightCm === undefined ? {} : { heightCm: input.heightCm }),
+            ...(input.weightKg === undefined ? {} : { weightKg: input.weightKg }),
+          },
+        });
         if (profile.timezone === input.timezone) return;
         const at = now();
-        await supersedeAccountDerivedState(transaction, scope, input.timezone, at);
+        await supersedeAccountDerivedState(transaction, scope, at);
         await refreshAnalysis(transaction, { userId: scope.userId, timezone: input.timezone }, at);
       });
     },

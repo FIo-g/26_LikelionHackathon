@@ -5,6 +5,12 @@ import type { VersionedPayload } from "@/shared/domain/contracts";
 
 export const MAX_JSON_BYTES = 64 * 1024;
 
+function assertRawJsonSize(value: string): void {
+  if (Buffer.byteLength(value, "utf8") > MAX_JSON_BYTES) {
+    throw new JsonContractError("JSON_TOO_LARGE");
+  }
+}
+
 export function assertJsonSize(value: unknown): void {
   let serialized: string | undefined;
 
@@ -31,7 +37,7 @@ export function versionedPayloadSchema<T extends z.ZodRawShape>(payloadShape: T)
 }
 
 export function parseVersionedJson<T extends Record<string, unknown>>(value: string): VersionedPayload<T> {
-  assertJsonSize(value);
+  assertRawJsonSize(value);
 
   let parsed: unknown;
   try {

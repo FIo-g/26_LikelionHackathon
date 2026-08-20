@@ -1,53 +1,542 @@
 .onboardingLayout {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-canvas, #f7f8fe);
-  padding: var(--space-3);
+  display: grid;
+  place-items: center;
+  background: #e8deef;
 }
 
 .onboardingCard {
-  width: min(640px, 100%);
-  background: #fff;
-  border: 1px solid var(--color-border, #dfe3ef);
-  border-radius: var(--radius-card);
-  padding: var(--space-4);
+  width: min(390px, 100%);
+  min-height: 844px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #21152e;
+  background: #f4eef8;
+  box-shadow: 0 18px 54px rgba(38, 18, 56, 0.14);
+}
+
+.progressHeader {
+  position: relative;
+  height: 82px;
+  overflow: hidden;
+  color: #fff;
+}
+
+.progressBackdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 154px;
+  object-fit: cover;
+}
+
+.progressMeta {
+  position: absolute;
+  top: 23px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.progressMeta strong {
+  width: 44px;
+  color: #eaddf1;
+  font-weight: 800;
+}
+
+.progressMeta span {
+  color: #cbbad7;
+  font-weight: 600;
+}
+
+.progressList {
+  position: absolute;
+  top: 54px;
+  right: 50px;
+  left: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progressList li {
+  height: 4px;
+  border-radius: 999px;
+  background: #69517a;
+}
+
+.progressList .progressDone {
+  background: #fff4d9;
+}
+
+.backLink {
+  position: absolute;
+  bottom: 1px;
+  left: 24px;
+  width: 30px;
+  height: 23px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 20px;
+  text-decoration: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.onboardingBody {
+  min-height: 762px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 13px 24px 40px;
+}
+
+.onboardingBody h1 {
+  margin: 0;
+  color: #21152e;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 36px;
+  letter-spacing: -0.025em;
+}
+
+.lead {
+  margin: 6px 0 31px;
+  color: #766982;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
 }
 
 .onboardingForm {
-  margin-top: 16px;
-  display: grid;
-  gap: 12px;
+  min-height: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .field {
   display: grid;
   gap: 8px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
 }
 
 .field input,
 .field select {
   width: 100%;
-  min-height: 40px;
-  border: 1px solid #dfe3ef;
-  border-radius: 8px;
-  padding: 0 10px;
+  height: 52px;
+  border: 1px solid #e2d6e9;
+  border-radius: 12px;
+  padding: 0 16px;
+  color: #21152e;
+  background: #fff;
+  box-shadow: 0 3px 9px rgba(38, 18, 56, 0.03);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #5f346f;
+}
+
+.choiceFieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choiceFieldset legend {
+  margin-bottom: 12px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.choiceRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.choiceChip {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.choiceChip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.choiceChip span {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e2d6e9;
+  border-radius: 12px;
+  padding: 4px;
+  color: #766982;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+
+.choiceChip input:checked + span {
+  border-color: #5f346f;
+  color: #5f346f;
+  background: #f0e9f5;
+  box-shadow: 0 3px 10px rgba(38, 18, 56, 0.04);
+}
+
+.choiceChip:has(input:focus-visible) span {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 .cta {
-  background: var(--color-primary);
-  color: #fff;
+  flex: 0 0 auto;
+  margin-top: auto;
+  width: 100%;
+  min-height: 48px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 10px 16px;
+  color: #fff;
+  background: #5f346f;
+  box-shadow: 0 5px 14px rgba(38, 18, 56, 0.06);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-@media (max-width: 767px) { .onboardingLayout { align-items: start; padding: var(--space-2); padding-top: max(var(--space-4), env(safe-area-inset-top)); }.onboardingCard { padding: var(--space-3); } }
+.cta:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
 
-.nav {
-  margin-top: 12px;
+.tipCard,
+.manualTip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 74px;
+  border: 1px solid #f0ddaa;
+  border-radius: 16px;
+  padding: 12px 16px;
+  background: #fff4d9;
+}
+
+.tipCard strong,
+.manualTip strong {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.tipCard p,
+.manualTip p {
+  margin: 4px 0 0;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.tipCard img {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.rabbitNote {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 122px;
+}
+
+.rabbitNote p {
+  margin: 14px 0 0;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 17px;
+}
+
+.rabbitNote span {
+  flex: 0 0 auto;
+  width: 122px;
+  height: 122px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff4d9;
+}
+
+.rabbitNote img {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+}
+
+.goalCard {
+  position: relative;
+  min-height: 190px;
+  overflow: hidden;
+  border: 1px solid #7b548b;
+  border-radius: 20px;
+  padding: 14px 23px 13px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 92% 2%, #704480 0 95px, transparent 96px),
+    #5f346f;
+  box-shadow: 0 6px 16px rgba(38, 18, 56, 0.09);
+}
+
+.goalCard > strong {
+  color: #eaddf1;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.goalTimeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+  align-items: center;
+  margin-top: 10px;
+}
+
+.goalTimeRow > span {
+  color: #fff4d9;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 28px;
+  text-align: center;
+}
+
+.goalTimeRow > div {
+  display: grid;
+  gap: 0;
+}
+
+.goalTimeRow time {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 38px;
+}
+
+.goalTimeRow div span {
+  color: #eaddf1;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.goalEditButton {
+  position: absolute;
+  right: 23px;
+  bottom: 13px;
+  left: 23px;
+  min-height: 40px;
+  border: 1px solid #e2d6e9;
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #5f346f;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
+}
+
+.goalTimeEditor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  border: 1px solid #e2d6e9;
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff;
+}
+
+.goalTimeEditor legend {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-bottom: 8px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.goalTimeEditor label {
+  display: grid;
+  gap: 4px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.goalTimeEditor input {
+  min-width: 0;
+  height: 40px;
+  border: 1px solid #e2d6e9;
+  border-radius: 10px;
+  padding: 0 8px;
+  color: #21152e;
+  background: #fff;
   font-size: 14px;
+}
+
+.scheduleHint {
+  margin: 6px 0 0;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 17px;
+}
+
+.deviceStack {
+  display: grid;
+  gap: 14px;
+}
+
+.deviceCard {
+  min-height: 106px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e2d6e9;
+  border-radius: 16px;
+  padding: 18px;
+  background: #fff;
+}
+
+.deviceCardBlue {
+  background: #eaf5fb;
+}
+
+.deviceCard h3 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.deviceCard p {
+  max-width: 230px;
+  margin: 5px 0 0;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 17px;
+}
+
+.deviceButton {
+  flex: 0 0 auto;
+  border: 0;
+  padding: 8px 0;
+  color: #5f346f;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.deviceButton:disabled {
+  color: #766982;
+}
+
+.manualTip {
+  display: block;
+  min-height: 82px;
+  background: #fff0dc;
+}
+
+.profileForm {
+  gap: 20px;
+}
+
+.profileForm .tipCard {
+  min-height: 108px;
+  margin-top: 24px;
+  align-items: flex-start;
+}
+
+.measureRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.timezoneField {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.timezoneField select {
+  min-width: 0;
+  height: 28px;
+  border: 1px solid #e2d6e9;
+  border-radius: 8px;
+  padding: 0 8px;
+  color: #21152e;
+  background: #fff;
+  font-size: 11px;
+}
+
+.habitReassurance {
+  margin-top: 20px;
+}
+
+.goalReassurance {
+  margin-top: 52px;
+}
+
+.connectCompletion {
+  margin-top: 16px;
 }
 
 .errorList {
@@ -55,4 +544,41 @@
   padding: 0;
   list-style: none;
   color: #ad4f4f;
+}
+
+@media (max-width: 767px) {
+  .onboardingLayout {
+    display: block;
+  }
+
+  .onboardingCard {
+    width: 100%;
+    min-height: 100vh;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .onboardingBody {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .progressMeta,
+  .backLink {
+    left: 18px;
+  }
+
+  .progressList {
+    right: 44px;
+    left: 18px;
+  }
+
+  .choiceRow {
+    gap: 6px;
+  }
+
+  .goalTimeRow time {
+    font-size: 24px;
+  }
 }

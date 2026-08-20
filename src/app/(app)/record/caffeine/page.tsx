@@ -1,36 +1,24 @@
 import { requireUserScope } from "@/shared/auth/require-user-scope";
 import { CaffeineFlow } from "@/modules/records/ui/caffeine-flow";
 
-type SearchValue = string | string[] | undefined;
+type SearchParams = Record<string, string | string[] | undefined>;
 
-const toStringValue = (value: SearchValue): string => {
-  if (Array.isArray(value)) {
-    return value[0] ?? "";
-  }
+type CaffeinePageProps = Readonly<{
+  searchParams: Promise<SearchParams>;
+}>;
 
-  return value ?? "";
-};
+const firstParam = (value: string | string[] | undefined): string | undefined => (
+  Array.isArray(value) ? value[0] : value
+);
 
-export default async function CaffeinePage({
-  searchParams,
-}: Readonly<{
-  searchParams?: Readonly<{ [key: string]: SearchValue }>;
-}>) {
-  const params = searchParams ?? {};
+export default async function CaffeinePage({ searchParams }: CaffeinePageProps) {
   const { timezone } = await requireUserScope();
-  const step = toStringValue(params.step);
-  const initialValues = {
-    brand: toStringValue(params.brand),
-    product: toStringValue(params.product),
-    caffeineMg: toStringValue(params.caffeineMg),
-    consumedAt: toStringValue(params.consumedAt),
-  };
+  const query = await searchParams;
 
   return (
     <CaffeineFlow
       timezone={timezone}
-      step={step}
-      initialValues={initialValues}
+      step={firstParam(query.step)}
     />
   );
 }

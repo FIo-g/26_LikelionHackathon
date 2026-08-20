@@ -1,17 +1,283 @@
 .page {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
   min-height: 100vh;
   color: var(--color-text);
 }
 
+.desktopNavigation {
+  position: sticky;
+  top: 0;
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  border-right: 1px solid #dbe6e1;
+  background: #fff;
+}
+
+.brand { color: #245a49; font-weight: 900; letter-spacing: .08em; text-decoration: none; }
+.navigationList { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.navigationList a { display: block; border-radius: 10px; padding: 10px 12px; color: inherit; font-weight: 700; text-decoration: none; }
+.navigationList a:hover, .navigationList a:focus-visible { background: #edf6f1; }
+.lunarLabel, .mobileLabel { display: none; }
+
+.lunarSidebarArtwork, .lunarProfileLink, .mobileProfileLink { display: none; }
+
 .content {
+  min-width: 0;
   width: min(var(--content-max), 100%);
   margin-inline: auto;
-  padding: var(--space-4);
+}
+
+.mobileNavigation { display: none; }
+
+@media (min-width: 768px) {
+  .page:has([data-lunar-screen]) {
+    grid-template-columns: 220px minmax(0, 1fr);
+    background: #f4eef8;
+  }
+
+  .page:has([data-lunar-screen="care"]) {
+    grid-template-columns: 216px minmax(0, 1fr);
+  }
+
+  .page:has([data-lunar-screen]) .desktopNavigation {
+    gap: 32px;
+    padding: 28px 20px;
+    border-right: 0;
+    background: #28163b;
+    color: #d7c8e2;
+  }
+
+  .page:has([data-lunar-screen]) .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen]) .brand::before {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 50%;
+    color: #5f346f;
+    background: #fff0d7;
+    content: "토";
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+
+  .page:has([data-lunar-screen]) .content {
+    width: min(1220px, 100%);
+  }
+
+  .page:has([data-lunar-screen="care"]) .content {
+    width: min(1136px, 100%);
+  }
+
+  .page:has([data-lunar-screen]) .desktopNavigation .navigationList a {
+    min-height: 40px;
+    box-sizing: border-box;
+    color: #d7c8e2;
+  }
+
+  .page:has([data-lunar-screen]) .desktopNavigation .navigationList a:hover,
+  .page:has([data-lunar-screen]) .desktopNavigation .navigationList a:focus-visible {
+    background: rgba(95, 52, 111, .65);
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen]) .desktopNavigation .desktopLabel {
+    display: none;
+  }
+
+  .page:has([data-lunar-screen]) .desktopNavigation .lunarLabel {
+    display: inline;
+  }
+
+  .page:has([data-lunar-screen="today"]) .desktopNavigation a[href="/today"],
+  .page:has([data-lunar-screen="record"]) .desktopNavigation a[href="/record"],
+  .page:has([data-lunar-screen="plan"]) .desktopNavigation a[href="/plan"],
+  .page:has([data-lunar-screen="analyze"]) .desktopNavigation a[href="/analyze"],
+  .page:has([data-lunar-screen="care"]) .desktopNavigation a[href="/care"] {
+    background: #5f346f;
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen="account"]) .lunarProfileLink {
+    background: #5f346f;
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen]) .lunarSidebarArtwork {
+    position: relative;
+    display: block;
+    width: 176px;
+    height: 160px;
+    margin-top: auto;
+  }
+
+  .page:has([data-lunar-screen]) .lunarSidebarScene {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 169px;
+    height: 133px;
+  }
+
+  .page:has([data-lunar-screen]) .lunarSidebarRabbit {
+    position: absolute;
+    right: 8px;
+    bottom: -10px;
+    width: 142px;
+    height: 142px;
+    object-fit: contain;
+  }
+
+  .page:has([data-lunar-screen]) .lunarProfileLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 62px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, .17);
+    border-radius: 14px;
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .page:has([data-lunar-screen]) .lunarProfileLink:hover,
+  .page:has([data-lunar-screen]) .lunarProfileLink:focus-visible {
+    background: rgba(95, 52, 111, .65);
+  }
+
+  .lunarProfileMark {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    color: #5f346f;
+    background: #fff0d7;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .lunarProfileLink > span:last-child {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+  }
+
+  .lunarProfileLink strong,
+  .lunarProfileLink small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lunarProfileLink strong { font-size: 12px; }
+  .lunarProfileLink small { color: #d7c8e2; font-size: 10px; }
 }
 
 @media (max-width: 767px) {
+  .page { display: block; }
+  .desktopNavigation { display: none; }
   .content {
-    padding: var(--space-2);
     padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+  }
+  .mobileNavigation {
+    position: fixed;
+    z-index: 40;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    min-height: var(--mobile-nav-height);
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid #dbe6e1;
+    background: rgba(255, 255, 255, .97);
+  }
+  .mobileNavigation .navigationList { display: grid; width: 100%; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+  .mobileNavigation .navigationList a { padding: 14px 2px; font-size: .72rem; text-align: center; }
+  .mobileNavigation .desktopLabel { display: inline; }
+  .mobileNavigation .lunarLabel { display: none; }
+  .mobileNavigation .mobileLabel { display: none; }
+
+  .page:has([data-lunar-screen]) .mobileNavigation {
+    min-height: 58px;
+    border-top-color: #e2d6e9;
+    background: rgba(255, 255, 255, .98);
+  }
+  .page:has([data-lunar-screen]) .mobileNavigation .navigationList a {
+    position: relative;
+    min-height: 58px;
+    box-sizing: border-box;
+    padding: 24px 2px 8px;
+    border-radius: 0;
+    color: #766982;
+    font-size: .72rem;
+    letter-spacing: -0.04em;
+    text-align: center;
+  }
+  .page:has([data-lunar-screen]) .mobileNavigation .navigationList a:hover,
+  .page:has([data-lunar-screen]) .mobileNavigation .navigationList a:focus-visible { background: #f7f1f9; }
+  .page:has([data-lunar-screen]) .mobileNavigation .desktopLabel { display: none; }
+  .page:has([data-lunar-screen]) .mobileNavigation .mobileLabel { display: inline; }
+
+  .mobileProfileLink {
+    position: fixed;
+    z-index: 41;
+    top: max(12px, env(safe-area-inset-top));
+    right: 16px;
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, .62);
+    border-radius: 999px;
+    color: #5f346f;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 3px 10px rgba(38, 18, 56, .1);
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .mobileProfileLink:focus-visible,
+  .mobileProfileLink:hover {
+    color: #fff;
+    background: #5f346f;
+  }
+
+  .page:has([data-lunar-screen="account"]) .mobileProfileLink {
+    color: #fff;
+    background: #5f346f;
+  }
+
+  .page:has([data-lunar-screen="today"]) .mobileNavigation a[href="/today"],
+  .page:has([data-lunar-screen="record"]) .mobileNavigation a[href="/record"],
+  .page:has([data-lunar-screen="plan"]) .mobileNavigation a[href="/plan"],
+  .page:has([data-lunar-screen="analyze"]) .mobileNavigation a[href="/analyze"],
+  .page:has([data-lunar-screen="care"]) .mobileNavigation a[href="/care"] { color: #5f346f; font-weight: 800; }
+  .page:has([data-lunar-screen="today"]) .mobileNavigation a[href="/today"]::before,
+  .page:has([data-lunar-screen="record"]) .mobileNavigation a[href="/record"]::before,
+  .page:has([data-lunar-screen="plan"]) .mobileNavigation a[href="/plan"]::before,
+  .page:has([data-lunar-screen="analyze"]) .mobileNavigation a[href="/analyze"]::before,
+  .page:has([data-lunar-screen="care"]) .mobileNavigation a[href="/care"]::before {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #5f346f;
+    content: "";
+    transform: translateX(-50%);
   }
 }

@@ -1,8 +1,6 @@
-import type { PlanDayTarget, PlannerGoal } from "@/modules/planner/domain/types";
+import type { PlannerGoal } from "@/modules/planner/domain/types";
 import type { TransactionClient } from "@/shared/db/transaction";
 import type { UserScope } from "@/shared/domain/contracts";
-import type { CareToolKey } from "../domain/tool-catalog";
-import type { RoutineStepKey } from "../domain/routine";
 import type { CarePlanDay, CareRepository } from "../application/ports";
 
 type CareClient = {
@@ -16,6 +14,12 @@ type CareClient = {
   careToolSession: {
     create: (args: { data: Record<string, unknown> }) => Promise<{ id: string }>;
     updateMany: (args: { where: Record<string, unknown>; data: Record<string, unknown> }) => Promise<unknown>;
+  };
+  scheduleAdvice: {
+    findFirst: (args: { where: Record<string, unknown>; orderBy: Record<string, "asc" | "desc">; select: { id: true } }) => Promise<{ id: string } | null>;
+  };
+  phoneUsageEntry: {
+    findMany: (args: { where: Record<string, unknown>; orderBy: readonly Record<string, "asc" | "desc">[]; take: number; select: { localDate: true; durationMinutes: true } }) => Promise<readonly { localDate: string; durationMinutes: number }[]>;
   };
 };
 
@@ -35,13 +39,31 @@ const mapPlanDay = (row: Record<string, unknown>): CarePlanDay => ({
 export const createPrismaCareRepository = (db: TransactionClient, scope: UserScope): CareRepository => {
   const client = db as TransactionClient & CareClient;
   return {
-    findActivePlanDay: async (localDate) => {
-      const row = await client.planDay.findFirst({ where: { userId: scope.userId, localDate, status: "active" } });
+    findActivePlanDay: async (query) => {
+      const row = await client.planDay.findFirst({ where: { userId: query.userId, localDate: query.localDate, timezone: query.timezone, status: "active" } });
       return row ? mapPlanDay(row) : null;
     },
     findGoal: async () => {
       const goal = await client.sleepGoal.findUnique({ where: { userId: scope.userId } });
       return goal ? { targetBedTime: String(goal.targetBedTime), targetWakeTime: String(goal.targetWakeTime), targetDurationMinutes: Number(goal.targetDurationMinutes) } satisfies PlannerGoal : null;
+    },
+    findGeneratedRerouteAdvice: async () => {
+      const advice = await client.scheduleAdvice.findFirst({
+        where: { userId: scope.userId, status: "generated", triggerType: "reroute" },
+        orderBy: { generatedAt: "desc" },
+        select: { id: true },
+      });
+      return advice ? { id: advice.id } : null;
+    },
+    listRecentPhoneUsage: async (limit) => {
+      const safeLimit = Math.min(14, Math.max(1, Math.floor(limit)));
+      const rows = await client.phoneUsageEntry.findMany({
+        where: { userId: scope.userId, timezone: scope.timezone },
+        orderBy: [{ localDate: "desc" }, { createdAt: "desc" }],
+        take: safeLimit,
+        select: { localDate: true, durationMinutes: true },
+      });
+      return rows.map((row) => ({ localDate: row.localDate, durationMinutes: row.durationMinutes }));
     },
     listCompletions: async (localDate, routineRevisionKey) => new Set((await client.routineCompletion.findMany({ where: { userId: scope.userId, localDate, routineRevisionKey }, select: { stepKey: true } })).map((row) => row.stepKey)),
     completeStep: async (localDate, routineRevisionKey, planDayId, stepKey, completedAt) => {

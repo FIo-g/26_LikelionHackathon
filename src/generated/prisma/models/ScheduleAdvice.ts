@@ -692,6 +692,7 @@ export type ScheduleAdviceCreateOrConnectWithoutUserInput = {
 
 export type ScheduleAdviceCreateManyUserInputEnvelope = {
   data: Prisma.ScheduleAdviceCreateManyUserInput | Prisma.ScheduleAdviceCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type ScheduleAdviceUpsertWithWhereUniqueWithoutUserInput = {
@@ -766,6 +767,7 @@ export type ScheduleAdviceCreateOrConnectWithoutEventInput = {
 
 export type ScheduleAdviceCreateManyEventInputEnvelope = {
   data: Prisma.ScheduleAdviceCreateManyEventInput | Prisma.ScheduleAdviceCreateManyEventInput[]
+  skipDuplicates?: boolean
 }
 
 export type ScheduleAdviceUpsertWithWhereUniqueWithoutEventInput = {
@@ -902,6 +904,7 @@ export type ScheduleAdviceCreateOrConnectWithoutPlanInput = {
 
 export type ScheduleAdviceCreateManyPlanInputEnvelope = {
   data: Prisma.ScheduleAdviceCreateManyPlanInput | Prisma.ScheduleAdviceCreateManyPlanInput[]
+  skipDuplicates?: boolean
 }
 
 export type ScheduleAdviceUpsertWithWhereUniqueWithoutPlanInput = {
@@ -1993,6 +1996,7 @@ export type ScheduleAdviceCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many ScheduleAdvices.
    */
   data: Prisma.ScheduleAdviceCreateManyInput | Prisma.ScheduleAdviceCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -2011,6 +2015,7 @@ export type ScheduleAdviceCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * The data used to create many ScheduleAdvices.
    */
   data: Prisma.ScheduleAdviceCreateManyInput | Prisma.ScheduleAdviceCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

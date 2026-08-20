@@ -6,6 +6,7 @@ import type { TodayViewModel } from "@/modules/analysis/application/get-today-vi
 
 const nowReadyModel: TodayViewModel = {
   localDate: "2026-08-20",
+  hasRerouteAdvice: false,
   readiness: {
     state: "ready",
     data: {
@@ -33,6 +34,7 @@ const nowReadyModel: TodayViewModel = {
       { key: "exercise", label: "운동 마감", scheduledAt: "18:00", status: "current" },
       { key: "meal", label: "식사 마감", scheduledAt: "19:00", status: "upcoming" },
       { key: "windDown", label: "휴대폰 디지털 디톡스 시작", scheduledAt: "22:00", status: "upcoming" },
+      { key: "target-bed", label: "취침 준비", scheduledAt: "23:00", status: "upcoming" },
     ],
     message: "오늘 목표 취침 23:00 기준",
     action: null,
@@ -91,6 +93,22 @@ const noScoreModel: TodayViewModel = {
   },
 };
 
+const corruptModel: TodayViewModel = {
+  ...nowReadyModel,
+  readiness: {
+    state: "error",
+    data: null,
+    message: "분석 데이터가 손상되어 다시 계산해야 합니다",
+    action: { label: "재계산", href: "/record" },
+  },
+  dataStatus: {
+    state: "error",
+    data: null,
+    message: "분석 데이터가 손상되어 다시 계산해야 합니다",
+    action: { label: "재계산", href: "/record" },
+  },
+};
+
 describe("TodayScreen", () => {
   it("shows stale readiness while keeping record summary", () => {
     render(<TodayScreen viewModel={staleReadinessModel} />);
@@ -112,7 +130,8 @@ describe("TodayScreen", () => {
 
     const timeline = screen.getByRole("list", { name: "준비 타임라인" });
     expect(timeline).toBeVisible();
-    expect(within(timeline).getAllByRole("listitem")).toHaveLength(4);
+    expect(within(timeline).getAllByRole("listitem")).toHaveLength(5);
+    expect(within(timeline).getByText("취침 준비")).toBeVisible();
 
     expect(screen.getByRole("link", { name: "기록하기" })).toHaveAttribute("href", "/record/meal-health?step=meal");
 
@@ -121,5 +140,48 @@ describe("TodayScreen", () => {
     if (caffeineItem) {
       expect(within(caffeineItem).getByRole("link", { name: "수정하기" })).toHaveAttribute("href", "/record/caffeine?step=brand");
     }
+  });
+
+  it("uses the real goal, local date, and score in the Figma-aligned Today shell", () => {
+    render(<TodayScreen viewModel={nowReadyModel} />);
+
+    expect(screen.getByRole("heading", { name: /오늘 밤.*23:00.*편안히 잠들기 위한 준비/ })).toBeVisible();
+    expect(screen.getByText(/TODAY.*8월 20일 목요일/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "오늘 기록하기" })).toHaveAttribute("href", "/record");
+    expect(screen.getByRole("progressbar", { name: "수면 준비도 80점" })).toHaveAttribute("value", "80");
+    expect(screen.getByText("7/7 항목 기준 충족")).toBeVisible();
+    expect(screen.queryByText("3시간 12분")).not.toBeInTheDocument();
+    expect(screen.queryByText("실시간 연동")).not.toBeInTheDocument();
+  });
+
+  it("keeps the real sleep-entry route in the missing-sleep callout", () => {
+    const missingSleepModel: TodayViewModel = {
+      ...nowReadyModel,
+      recordSummary: {
+        ...nowReadyModel.recordSummary,
+        data: nowReadyModel.recordSummary.data?.map((item) => (
+          item.type === "sleep" ? { ...item, presence: "empty" as const } : item
+        )) ?? null,
+      },
+    };
+
+    render(<TodayScreen viewModel={missingSleepModel} />);
+
+    const callout = screen.getByText("어젯밤 수면 기록이 필요해요").closest("li");
+    expect(callout).toBeInstanceOf(HTMLLIElement);
+    if (callout) {
+      expect(within(callout).getByRole("link", { name: "수면 기록 추가" })).toHaveAttribute(
+        "href",
+        "/record/sleep-phone?step=sleep",
+      );
+      expect(within(callout).getByText("기상 후 어제 기준으로 직접 입력해요.")).toBeVisible();
+    }
+  });
+
+  it("renders corrupt analysis as an actionable error", () => {
+    render(<TodayScreen viewModel={corruptModel} />);
+
+    expect(screen.getAllByText("분석 데이터가 손상되어 다시 계산해야 합니다").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "재계산" })[0]).toHaveAttribute("href", "/record");
   });
 });

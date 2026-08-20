@@ -1,6 +1,10 @@
 import type { Clock, UserScope } from "@/shared/domain/contracts";
 import type { TransactionClient } from "@/shared/db/transaction";
-import type { MutationReceiptRepository, MutationReceiptCommand } from "@/modules/records/application/ports";
+import {
+  MutationReceiptRaceError,
+  type MutationReceiptRepository,
+  type MutationReceiptCommand,
+} from "@/modules/records/application/ports";
 
 type AnyPrismaTx = TransactionClient & {
   mutationReceipt: {
@@ -47,6 +51,31 @@ const extractResponse = (stored: Record<string, unknown>): unknown => {
   return stored.responseJson;
 };
 
+const receiptWhere = (scope: UserScope, command: MutationReceiptCommand) => ({
+  userId_operation_idempotencyKey: {
+    userId: scope.userId,
+    operation: command.operation,
+    idempotencyKey: command.idempotencyKey,
+  },
+});
+
+const resolveStoredReceipt = <T>(
+  current: Record<string, unknown> | null,
+  command: MutationReceiptCommand,
+): T => {
+  if (!current) {
+    throw new MutationReceiptRaceError();
+  }
+  if (current.requestHash !== command.requestHash) {
+    throw new Error("IDEMPOTENCY_CONFLICT");
+  }
+  if (current.status !== "completed") {
+    throw new Error("IDEMPOTENCY_IN_PROGRESS");
+  }
+
+  return extractResponse(current) as T;
+};
+
 export const createMutationReceiptRepository = (
   db: TransactionClient,
   scope: UserScope,
@@ -55,6 +84,12 @@ export const createMutationReceiptRepository = (
   const client = asAnyPrisma(db);
 
   return {
+    resolve: async <T>(command: MutationReceiptCommand): Promise<T> => {
+      const current = await client.mutationReceipt.findUnique({
+        where: receiptWhere(scope, command),
+      }) as Record<string, unknown> | null;
+      return resolveStoredReceipt<T>(current, command);
+    },
     execute: async <T>(command: MutationReceiptCommand, work: () => Promise<T>): Promise<T> => {
       const now = clock.now();
 
@@ -69,6 +104,13 @@ export const createMutationReceiptRepository = (
         },
       });
 
+      const existing = await client.mutationReceipt.findUnique({
+        where: receiptWhere(scope, command),
+      }) as Record<string, unknown> | null;
+      if (existing) {
+        return resolveStoredReceipt<T>(existing, command);
+      }
+
       try {
         await client.mutationReceipt.create({
           data: withPendingReceipt(scope, command, now),
@@ -77,41 +119,14 @@ export const createMutationReceiptRepository = (
         if (!isUniqueError(error)) {
           throw error;
         }
-
-        const current = await client.mutationReceipt.findUnique({
-          where: {
-            userId_operation_idempotencyKey: {
-              userId: scope.userId,
-              operation: command.operation,
-              idempotencyKey: command.idempotencyKey,
-            },
-          },
-        }) as Record<string, unknown> | null;
-
-        if (!current) {
-          throw error;
-        }
-
-        if (current.requestHash !== command.requestHash) {
-          throw new Error("IDEMPOTENCY_CONFLICT");
-        }
-
-        if (current.status === "completed") {
-          return extractResponse(current) as T;
-        }
-
-        throw new Error("IDEMPOTENCY_IN_PROGRESS");
+        throw new MutationReceiptRaceError();
       }
 
       const response = await work();
 
       await client.mutationReceipt.update({
         where: {
-          userId_operation_idempotencyKey: {
-            userId: scope.userId,
-            operation: command.operation,
-            idempotencyKey: command.idempotencyKey,
-          },
+          ...receiptWhere(scope, command),
         },
         data: {
           status: "completed",
