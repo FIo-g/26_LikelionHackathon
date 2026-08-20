@@ -1,0 +1,27 @@
+name: guarded database migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Approved environment with a verified backup.
+        required: true
+        type: choice
+        options: [preview, production]
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: migration-${{ inputs.target }}
+    env:
+      MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm exec -- prisma generate
+      - run: npm exec -- prisma migrate deploy

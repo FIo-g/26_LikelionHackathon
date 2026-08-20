@@ -1,0 +1,200 @@
+.todayPage {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-4);
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 0%, #f4f7ff 0%, #f7f8fe 45%, #edf1ff 100%);
+  color: #1c223e;
+}
+
+.todayHeader {
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: var(--font-heading-page-size);
+  line-height: var(--font-heading-page-line-height);
+  letter-spacing: -0.01em;
+}
+
+.localDate {
+  margin: 0;
+  color: #4a5477;
+}
+
+.regionGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.regionCard {
+  border-radius: 14px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #d7dcf3;
+  box-shadow: 0 10px 24px rgba(17, 25, 60, 0.08);
+}
+
+.regionTitle {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.regionMessage {
+  margin: 0 0 8px;
+  color: #3a4568;
+}
+
+.regionValue {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.regionBadge {
+  margin: 0 0 8px;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: #eef2ff;
+  color: #3b4bbf;
+}
+
+.regionReady {
+  border-left: 6px solid #2dbb89;
+}
+
+.regionInsufficient {
+  border-left: 6px solid #f1a33a;
+}
+
+.regionStale {
+  border-left: 6px solid #5c7cff;
+}
+
+.regionError {
+  border-left: 6px solid #d93a3a;
+}
+
+.pageReady { }
+
+.pageInsufficient {
+  background: linear-gradient(180deg, #fffbf0, #f7f8fe);
+}
+
+.pageStale {
+  background: linear-gradient(180deg, #f0f4ff, #f7f8fe);
+}
+
+.pageError {
+  background: linear-gradient(180deg, #fff0f0, #f7f8fe);
+}
+
+.scoreRow {
+  margin-bottom: 8px;
+}
+
+.scoreText {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.scoreLabel {
+  display: block;
+  margin-top: 2px;
+  color: #55618c;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+}
+
+.noScoreNote {
+  color: #8a94b0;
+  margin: 0;
+}
+
+.missingList,
+.recordList,
+.timelineList {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.timelineItem {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e4e8f6;
+  background: #f9fbff;
+}
+
+.timelineStepLabel {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.timelineStatus {
+  color: #2f3b6e;
+  font-size: 0.87rem;
+  background: #eef2ff;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.timelineTime {
+  margin: 6px 0 0;
+  color: #4e5a82;
+}
+
+.recordList {
+  margin-top: 10px;
+}
+
+.recordItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #edf0f8;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.recordInfo {
+  display: grid;
+  gap: 2px;
+}
+
+.linkButton,
+.primaryButton {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  background: #6d67df;
+  color: #ffffff;
+  padding: 7px 12px;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.primaryButton {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.linkButton:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 767px) { .todayPage { padding: var(--space-2); padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }.regionGrid { grid-template-columns: 1fr; }.recordItem { align-items: start; flex-direction: column; } }

@@ -1,0 +1,58 @@
+.onboardingLayout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-canvas, #f7f8fe);
+  padding: var(--space-3);
+}
+
+.onboardingCard {
+  width: min(640px, 100%);
+  background: #fff;
+  border: 1px solid var(--color-border, #dfe3ef);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+}
+
+.onboardingForm {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #dfe3ef;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.cta {
+  background: var(--color-primary);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+
+@media (max-width: 767px) { .onboardingLayout { align-items: start; padding: var(--space-2); padding-top: max(var(--space-4), env(safe-area-inset-top)); }.onboardingCard { padding: var(--space-3); } }
+
+.nav {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.errorList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #ad4f4f;
+}

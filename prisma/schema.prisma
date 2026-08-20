@@ -4,5 +4,512 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+}
+
+model User {
+  id              String @id
+  name            String?
+  email           String? @unique
+  emailVerified   Boolean @default(false)
+  image           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  accounts        Account[]
+  sessions        Session[]
+  dailyLogs       DailyLog[]
+  sleepSessions   SleepSession[]
+  caffeineEntries CaffeineEntry[]
+  alcoholEntries  AlcoholEntry[]
+  mealEntries     MealEntry[]
+  exerciseEntries ExerciseEntry[]
+  phoneUsageEntries PhoneUsageEntry[]
+  wellnessEntries WellnessEntry[]
+  recordRevisions RecordRevision[]
+  mutationReceipts MutationReceipt[]
+  baselineSnapshots BaselineSnapshot[]
+  analysisSnapshots AnalysisSnapshot[]
+  specialEvents   SpecialEvent[]
+  scheduleAdvice  ScheduleAdvice[]
+  narrations      Narration[]
+  routineCompletions RoutineCompletion[]
+  careToolSessions CareToolSession[]
+  sleepPlans      SleepPlan[]
+  planDays        PlanDay[]
+  planRevisions   PlanRevision[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String   @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
+model UserProfile {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  nickname             String?
+  timezone             String?
+  onboardingCompletedAt DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model SleepGoal {
+  id                    String @id @default(cuid())
+  userId                String @unique
+  targetBedTime         String
+  targetWakeTime        String
+  targetDurationMinutes Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model UserHabit {
+  id         String @id @default(cuid())
+  userId     String @unique
+  caffeine   String
+  exercise   String
+  meal       String
+  phoneUsage String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Connection {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  selected       String
+  mode           String
+  availability   String
+  state          String
+  lastSyncedAt   DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model DailyLog {
+  id        String @id @default(uuid())
+  userId    String
+  localDate String
+  timezone  String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sleepSession  SleepSession[]
+  caffeineEntry CaffeineEntry[]
+  alcoholEntry  AlcoholEntry[]
+  mealEntry     MealEntry[]
+  exerciseEntry ExerciseEntry[]
+  phoneUsageEntry PhoneUsageEntry[]
+  wellnessEntry WellnessEntry[]
+
+  @@unique([userId, localDate, timezone])
+  @@unique([id, userId])
+  @@index([userId, timezone, localDate])
+}
+
+model SleepSession {
+  id           String   @id @default(uuid())
+  userId       String
+  dailyLogId   String
+  sleepDate    String
+  startedAt    DateTime
+  endedAt      DateTime
+  morningFatigue Int
+  timezone     String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId, sleepDate])
+}
+
+model CaffeineEntry {
+  id           String   @id @default(uuid())
+  userId       String
+  dailyLogId   String
+  brand        String
+  product      String
+  caffeineMg   Int
+  consumedAt   DateTime
+  timezone     String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AlcoholEntry {
+  id           String   @id @default(uuid())
+  userId       String
+  dailyLogId   String
+  alcoholType  String
+  servings     Float
+  consumedAt   DateTime
+  timezone     String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model MealEntry {
+  id           String   @id @default(uuid())
+  userId       String
+  dailyLogId   String
+  size         String
+  eatenAt      DateTime
+  notes        String?
+  timezone     String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog     DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ExerciseEntry {
+  id              String   @id @default(uuid())
+  userId          String
+  dailyLogId      String
+  exerciseType    String
+  intensity       String
+  startedAt       DateTime
+  endedAt         DateTime
+  averageHeartRate Int?
+  timezone        String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog        DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PhoneUsageEntry {
+  id             String   @id @default(uuid())
+  userId         String
+  dailyLogId     String
+  localDate      String
+  lastUseAt      DateTime
+  durationMinutes Int
+  timezone       String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog       DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model WellnessEntry {
+  id             String   @id @default(uuid())
+  userId         String
+  dailyLogId     String
+  localDate      String
+  fatigueLevel   Int
+  stressLevel    Int
+  timezone       String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyLog       DailyLog @relation(fields: [dailyLogId, userId], references: [id, userId])
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model RecordRevision {
+  id         String   @id @default(uuid())
+  userId     String
+  entityType String
+  entityId   String
+  operation  String
+  before     Json?
+  after      Json?
+  changedAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, entityType, entityId])
+}
+
+model MutationReceipt {
+  id             String   @id @default(uuid())
+  userId         String
+  operation      String
+  idempotencyKey String
+  requestHash    String
+  status         String
+  resourceType   String?
+  resourceId     String?
+  responseJson    Json?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, operation, idempotencyKey])
+  @@index([userId, expiresAt])
+}
+
+model BaselineSnapshot {
+  id           String   @id @default(cuid())
+  userId       String
+  timezone     String
+  status       String
+  result       Json
+  generatedAt  DateTime @default(now())
+  supersededAt DateTime?
+  currentKey   String?  @unique
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timezone, status, generatedAt])
+}
+
+model AnalysisSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  localDate   String
+  timezone    String
+  status      String
+  result      Json
+  generatedAt DateTime @default(now())
+  supersededAt DateTime?
+  currentKey  String?  @unique
+
+  factors ImpactFactor[]
+  narrations Narration[]
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timezone, status, generatedAt])
+  @@index([userId, timezone, localDate, status])
+  @@index([userId, timezone, localDate])
+}
+
+model ImpactFactor {
+  id                String   @id @default(cuid())
+  analysisSnapshotId String
+  factor            String
+  exposedCount      Int
+  unexposedCount    Int
+  deltaMinutes      Float?
+  confidence        String
+  evidence          Json
+
+  analysisSnapshot AnalysisSnapshot @relation(fields: [analysisSnapshotId], references: [id], onDelete: Cascade)
+
+  @@index([analysisSnapshotId])
+}
+
+model SpecialEvent {
+  id            String   @id @default(uuid())
+  userId        String
+  title         String
+  type          String
+  startsAt      DateTime
+  localDate     String
+  desiredWakeAt DateTime?
+  notes         String?
+  timezone      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  advice        ScheduleAdvice[]
+
+  @@unique([id, userId])
+  @@index([userId, startsAt])
+}
+
+model ScheduleAdvice {
+  id               String   @id @default(uuid())
+  userId           String
+  eventId          String?
+  planId           String?
+  triggerType      String
+  status           String
+  algorithmVersion String
+  inputHash        String
+  inputSnapshot    Json
+  proposal         Json
+  confidence       String
+  generatedAt      DateTime @default(now())
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event            SpecialEvent? @relation(fields: [eventId, userId], references: [id, userId])
+  plan             SleepPlan?    @relation("AdvicePlan", fields: [planId, userId], references: [id, userId])
+  sourceRevision   PlanRevision? @relation("AdviceRevision")
+  narrations       Narration[]
+
+  @@unique([id, userId])
+  @@unique([userId, triggerType, inputHash])
+  @@index([userId, status, generatedAt])
+}
+
+model Narration {
+  id                 String   @id @default(cuid())
+  userId             String
+  analysisSnapshotId String?
+  scheduleAdviceId   String?
+  provider           String
+  model              String?
+  inputHash          String
+  facts              Json
+  output             Json?
+  status             String
+  generatedAt        DateTime @default(now())
+  retryCount         Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisSnapshot AnalysisSnapshot? @relation(fields: [analysisSnapshotId], references: [id], onDelete: Cascade)
+  scheduleAdvice   ScheduleAdvice?   @relation(fields: [scheduleAdviceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, generatedAt])
+  @@unique([analysisSnapshotId])
+  @@unique([scheduleAdviceId])
+}
+
+model RoutineCompletion {
+  id                 String   @id @default(cuid())
+  userId             String
+  localDate          String
+  planDayId          String?
+  routineRevisionKey String
+  stepKey            String
+  completedAt        DateTime
+  createdAt          DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planDay PlanDay? @relation(fields: [planDayId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, localDate, routineRevisionKey, stepKey])
+  @@index([userId, localDate])
+}
+
+model CareToolSession {
+  id                     String   @id @default(cuid())
+  userId                 String
+  localDate              String
+  toolKey                String
+  startedAt              DateTime
+  plannedDurationSeconds Int
+  completedAt            DateTime?
+  createdAt              DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, localDate, toolKey])
+  @@index([userId, completedAt])
+}
+
+model SleepPlan {
+  id        String   @id @default(uuid())
+  userId    String
+  timezone  String
+  status    String
+  activeKey String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  days      PlanDay[]
+  revisions PlanRevision[]
+  advice    ScheduleAdvice[] @relation("AdvicePlan")
+
+  @@unique([id, userId])
+  @@index([userId, status, createdAt])
+}
+
+model PlanDay {
+  id                String   @id @default(uuid())
+  userId            String
+  planId            String
+  localDate         String
+  timezone          String
+  targetBedAt       DateTime
+  targetWakeAt      DateTime
+  caffeineCutoffAt  DateTime
+  exerciseCutoffAt  DateTime
+  mealCutoffAt      DateTime
+  windDownAt        DateTime
+  status            String
+  activeKey         String?  @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              SleepPlan @relation(fields: [planId, userId], references: [id, userId], onDelete: Cascade)
+  routineCompletions RoutineCompletion[]
+
+  @@unique([id, userId])
+  @@index([userId, localDate, status])
+}
+
+model PlanRevision {
+  id                String   @id @default(uuid())
+  userId            String
+  planId            String
+  triggerType       String
+  triggerEntityType String?
+  triggerEntityId   String?
+  sourceAdviceId    String?  @unique
+  beforeSnapshot    Json
+  afterSnapshot     Json
+  reason            String
+  createdAt         DateTime @default(now())
+
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              SleepPlan        @relation(fields: [planId, userId], references: [id, userId], onDelete: Cascade)
+  sourceAdvice      ScheduleAdvice?  @relation("AdviceRevision", fields: [sourceAdviceId, userId], references: [id, userId])
+
+  @@unique([sourceAdviceId, userId])
+  @@index([userId, planId, createdAt])
 }

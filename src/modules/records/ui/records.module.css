@@ -1,0 +1,31 @@
+.recordPage {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.recordTitle {
+  margin: 0 0 12px;
+  font-size: var(--font-heading-page-size);
+  line-height: var(--font-heading-page-line-height);
+}
+
+.recordGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.categoryCard {
+  border: 1px solid var(--color-border, #dfe3ef);
+  border-radius: var(--radius-card);
+  background: var(--color-surface, #fff);
+  padding: 16px;
+}
+
+@media (max-width: 767px) { .recordPage { padding: var(--space-2); padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }.recordGrid { grid-template-columns: 1fr; } }
+
+.categoryCard a {
+  display: inline-block;
+  margin-top: 8px;
+}

@@ -6,7 +6,9 @@
 
 **Architecture:** Next.js App Router 모듈형 모놀리스로 구성하며 UI → application use case → 순수 domain rule → 사용자 범위 repository → Prisma 순서로만 의존한다. `provisional-v1` 규칙 엔진이 모든 수치와 계획을 결정하고 OpenAI는 commit된 결과를 transaction 밖에서 설명한다.
 
-**Tech Stack:** Node.js 22.12+, pnpm, Next.js App Router, React, TypeScript strict, Prisma ORM 7, SQLite, PostgreSQL, Better Auth, Zod, CSS Modules, Vitest, Testing Library, Playwright, OpenAI SDK
+**Tech Stack:** Node.js 22.12+, npm, Next.js App Router, React, TypeScript strict, Prisma ORM 7, SQLite, PostgreSQL, Better Auth, Zod, CSS Modules, Vitest, Testing Library, Playwright, OpenAI SDK
+
+**Package Manager Policy:** Use npm only. Install every new direct dependency at the latest stable version compatible with existing peer dependencies, commit the resulting package-lock.json, and do not introduce another package manager.
 
 **Spec:** `docs/superpowers/specs/2026-08-19-adaptive-sleep-planner-design.md`
 
@@ -138,7 +140,7 @@ export type Evidence = Readonly<{
 
 **Files:**
 - Create: `package.json`
-- Create: `pnpm-workspace.yaml`
+- Do not create a workspace manifest; this is a single-package npm project.
 - Create: `tsconfig.json`
 - Create: `next.config.ts`
 - Create: `eslint.config.mjs`
@@ -178,19 +180,19 @@ it("renders Korean product metadata and its child content", () => {
 
 - [ ] **Step 2: Run the test and verify the missing-app failure**
 
-Run: `pnpm vitest run tests/component/root-layout.test.tsx`
+Run: `npm run test:run tests/component/root-layout.test.tsx`
 
 Expected: FAIL because the package and `src/app/layout.tsx` do not exist.
 
 - [ ] **Step 3: Install dependencies and set exact scripts**
 
 ```bash
-pnpm init
-pnpm add next react react-dom zod clsx lucide-react
-pnpm add -D typescript @types/node @types/react @types/react-dom eslint eslint-config-next vitest @vitejs/plugin-react jsdom vite-tsconfig-paths @testing-library/react @testing-library/jest-dom @testing-library/user-event @playwright/test
+npm init -y
+npm install next@latest react@latest react-dom@latest zod@latest clsx@latest lucide-react@latest
+npm install -D typescript@6.0.3 @types/node@latest @types/react@latest @types/react-dom@latest eslint@9.39.5 eslint-config-next@latest vitest@latest @vitejs/plugin-react@latest jsdom@latest vite-tsconfig-paths@latest @testing-library/react@latest @testing-library/jest-dom@latest @testing-library/user-event@latest @playwright/test@latest
 ```
 
-Set these package fields without changing versions resolved into `pnpm-lock.yaml`:
+Set these package fields without changing versions resolved into `package-lock.json`:
 
 ```json
 {
@@ -239,15 +241,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 }
 ```
 
-Configure Vitest with `environment: "jsdom"`, `setupFiles: ["./vitest.setup.ts"]`, and `vite-tsconfig-paths`. Configure Playwright with `baseURL: "http://127.0.0.1:3000"` and `webServer.command: "pnpm dev"`.
+Configure Vitest with `environment: "jsdom"`, `setupFiles: ["./vitest.setup.ts"]`, and `vite-tsconfig-paths`. Configure Playwright with `baseURL: "http://127.0.0.1:3000"` and `webServer.command: "npm run dev"`.
 
 - [ ] **Step 5: Run bootstrap verification**
 
 ```bash
-pnpm test:run tests/component/root-layout.test.tsx
-pnpm lint
-pnpm typecheck
-pnpm build
+npm run test:run tests/component/root-layout.test.tsx
+npm run lint
+npm run typecheck
+npm run build
 ```
 
 Expected: all four commands PASS.
@@ -255,7 +257,7 @@ Expected: all four commands PASS.
 - [ ] **Step 6: Commit the foundation**
 
 ```bash
-git add package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json next.config.ts eslint.config.mjs vitest.config.ts vitest.setup.ts playwright.config.ts .gitignore .env.example src/app src/shared/domain/contracts.ts tests/component/root-layout.test.tsx
+git add package.json package-lock.json tsconfig.json next.config.ts eslint.config.mjs vitest.config.ts vitest.setup.ts playwright.config.ts .gitignore .env.example src/app src/shared/domain/contracts.ts tests/component/root-layout.test.tsx
 git commit -m "chore: bootstrap sleep planner web app"
 ```
 
@@ -299,7 +301,7 @@ it("marks the active destination and exposes five mobile tabs", () => {
 
 - [ ] **Step 2: Run tests and verify missing components**
 
-Run: `pnpm test:run tests/component/ui-primitives.test.tsx tests/component/app-shell.test.tsx`
+Run: `npm run test:run tests/component/ui-primitives.test.tsx tests/component/app-shell.test.tsx`
 
 Expected: FAIL with unresolved shared UI modules.
 
@@ -358,9 +360,9 @@ DesktopSidebar renders all six entries. MobileBottomNavigation renders the first
 - [ ] **Step 5: Verify the shared UI**
 
 ```bash
-pnpm test:run tests/component/ui-primitives.test.tsx tests/component/app-shell.test.tsx
-pnpm lint
-pnpm typecheck
+npm run test:run tests/component/ui-primitives.test.tsx tests/component/app-shell.test.tsx
+npm run lint
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit the shared UI**
@@ -411,15 +413,15 @@ expect(() => resolveAuthOrigin({ VERCEL_ENV: "preview", VERCEL_URL: "*.vercel.ap
 
 - [ ] **Step 2: Run tests and verify missing infrastructure**
 
-Run: `pnpm test:run tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts`
+Run: `npm run test:run tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts`
 
 Expected: FAIL with missing provider and origin modules.
 
 - [ ] **Step 3: Install and initialize the stable Prisma stack**
 
 ```bash
-pnpm add @prisma/client@7 @prisma/adapter-better-sqlite3@7 @prisma/adapter-pg@7 pg dotenv better-auth @better-auth/prisma-adapter
-pnpm add -D prisma@7 @types/better-sqlite3 @types/pg tsx
+npm install @prisma/client@latest @prisma/adapter-better-sqlite3@latest @prisma/adapter-pg@latest pg@latest dotenv@latest better-auth@latest @better-auth/prisma-adapter@latest
+npm install -D prisma@latest @types/better-sqlite3@latest @types/pg@latest tsx@latest
 ```
 
 ```prisma
@@ -476,7 +478,7 @@ export const prisma = runtime.__sleepPlannerPrisma ??= new PrismaClient({ adapte
 export const databaseProvider = provider;
 ```
 
-Run `pnpm prisma generate` once so the auth configuration can import the client. Unit tests reset only their own generated SQLite file or PostgreSQL schema and call `prisma.$disconnect()` in teardown; application code never exposes the pool or logs its connection string.
+Run `npm exec -- prisma generate` once so the auth configuration can import the client. Unit tests reset only their own generated SQLite file or PostgreSQL schema and call `prisma.$disconnect()` in teardown; application code never exposes the pool or logs its connection string.
 
 - [ ] **Step 4: Generate Better Auth schema and add owned settings models**
 
@@ -517,7 +519,7 @@ export const AUTH_SESSION_COOKIE = "asp_session";
 Run:
 
 ```bash
-pnpm dlx auth@latest generate --yes --config src/shared/auth/auth.ts
+npm exec --package=auth@latest -- auth generate --yes --config src/shared/auth/auth.ts
 ```
 
 Review the generated User, Session, Account, Verification, and RateLimit models, then add `UserProfile`, `SleepGoal`, `UserHabit`, and `Connection`. `Connection` fields are `type`, `mode`, `availability`, `state`, and nullable `lastSyncedAt`; unique key is `[userId, type]`. `AUTH_RATE_LIMIT_ENABLED` is an optional strict boolean: production defaults true, local development/test defaults false so parallel fixtures are not throttled. The auth integration test explicitly enables it, sends four invalid sign-in requests from one test IP, expects the fourth to return `429` with `X-Retry-After`, and clears only that test rate-limit key afterward.
@@ -527,11 +529,11 @@ Add `"postinstall": "prisma generate"`, `"db:generate": "prisma generate"`, `"db
 - [ ] **Step 5: Migrate and test the auth handler**
 
 ```bash
-pnpm prisma validate
-pnpm prisma migrate dev --name auth_and_settings
-pnpm prisma generate
-AUTH_RATE_LIMIT_ENABLED=true pnpm test:run tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts tests/integration/auth-handler.test.ts
-pnpm typecheck
+npm exec -- prisma validate
+npm exec -- prisma migrate dev --name auth_and_settings
+npm exec -- prisma generate
+AUTH_RATE_LIMIT_ENABLED=true npm run test:run tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts tests/integration/auth-handler.test.ts
+npm run typecheck
 ```
 
 Expected: migration succeeds and auth route exports callable GET and POST handlers.
@@ -539,7 +541,7 @@ Expected: migration succeeds and auth route exports callable GET and POST handle
 - [ ] **Step 6: Commit auth infrastructure**
 
 ```bash
-git add package.json pnpm-lock.yaml prisma.config.ts prisma src/shared/config src/shared/db src/shared/auth src/app/api .env.example .gitignore tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts tests/integration/auth-handler.test.ts
+git add package.json package-lock.json prisma.config.ts prisma src/shared/config src/shared/db src/shared/auth src/app/api .env.example .gitignore tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts tests/integration/auth-handler.test.ts
 git commit -m "feat: configure prisma and better auth"
 ```
 
@@ -586,7 +588,7 @@ The guard integration test asserts that no session throws `UnauthorizedError`, a
 
 - [ ] **Step 2: Run tests and verify missing route code**
 
-Run: `pnpm test:run tests/unit/entry-path.test.ts tests/integration/require-user-scope.test.ts`
+Run: `npm run test:run tests/unit/entry-path.test.ts tests/integration/require-user-scope.test.ts`
 
 Expected: FAIL with missing auth application modules.
 
@@ -632,9 +634,9 @@ if (signUpResult.error) setFormError(toKoreanAuthError(signUpResult.error.code))
 - [ ] **Step 5: Verify auth behavior**
 
 ```bash
-pnpm test:run tests/unit/entry-path.test.ts tests/integration/require-user-scope.test.ts
-pnpm playwright test tests/e2e/auth.spec.ts --project=chromium
-pnpm typecheck
+npm run test:run tests/unit/entry-path.test.ts tests/integration/require-user-scope.test.ts
+npm exec -- playwright test tests/e2e/auth.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit authentication pages**
@@ -697,7 +699,7 @@ expect(screen.queryByText("연동 완료")).not.toBeInTheDocument();
 
 - [ ] **Step 2: Run onboarding tests and verify they fail**
 
-Run: `pnpm test:run tests/unit/onboarding.test.ts tests/integration/onboarding-persistence.test.ts tests/component/onboarding-ui.test.tsx`
+Run: `npm run test:run tests/unit/onboarding.test.ts tests/integration/onboarding-persistence.test.ts tests/component/onboarding-ui.test.tsx`
 
 Expected: FAIL with missing onboarding contracts and components.
 
@@ -760,11 +762,11 @@ export async function submitSleepGoalAction(
 - [ ] **Step 5: Verify resume and completion behavior**
 
 ```bash
-pnpm test:run tests/unit/onboarding.test.ts tests/integration/onboarding-persistence.test.ts tests/component/onboarding-ui.test.tsx
-pnpm playwright test tests/e2e/onboarding.spec.ts --project=chromium
-pnpm lint
-pnpm typecheck
-pnpm build
+npm run test:run tests/unit/onboarding.test.ts tests/integration/onboarding-persistence.test.ts tests/component/onboarding-ui.test.tsx
+npm exec -- playwright test tests/e2e/onboarding.spec.ts --project=chromium
+npm run lint
+npm run typecheck
+npm run build
 ```
 
 Expected: all checks PASS, including refresh at every step and all-or-nothing final completion.
@@ -823,13 +825,13 @@ it("rejects a versioned payload larger than 64 KiB", () => {
 
 - [ ] **Step 2: Run tests and verify missing contract failures**
 
-Run: `pnpm test:run tests/unit/zoned-date-time.test.ts tests/unit/versioned-json.test.ts tests/unit/record-schemas.test.ts`
+Run: `npm run test:run tests/unit/zoned-date-time.test.ts tests/unit/versioned-json.test.ts tests/unit/record-schemas.test.ts`
 
 Expected: FAIL because time and record contract modules do not exist.
 
 - [ ] **Step 3: Add Temporal and implement unambiguous conversion**
 
-Run: `pnpm add @js-temporal/polyfill`
+Run: `npm install @js-temporal/polyfill@latest`
 
 ```ts
 export type ZonedDateTimeInput = Readonly<{
@@ -944,15 +946,15 @@ export const uuidGenerator: IdGenerator = { uuid: () => crypto.randomUUID() };
 - [ ] **Step 5: Verify the shared contracts**
 
 ```bash
-pnpm test:run tests/unit/zoned-date-time.test.ts tests/unit/versioned-json.test.ts tests/unit/record-schemas.test.ts
-pnpm lint
-pnpm typecheck
+npm run test:run tests/unit/zoned-date-time.test.ts tests/unit/versioned-json.test.ts tests/unit/record-schemas.test.ts
+npm run lint
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit the shared contracts**
 
 ```bash
-git add package.json pnpm-lock.yaml src/shared/time src/shared/domain/uuid-generator.ts src/shared/validation src/modules/records/domain tests/unit/zoned-date-time.test.ts tests/unit/versioned-json.test.ts tests/unit/record-schemas.test.ts
+git add package.json package-lock.json src/shared/time src/shared/domain/uuid-generator.ts src/shared/validation src/modules/records/domain tests/unit/zoned-date-time.test.ts tests/unit/versioned-json.test.ts tests/unit/record-schemas.test.ts
 git commit -m "feat: define time and record contracts"
 ```
 
@@ -1001,7 +1003,7 @@ The same suite launches two concurrent calls with one key and asserts one mutati
 
 - [ ] **Step 2: Run integration tests and verify schema failure**
 
-Run: `pnpm test:run tests/integration/record-repository.test.ts tests/integration/mutation-receipt.test.ts`
+Run: `npm run test:run tests/integration/record-repository.test.ts tests/integration/mutation-receipt.test.ts`
 
 Expected: FAIL because record tables and repositories do not exist.
 
@@ -1118,17 +1120,17 @@ export function hashCanonicalJson(value: unknown): string {
 - [ ] **Step 5: Migrate and verify storage**
 
 ```bash
-pnpm prisma migrate dev --name direct_records
-pnpm prisma generate
-pnpm test:run tests/integration/record-repository.test.ts tests/integration/mutation-receipt.test.ts
+npm exec -- prisma migrate dev --name direct_records
+npm exec -- prisma generate
+npm run test:run tests/integration/record-repository.test.ts tests/integration/mutation-receipt.test.ts
 docker compose -f docker-compose.test.yml up -d postgres
-pnpm db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run tests/integration/database-contract.test.ts
+npm run db:schema -- --provider postgresql
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run tests/integration/database-contract.test.ts
 docker compose -f docker-compose.test.yml down
-pnpm prisma generate
-pnpm typecheck
+npm exec -- prisma generate
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit record storage**
@@ -1177,7 +1179,7 @@ The integration test creates, updates, and deletes one caffeine entry, then asse
 
 - [ ] **Step 2: Run tests and verify missing service failure**
 
-Run: `pnpm test:run tests/unit/affected-analysis-dates.test.ts tests/integration/record-service.test.ts`
+Run: `npm run test:run tests/unit/affected-analysis-dates.test.ts tests/integration/record-service.test.ts`
 
 Expected: FAIL because record application services do not exist.
 
@@ -1262,9 +1264,9 @@ export async function createRecordAction(formData: FormData): Promise<RecordActi
 - [ ] **Step 5: Verify record mutations**
 
 ```bash
-pnpm test:run tests/unit/affected-analysis-dates.test.ts tests/integration/record-service.test.ts
-pnpm lint
-pnpm typecheck
+npm run test:run tests/unit/affected-analysis-dates.test.ts tests/integration/record-service.test.ts
+npm run lint
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit record mutations**
@@ -1319,7 +1321,7 @@ it("never presents manual phone data as synchronized", () => {
 
 - [ ] **Step 2: Run component tests and verify missing UI**
 
-Run: `pnpm test:run tests/component/record-hub.test.tsx tests/component/intake-flows.test.tsx`
+Run: `npm run test:run tests/component/record-hub.test.tsx tests/component/intake-flows.test.tsx`
 
 Expected: FAIL because Record Hub and intake components do not exist.
 
@@ -1358,9 +1360,9 @@ export const INTAKE_STEPS = {
 - [ ] **Step 5: Verify all categories through the browser**
 
 ```bash
-pnpm test:run tests/component/record-hub.test.tsx tests/component/intake-flows.test.tsx
-pnpm playwright test tests/e2e/record-crud.spec.ts --project=chromium
-pnpm typecheck
+npm run test:run tests/component/record-hub.test.tsx tests/component/intake-flows.test.tsx
+npm exec -- playwright test tests/e2e/record-crud.spec.ts --project=chromium
+npm run typecheck
 ```
 
 Expected: a signed-in user can add, edit, delete, refresh, and see persisted state for every category.
@@ -1412,7 +1414,7 @@ it("requires three nights in both sleep-impact cohorts", () => {
 
 - [ ] **Step 2: Run domain tests and verify missing engine failures**
 
-Run: `pnpm test:run tests/unit/baseline.test.ts tests/unit/readiness.test.ts tests/unit/confidence.test.ts tests/unit/sleep-impact.test.ts`
+Run: `npm run test:run tests/unit/baseline.test.ts tests/unit/readiness.test.ts tests/unit/confidence.test.ts tests/unit/sleep-impact.test.ts`
 
 Expected: FAIL because the domain engine does not exist.
 
@@ -1509,9 +1511,9 @@ Sleep Impact is mean sleep minutes on exposed nights minus mean sleep minutes on
 - [ ] **Step 5: Run deterministic tests**
 
 ```bash
-pnpm test:run tests/unit/baseline.test.ts tests/unit/readiness.test.ts tests/unit/confidence.test.ts tests/unit/sleep-impact.test.ts
-pnpm lint
-pnpm typecheck
+npm run test:run tests/unit/baseline.test.ts tests/unit/readiness.test.ts tests/unit/confidence.test.ts tests/unit/sleep-impact.test.ts
+npm run lint
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit the provisional engine**
@@ -1568,7 +1570,7 @@ it("shows stale analysis without hiding ready record status", () => {
 
 - [ ] **Step 2: Run tests and verify missing persistence/UI failures**
 
-Run: `pnpm test:run tests/integration/analysis-recalculation.test.ts tests/unit/today-view-model.test.ts tests/component/today.test.tsx`
+Run: `npm run test:run tests/integration/analysis-recalculation.test.ts tests/unit/today-view-model.test.ts tests/component/today.test.tsx`
 
 Expected: FAIL because snapshot models, service, and Today components do not exist.
 
@@ -1674,18 +1676,18 @@ export const PROVISIONAL_SCHEDULE_RULES = Object.freeze({
 - [ ] **Step 6: Migrate and verify Today**
 
 ```bash
-pnpm prisma migrate dev --name analysis_snapshots
-pnpm prisma generate
-pnpm test:run tests/integration/analysis-recalculation.test.ts tests/unit/today-view-model.test.ts tests/component/today.test.tsx
+npm exec -- prisma migrate dev --name analysis_snapshots
+npm exec -- prisma generate
+npm run test:run tests/integration/analysis-recalculation.test.ts tests/unit/today-view-model.test.ts tests/component/today.test.tsx
 docker compose -f docker-compose.test.yml up -d postgres
-pnpm db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run tests/integration/database-contract.test.ts
+npm run db:schema -- --provider postgresql
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run tests/integration/database-contract.test.ts
 docker compose -f docker-compose.test.yml down
-pnpm prisma generate
-pnpm playwright test tests/e2e/today.spec.ts --project=chromium
-pnpm typecheck
+npm exec -- prisma generate
+npm exec -- playwright test tests/e2e/today.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 7: Commit Today and snapshots**
@@ -1732,7 +1734,7 @@ it("uses low confidence and a goal fallback without a valid baseline", () => {
 
 - [ ] **Step 2: Run tests and verify missing planner failure**
 
-Run: `pnpm test:run tests/unit/schedule-proposal.test.ts tests/integration/planner-repository.test.ts`
+Run: `npm run test:run tests/unit/schedule-proposal.test.ts tests/integration/planner-repository.test.ts`
 
 Expected: FAIL because planner models and domain functions do not exist.
 
@@ -1839,17 +1841,17 @@ Config imports `PROVISIONAL_SCHEDULE_RULES` and adds a 15-minute maximum daily m
 - [ ] **Step 5: Migrate and verify the planning base**
 
 ```bash
-pnpm prisma migrate dev --name planner_domain
-pnpm prisma generate
-pnpm test:run tests/unit/schedule-proposal.test.ts tests/integration/planner-repository.test.ts
+npm exec -- prisma migrate dev --name planner_domain
+npm exec -- prisma generate
+npm run test:run tests/unit/schedule-proposal.test.ts tests/integration/planner-repository.test.ts
 docker compose -f docker-compose.test.yml up -d postgres
-pnpm db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run tests/integration/database-contract.test.ts
+npm run db:schema -- --provider postgresql
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run tests/integration/database-contract.test.ts
 docker compose -f docker-compose.test.yml down
-pnpm prisma generate
-pnpm typecheck
+npm exec -- prisma generate
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit the planning base**
@@ -1899,7 +1901,7 @@ expect(screen.getByRole("link", { name: "주요 일정 직접 입력" })).toBeVi
 
 - [ ] **Step 2: Run tests and verify missing use case/UI**
 
-Run: `pnpm test:run tests/integration/create-schedule-advice.test.ts tests/component/plan-screen.test.tsx`
+Run: `npm run test:run tests/integration/create-schedule-advice.test.ts tests/component/plan-screen.test.tsx`
 
 Expected: FAIL because event creation and Plan components do not exist.
 
@@ -1983,9 +1985,9 @@ export function PlanScreen({ viewModel }: { viewModel: PlanViewModel }) {
 - [ ] **Step 5: Verify generated advice flow**
 
 ```bash
-pnpm test:run tests/integration/create-schedule-advice.test.ts tests/component/plan-screen.test.tsx
-pnpm playwright test tests/e2e/major-event.spec.ts --project=chromium
-pnpm typecheck
+npm run test:run tests/integration/create-schedule-advice.test.ts tests/component/plan-screen.test.tsx
+npm exec -- playwright test tests/e2e/major-event.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit major-event advice**
@@ -2031,7 +2033,7 @@ The integration test asserts generated → accepted, future old days → superse
 
 - [ ] **Step 2: Run tests and verify missing acceptance behavior**
 
-Run: `pnpm test:run tests/unit/schedule-diff.test.ts tests/integration/accept-schedule-advice.test.ts`
+Run: `npm run test:run tests/unit/schedule-diff.test.ts tests/integration/accept-schedule-advice.test.ts`
 
 Expected: FAIL because diff and acceptance use cases do not exist.
 
@@ -2076,10 +2078,10 @@ After acceptance, revalidate `/plan`, `/today`, `/analyze`, and `/care`. `getTod
 - [ ] **Step 5: Verify approval-only mutation**
 
 ```bash
-pnpm test:run tests/unit/schedule-diff.test.ts tests/integration/accept-schedule-advice.test.ts
-pnpm playwright test tests/e2e/major-event.spec.ts --project=chromium
-pnpm playwright test tests/e2e/today.spec.ts --project=chromium
-pnpm typecheck
+npm run test:run tests/unit/schedule-diff.test.ts tests/integration/accept-schedule-advice.test.ts
+npm exec -- playwright test tests/e2e/major-event.spec.ts --project=chromium
+npm exec -- playwright test tests/e2e/today.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit approval-only schedule application**
@@ -2125,7 +2127,7 @@ it("previews caffeine without repository writes", async () => {
 
 - [ ] **Step 2: Run tests and verify missing reroute/preview failures**
 
-Run: `pnpm test:run tests/unit/rerouting.test.ts tests/unit/what-if.test.ts tests/integration/rerouting-service.test.ts`
+Run: `npm run test:run tests/unit/rerouting.test.ts tests/unit/what-if.test.ts tests/integration/rerouting-service.test.ts`
 
 Expected: FAIL because rerouting and What-if functions do not exist.
 
@@ -2189,9 +2191,9 @@ Plan renders the generated reroute ScheduleAdviceCard. Today PreparationTimeline
 - [ ] **Step 6: Verify Rerouting and What-if**
 
 ```bash
-pnpm test:run tests/unit/rerouting.test.ts tests/unit/what-if.test.ts tests/integration/rerouting-service.test.ts
-pnpm playwright test tests/e2e/rerouting-what-if.spec.ts --project=chromium
-pnpm typecheck
+npm run test:run tests/unit/rerouting.test.ts tests/unit/what-if.test.ts tests/integration/rerouting-service.test.ts
+npm exec -- playwright test tests/e2e/rerouting-what-if.spec.ts --project=chromium
+npm run typecheck
 ```
 
 The browser test starts from an accepted plan, saves a cutoff-crossing record, confirms that only a generated reroute card appears, cancels its confirmation dialog and proves the old plan remains, then accepts and proves only future days change. It also opens What-if, observes before/after without any record-count change, follows “실제 기록으로 추가”, cancels before final confirmation, and again asserts no persistent write.
@@ -2239,7 +2241,7 @@ expect(screen.queryByText(/원인/)).not.toBeInTheDocument();
 
 - [ ] **Step 2: Run tests and verify missing Analyze UI**
 
-Run: `pnpm test:run tests/unit/analyze-view-model.test.ts tests/component/analyze-screen.test.tsx`
+Run: `npm run test:run tests/unit/analyze-view-model.test.ts tests/component/analyze-screen.test.tsx`
 
 Expected: FAIL because Analyze query and components do not exist.
 
@@ -2299,10 +2301,10 @@ Desktop shows four metrics, two-week trend with goal line, caffeine profile and 
 - [ ] **Step 5: Verify Analyze**
 
 ```bash
-pnpm test:run tests/unit/analyze-view-model.test.ts tests/component/analyze-screen.test.tsx
-pnpm playwright test tests/e2e/analyze.spec.ts --project=chromium
-pnpm lint
-pnpm typecheck
+npm run test:run tests/unit/analyze-view-model.test.ts tests/component/analyze-screen.test.tsx
+npm exec -- playwright test tests/e2e/analyze.spec.ts --project=chromium
+npm run lint
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit Analyze**
@@ -2369,7 +2371,7 @@ it("rejects a number or medical claim not present in immutable facts", () => {
 
 - [ ] **Step 2: Run tests and verify missing narration failure**
 
-Run: `pnpm test:run tests/unit/template-narration.test.ts tests/unit/narration-validation.test.ts tests/integration/generate-narration.test.ts tests/unit/openai-input-allowlist.test.ts`
+Run: `npm run test:run tests/unit/template-narration.test.ts tests/unit/narration-validation.test.ts tests/integration/generate-narration.test.ts tests/unit/openai-input-allowlist.test.ts`
 
 Expected: FAIL because narration modules and model do not exist.
 
@@ -2393,7 +2395,7 @@ export interface NarrationRepository {
 
 - [ ] **Step 4: Implement the provider and strict output schema**
 
-Run: `pnpm add openai`
+Run: `npm install openai@latest`
 
 Add empty `OPENAI_API_KEY` and `OPENAI_MODEL` entries to `.env.example`. The Task 17 environment parser treats either missing value as “provider unavailable” and immediately uses the deterministic template; Task 22 requires both in preview and production.
 
@@ -2508,24 +2510,24 @@ return committed.result;
 - [ ] **Step 6: Migrate and verify narration**
 
 ```bash
-pnpm prisma migrate dev --name narration
-pnpm prisma generate
-pnpm test:run tests/unit/template-narration.test.ts tests/unit/narration-validation.test.ts tests/integration/generate-narration.test.ts tests/unit/openai-input-allowlist.test.ts
+npm exec -- prisma migrate dev --name narration
+npm exec -- prisma generate
+npm run test:run tests/unit/template-narration.test.ts tests/unit/narration-validation.test.ts tests/integration/generate-narration.test.ts tests/unit/openai-input-allowlist.test.ts
 docker compose -f docker-compose.test.yml up -d postgres
-pnpm db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run tests/integration/database-contract.test.ts
+npm run db:schema -- --provider postgresql
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run tests/integration/database-contract.test.ts
 docker compose -f docker-compose.test.yml down
-pnpm prisma generate
-OPENAI_API_KEY= OPENAI_MODEL= pnpm playwright test tests/e2e/narration-fallback.spec.ts --project=chromium
-pnpm typecheck
+npm exec -- prisma generate
+OPENAI_API_KEY= OPENAI_MODEL= npm exec -- playwright test tests/e2e/narration-fallback.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 7: Commit narration**
 
 ```bash
-git add package.json pnpm-lock.yaml .env.example prisma src/modules/narration src/modules/analysis/application/recalculate-analysis.ts src/modules/planner/application/create-schedule-advice.ts src/modules/planner/application/evaluate-rerouting.ts src/modules/records/application/record-service.ts tests/unit/template-narration.test.ts tests/unit/narration-validation.test.ts tests/integration/generate-narration.test.ts tests/unit/openai-input-allowlist.test.ts tests/e2e/narration-fallback.spec.ts
+git add package.json package-lock.json .env.example prisma src/modules/narration src/modules/analysis/application/recalculate-analysis.ts src/modules/planner/application/create-schedule-advice.ts src/modules/planner/application/evaluate-rerouting.ts src/modules/records/application/record-service.ts tests/unit/template-narration.test.ts tests/unit/narration-validation.test.ts tests/integration/generate-narration.test.ts tests/unit/openai-input-allowlist.test.ts tests/e2e/narration-fallback.spec.ts
 git commit -m "feat: add safe sleep narration"
 ```
 
@@ -2583,7 +2585,7 @@ it("allows undo only before the local day closes", async () => {
 
 - [ ] **Step 2: Run tests and verify missing Care behavior**
 
-Run: `pnpm test:run tests/unit/routine-state.test.ts tests/integration/care-session.test.ts tests/component/care-screen.test.tsx`
+Run: `npm run test:run tests/unit/routine-state.test.ts tests/integration/care-session.test.ts tests/component/care-screen.test.tsx`
 
 Expected: FAIL because Care models and components do not exist.
 
@@ -2674,18 +2676,18 @@ Care renders hero, “직접 입력 사용 중” SyncSummary, RoutineTimeline, 
 - [ ] **Step 6: Migrate and verify Care**
 
 ```bash
-pnpm prisma migrate dev --name care
-pnpm prisma generate
-pnpm test:run tests/unit/routine-state.test.ts tests/integration/care-session.test.ts tests/component/care-screen.test.tsx
+npm exec -- prisma migrate dev --name care
+npm exec -- prisma generate
+npm run test:run tests/unit/routine-state.test.ts tests/integration/care-session.test.ts tests/component/care-screen.test.tsx
 docker compose -f docker-compose.test.yml up -d postgres
-pnpm db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run tests/integration/database-contract.test.ts
+npm run db:schema -- --provider postgresql
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run tests/integration/database-contract.test.ts
 docker compose -f docker-compose.test.yml down
-pnpm prisma generate
-pnpm playwright test tests/e2e/care.spec.ts --project=chromium
-pnpm typecheck
+npm exec -- prisma generate
+npm exec -- playwright test tests/e2e/care.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 7: Commit Care**
@@ -2735,7 +2737,7 @@ The integration test updates Alice's goal using Alice's scope, attempts Bob's pr
 
 - [ ] **Step 2: Run tests and verify missing Account behavior**
 
-Run: `pnpm test:run tests/integration/account-settings.test.ts tests/component/account-screen.test.tsx`
+Run: `npm run test:run tests/integration/account-settings.test.ts tests/component/account-screen.test.tsx`
 
 Expected: FAIL because Account service and UI do not exist.
 
@@ -2803,9 +2805,9 @@ export function AccountScreen({ viewModel }: { viewModel: AccountViewModel }) {
 - [ ] **Step 5: Verify Account settings**
 
 ```bash
-pnpm test:run tests/integration/account-settings.test.ts tests/component/account-screen.test.tsx
-pnpm playwright test tests/e2e/account-settings.spec.ts --project=chromium
-pnpm typecheck
+npm run test:run tests/integration/account-settings.test.ts tests/component/account-screen.test.tsx
+npm exec -- playwright test tests/e2e/account-settings.spec.ts --project=chromium
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit Account settings**
@@ -2855,7 +2857,7 @@ The deletion test injects a failure before User deletion and asserts every domai
 
 - [ ] **Step 2: Run tests and verify missing data-management behavior**
 
-Run: `pnpm test:run tests/integration/account-export-delete.test.ts`
+Run: `npm run test:run tests/integration/account-export-delete.test.ts`
 
 Expected: FAIL because export and deletion services do not exist.
 
@@ -3067,10 +3069,10 @@ The Server Action first calls `assertTrustedMutationOrigin((await headers()).get
 - [ ] **Step 5: Verify sensitive flows**
 
 ```bash
-pnpm test:run tests/integration/account-export-delete.test.ts
-pnpm playwright test tests/e2e/account-data-management.spec.ts --project=chromium
-pnpm lint
-pnpm typecheck
+npm run test:run tests/integration/account-export-delete.test.ts
+npm exec -- playwright test tests/e2e/account-data-management.spec.ts --project=chromium
+npm run lint
+npm run typecheck
 ```
 
 - [ ] **Step 6: Commit sensitive data management**
@@ -3149,7 +3151,7 @@ Foundations, Components, Cover, and Product Flow are references, not runtime scr
 
 - [ ] **Step 2: Write deterministic visual and accessibility tests**
 
-Run: `pnpm add -D @axe-core/playwright`
+Run: `npm install -D @axe-core/playwright@latest`
 
 For each frame: create an isolated Better Auth user when the fixture is not `signed-out`, seed only that user's domain rows, set Playwright clock to `2026-08-19T12:00:00.000Z`, set timezone `Asia/Seoul`, wait for `document.fonts.ready`, disable animation/transition/caret, mock OpenAI and abort unapproved external network, then capture the page at the manifest viewport. The public Figma Foundations frame exposes the `Display/Care`, `Heading/Page`, and `Body/Medium` hierarchy but not a family label, so lock the implementation decision instead of relying on OS fonts: install `pretendard@1.3.9`, import its packaged variable-font CSS from `src/app/layout.tsx`, and set the global family to `"Pretendard Variable", Pretendard, sans-serif`. No font CDN is allowed in tests or production.
 
@@ -3218,7 +3220,7 @@ expect(result.violations.filter(({ impact }) => impact === "serious" || impact =
 
 - [ ] **Step 3: Run visual tests to capture intentional failures**
 
-Run: `pnpm test:visual`
+Run: `npm run test:visual`
 
 Expected: FAIL with new or mismatched screenshots before Figma calibration.
 
@@ -3249,12 +3251,12 @@ Use `1440×1024` and `390×844` as the two locked calibration canvases. At each 
 - [ ] **Step 5: Run complete visual and accessibility verification**
 
 ```bash
-pnpm test:visual
-pnpm playwright test tests/e2e/accessibility.spec.ts --project=chromium
-pnpm test:run
-pnpm lint
-pnpm typecheck
-pnpm build
+npm run test:visual
+npm exec -- playwright test tests/e2e/accessibility.spec.ts --project=chromium
+npm run test:run
+npm run lint
+npm run typecheck
+npm run build
 ```
 
 Expected: all checks PASS with reviewed baseline snapshots and no serious axe violations.
@@ -3262,7 +3264,7 @@ Expected: all checks PASS with reviewed baseline snapshots and no serious axe vi
 - [ ] **Step 6: Commit responsive fidelity**
 
 ```bash
-git add src tests/visual tests/e2e/accessibility.spec.ts scripts/seed-visual-fixtures.ts playwright.config.ts package.json pnpm-lock.yaml
+git add src tests/visual tests/e2e/accessibility.spec.ts scripts/seed-visual-fixtures.ts playwright.config.ts package.json package-lock.json
 git commit -m "feat: match responsive figma screens"
 ```
 
@@ -3312,7 +3314,7 @@ it("preserves ownership, JSON, unique keys, cascade, ordering, and rollback", as
 
 - [ ] **Step 2: Run the contract against SQLite first**
 
-Run: `DATABASE_URL=file:./prisma/contract.db pnpm test:run tests/integration/database-contract.test.ts`
+Run: `DATABASE_URL=file:./prisma/contract.db npm run test:run tests/integration/database-contract.test.ts`
 
 Expected: PASS on the verified local provider.
 
@@ -3343,10 +3345,10 @@ Run:
 
 ```bash
 docker compose -f docker-compose.test.yml up -d postgres
-pnpm db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run tests/integration/database-contract.test.ts
+npm run db:schema -- --provider postgresql
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run tests/integration/database-contract.test.ts
 ```
 
 Expected: the same contract object as SQLite.
@@ -3405,11 +3407,11 @@ Run:
 ```bash
 git mv prisma/migrations prisma/migrations-sqlite
 mkdir -p prisma/migrations/20260819000000_initial_postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script --output prisma/migrations/20260819000000_initial_postgresql/migration.sql
-DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' pnpm verify:migrations
-DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' pnpm prisma migrate deploy
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm test:run
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test pnpm playwright test --project=chromium
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script --output prisma/migrations/20260819000000_initial_postgresql/migration.sql
+DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' npm run verify:migrations
+DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' npm exec -- prisma migrate deploy
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm run test:run
+DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- playwright test --project=chromium
 docker compose -f docker-compose.test.yml down
 ```
 
@@ -3457,7 +3459,7 @@ try {
   await client.end();
 }
 
-execFileSync("pnpm", ["prisma", "migrate", "deploy"], {
+execFileSync("npm", ["exec", "--", "prisma", "migrate", "deploy"], {
   stdio: "inherit",
   env: { ...process.env, DATABASE_URL: rawUrl, MIGRATION_DATABASE_URL: rawUrl },
 });
@@ -3473,7 +3475,7 @@ try {
 } finally {
   await verify.end();
 }
-execFileSync("pnpm", ["prisma", "migrate", "status"], {
+execFileSync("npm", ["exec", "--", "prisma", "migrate", "status"], {
   stdio: "inherit",
   env: { ...process.env, DATABASE_URL: rawUrl, MIGRATION_DATABASE_URL: rawUrl },
 });
@@ -3481,15 +3483,15 @@ execFileSync("pnpm", ["prisma", "migrate", "status"], {
 
 - [ ] **Step 5: Add CI provider matrix and deterministic gates**
 
-CI installs with `pnpm install --frozen-lockfile`, then runs:
+CI installs with `npm ci`, then runs:
 
 ```bash
-pnpm prisma validate
-pnpm dlx auth@latest generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
-pnpm verify:auth-schema
-pnpm lint
-pnpm typecheck
-pnpm test:run
+npm exec -- prisma validate
+npm exec --package=auth@latest -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
+npm run verify:auth-schema
+npm run lint
+npm run typecheck
+npm run test:run
 ```
 
 `verify-auth-schema.ts` extracts User, Session, Account, Verification, and RateLimit from the generated check schema and asserts that every generated scalar, relation key, unique/index, and mapped field exists in canonical `prisma/schema.prisma`; canonical-only domain relations on User are allowed. Add `prisma/schema.auth-check.prisma` to `.gitignore` and add `"verify:auth-schema": "tsx scripts/verify-auth-schema.ts"` to package scripts.
@@ -3520,7 +3522,7 @@ for (const name of names) {
 
 The provider matrix then runs SQLite and PostgreSQL integration jobs followed by E2E, visual, and build. PostgreSQL uses a dedicated service database. Each parallel worker creates a unique user, idempotency key, database namespace, and timezone fixture. The workflow has four required jobs: `quality` (lint/typecheck/unit), `contract-sqlite`, `contract-postgresql` with a PostgreSQL service and health check, and `browser` after both contracts. `browser` runs migration deploy, migration status, E2E, visual, and build against PostgreSQL; no job shares a mutable SQLite file. Every job removes generated active/auth-check schemas in an `if: always()` cleanup step.
 
-Use this exact job graph; each `setup` block expands to checkout, `pnpm/action-setup@v4`, `actions/setup-node@v4` with Node 22 and pnpm cache, then `pnpm install --frozen-lockfile`:
+Use this exact job graph; each `setup` block expands to checkout and `actions/setup-node@v4` with Node 22 and the npm cache, then `npm ci`:
 
 ```yaml
 name: ci
@@ -3541,14 +3543,13 @@ jobs:
     env: { DATABASE_URL: "postgresql://planner:planner@127.0.0.1:5432/planner_test" }
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm prisma generate
-      - run: pnpm dlx auth@latest generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
-      - run: pnpm verify:auth-schema
-      - run: pnpm lint && pnpm typecheck && pnpm test:run tests/unit tests/component
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm exec -- prisma generate
+      - run: npm exec --package=auth@latest -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
+      - run: npm run verify:auth-schema
+      - run: npm run lint && npm run typecheck && npm run test:run tests/unit tests/component
       - if: always()
         run: rm -f prisma/schema.auth-check.prisma prisma/schema.active.prisma
 
@@ -3559,14 +3560,13 @@ jobs:
       AUTH_RATE_LIMIT_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm db:schema -- --provider sqlite
-      - run: pnpm prisma generate --schema prisma/schema.active.prisma
-      - run: pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-      - run: pnpm test:run tests/integration
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:schema -- --provider sqlite
+      - run: npm exec -- prisma generate --schema prisma/schema.active.prisma
+      - run: npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+      - run: npm run test:run tests/integration
       - if: always()
         run: rm -f prisma/contract.db prisma/schema.active.prisma
 
@@ -3585,14 +3585,13 @@ jobs:
       AUTH_RATE_LIMIT_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm db:schema -- --provider postgresql
-      - run: pnpm prisma generate --schema prisma/schema.active.prisma
-      - run: pnpm prisma db push --schema prisma/schema.active.prisma --force-reset
-      - run: pnpm test:run tests/integration
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:schema -- --provider postgresql
+      - run: npm exec -- prisma generate --schema prisma/schema.active.prisma
+      - run: npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+      - run: npm run test:run tests/integration
       - if: always()
         run: rm -f prisma/schema.active.prisma
 
@@ -3610,39 +3609,38 @@ jobs:
     env: { DATABASE_URL: "postgresql://planner:planner@127.0.0.1:5432/planner_test" }
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm prisma generate && pnpm prisma migrate deploy && pnpm prisma migrate status
-      - run: pnpm playwright test --project=chromium
-      - run: pnpm test:visual
-      - run: pnpm build
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm exec -- playwright install --with-deps chromium
+      - run: npm exec -- prisma generate && npm exec -- prisma migrate deploy && npm exec -- prisma migrate status
+      - run: npm exec -- playwright test --project=chromium
+      - run: npm run test:visual
+      - run: npm run build
       - if: always()
         run: rm -f prisma/schema.auth-check.prisma prisma/schema.active.prisma
 ```
 
 - [ ] **Step 6: Configure Vercel preview and production**
 
-Run `pnpm add -D vercel dotenv-cli`. Set pooled runtime `DATABASE_URL`, direct non-pooled `MIGRATION_DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `AUTH_RATE_LIMIT_ENABLED=true`, `OPENAI_API_KEY`, and `OPENAI_MODEL`. Each preview uses its own PostgreSQL branch/database and exact `https://${VERCEL_URL}` origin; production uses its fixed HTTPS origin. Preview CI pulls its environment into gitignored `.env.preview.local`; Prisma CLI selects `MIGRATION_DATABASE_URL` through `prisma.config.ts`, so `pnpm dotenv -e .env.preview.local -- pnpm prisma migrate deploy` uses the direct endpoint while serverless runtime uses the pooled endpoint. Production migration deploy is a separately approved release job before production promotion, never a serverless request or Next.js build side effect.
+Run `npm install -D vercel@latest dotenv-cli@latest`. Set pooled runtime `DATABASE_URL`, direct non-pooled `MIGRATION_DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `AUTH_RATE_LIMIT_ENABLED=true`, `OPENAI_API_KEY`, and `OPENAI_MODEL`. Each preview uses its own PostgreSQL branch/database and exact `https://${VERCEL_URL}` origin; production uses its fixed HTTPS origin. Preview CI pulls its environment into gitignored `.env.preview.local`; Prisma CLI selects `MIGRATION_DATABASE_URL` through `prisma.config.ts`, so `npm exec -- dotenv -e .env.preview.local -- npm exec -- prisma migrate deploy` uses the direct endpoint while serverless runtime uses the pooled endpoint. Production migration deploy is a separately approved release job before production promotion, never a serverless request or Next.js build side effect.
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "pnpm prisma generate && pnpm build"
+  "buildCommand": "npm exec -- prisma generate && npm run build"
 }
 ```
 
 Add global response headers in `next.config.ts`: `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`, and `Permissions-Policy: camera=(), microphone=(), geolocation=()`. Vercel supplies HTTPS/HSTS at the edge; do not send HSTS from local HTTP. The production smoke test asserts these six headers on `/sign-in` and one authenticated route.
 
-`scripts/deploy-preview.mjs` invokes `pnpm vercel deploy --prebuilt --yes` with `execFileSync`, extracts the final stdout line, parses it with `new URL`, rejects non-HTTPS or non-`.vercel.app` hosts, and launches `pnpm playwright test tests/e2e/production-smoke.spec.ts` with that validated origin in `BASE_URL`. This avoids a hand-edited preview URL and ensures smoke tests target the deployment that was just created.
+`scripts/deploy-preview.mjs` invokes `npm exec -- vercel deploy --prebuilt --yes` with `execFileSync`, extracts the final stdout line, parses it with `new URL`, rejects non-HTTPS or non-`.vercel.app` hosts, and launches `npm exec -- playwright test tests/e2e/production-smoke.spec.ts` with that validated origin in `BASE_URL`. This avoids a hand-edited preview URL and ensures smoke tests target the deployment that was just created.
 
 ```js
 import { execFileSync } from "node:child_process";
 
-const stdout = execFileSync("pnpm", ["vercel", "deploy", "--prebuilt", "--yes"], {
+const stdout = execFileSync("npm", ["exec", "--", "vercel", "deploy", "--prebuilt", "--yes"], {
   encoding: "utf8",
   stdio: ["inherit", "pipe", "inherit"],
 });
@@ -3651,7 +3649,7 @@ const deployed = candidates.at(-1);
 if (!deployed) throw new Error("Vercel did not return a deployment URL");
 const url = new URL(deployed);
 if (url.protocol !== "https:" || !url.hostname.endsWith(".vercel.app")) throw new Error("unexpected deployment origin");
-execFileSync("pnpm", ["playwright", "test", "tests/e2e/production-smoke.spec.ts"], {
+execFileSync("npm", ["exec", "--", "playwright", "test", "tests/e2e/production-smoke.spec.ts"], {
   stdio: "inherit",
   env: { ...process.env, BASE_URL: url.origin },
 });
@@ -3664,16 +3662,16 @@ Before any later production migration, confirm provider snapshot/backup, use exp
 Run:
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test:run
-pnpm test:visual
-pnpm playwright test --project=chromium
-pnpm build
-pnpm vercel pull --yes --environment=preview
-pnpm vercel env pull .env.preview.local --yes --environment=preview
-pnpm dotenv -e .env.preview.local -- pnpm prisma migrate deploy
-pnpm vercel build
+npm run lint
+npm run typecheck
+npm run test:run
+npm run test:visual
+npm exec -- playwright test --project=chromium
+npm run build
+npm exec -- vercel pull --yes --environment=preview
+npm exec -- vercel env pull .env.preview.local --yes --environment=preview
+npm exec -- dotenv -e .env.preview.local -- npm exec -- prisma migrate deploy
+npm exec -- vercel build
 node scripts/deploy-preview.mjs
 ```
 
@@ -3684,19 +3682,19 @@ Expected: the complete smoke journey PASSes on the exact PostgreSQL preview URL 
 - [ ] **Step 8: Commit deployment readiness**
 
 ```bash
-git add prisma scripts docker-compose.test.yml .github/workflows/ci.yml vercel.json next.config.ts tests/integration/database-contract.test.ts tests/e2e/production-smoke.spec.ts package.json pnpm-lock.yaml .env.example .gitignore README.md
+git add prisma scripts docker-compose.test.yml .github/workflows/ci.yml vercel.json next.config.ts tests/integration/database-contract.test.ts tests/e2e/production-smoke.spec.ts package.json package-lock.json .env.example .gitignore README.md
 git commit -m "chore: prepare postgres vercel deployment"
 ```
 
 ## Final Verification Checklist
 
-- [ ] `pnpm lint` passes.
-- [ ] `pnpm typecheck` passes.
-- [ ] `pnpm test:run` passes.
+- [ ] `npm run lint` passes.
+- [ ] `npm run typecheck` passes.
+- [ ] `npm run test:run` passes.
 - [ ] SQLite and PostgreSQL integration suites return the same contract results.
-- [ ] `pnpm playwright test --project=chromium` passes with isolated users.
-- [ ] `pnpm test:visual` passes for every manifest frame.
-- [ ] `pnpm build` passes with only documented environment variables.
+- [ ] `npm exec -- playwright test --project=chromium` passes with isolated users.
+- [ ] `npm run test:visual` passes for every manifest frame.
+- [ ] `npm run build` passes with only documented environment variables.
 - [ ] No page or action queries Prisma directly.
 - [ ] Every user-owned table has direct userId and a tested scope boundary.
 - [ ] Record edit/delete appends revisions and recalculates affected snapshots.

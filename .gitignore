@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+.next/
+out/
+coverage/
+.prisma/
+playwright-report/
+test-results/
+.vscode/
+prisma/schema.active.prisma
+prisma/schema.auth-check.prisma
+.env.preview.local
+.env.migration.local

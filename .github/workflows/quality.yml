@@ -1,0 +1,57 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      visual_mode:
+        description: Capture reviewed baselines explicitly, or strictly compare committed baselines.
+        required: false
+        default: compare
+        type: choice
+        options: [capture, compare]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:run
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+
+  visual-and-accessibility:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: visual-tests
+    env:
+      ADAPTIVE_SLEEP_E2E_DATABASE_URL: ${{ vars.ADAPTIVE_SLEEP_E2E_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Capture candidate baselines for review
+        if: inputs.visual_mode == 'capture'
+        run: npm run test:visual -- --update-snapshots
+      - name: Require committed baselines before strict comparison
+        if: inputs.visual_mode == 'compare'
+        run: test -d tests/visual/__screenshots__/visual
+      - name: Compare reviewed baselines strictly
+        if: inputs.visual_mode == 'compare'
+        run: npm run test:visual
+      - run: npm exec -- playwright test tests/e2e/accessibility.spec.ts --project=chromium

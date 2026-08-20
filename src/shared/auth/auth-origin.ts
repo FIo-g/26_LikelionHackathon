@@ -1,4 +1,4 @@
-type RawAuthEnv = {
+export type RawAuthEnv = {
   VERCEL_ENV?: string;
   VERCEL_URL?: string;
   BETTER_AUTH_URL?: string;
@@ -88,7 +88,7 @@ export const resolveAuthOrigin = (env: RawAuthEnv): AuthOrigin => {
   }
 
   const fallback = env.BETTER_AUTH_URL ?? "http://127.0.0.1:3000";
-  if ((env.NODE_ENV ?? "development") !== "development") {
+  if ((env.NODE_ENV ?? "development") !== "development" && env.NODE_ENV !== "test") {
     const candidate = parseOrigin(fallback, { allowHttp: false, allowLoopbackOnly: false });
     return {
       baseURL: candidate,

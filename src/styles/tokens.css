@@ -1,0 +1,24 @@
+:root {
+  --font-family: "Pretendard Variable", Pretendard, sans-serif;
+  --font-display-care-size: 32px;
+  --font-display-care-line-height: 40px;
+  --font-heading-page-size: 28px;
+  --font-heading-page-line-height: 36px;
+  --font-body-medium-size: 14px;
+  --font-body-medium-line-height: 21px;
+  --content-max: 1120px;
+  --mobile-nav-height: 68px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --radius-control: 9px;
+  --radius-card: 16px;
+  --color-canvas: #f7f8fe;
+  --color-surface: #ffffff;
+  --color-text: #1c223e;
+  --color-muted: #59627e;
+  --color-border: #d7dcf3;
+  --color-primary: #5450bd;
+  --color-focus: #212a75;
+}

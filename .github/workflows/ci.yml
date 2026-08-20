@@ -1,0 +1,107 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  BETTER_AUTH_SECRET: test-secret-that-is-at-least-32-characters
+  BETTER_AUTH_URL: http://127.0.0.1:3000
+  AUTH_RATE_LIMIT_ENABLED: "true"
+  OPENAI_API_KEY: test-key
+  OPENAI_MODEL: gpt-5.6-terra
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm exec -- prisma generate
+      - run: ADAPTIVE_SLEEP_RELEASE_VALIDATION=1 BETTER_AUTH_URL=https://preview.example.vercel.app npm run validate:release
+      - run: npm exec --package=auth@latest -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
+      - run: npm run verify:auth-schema
+      - run: npm run lint && npm run typecheck && npm run test:run tests/unit tests/component
+      - if: always()
+        run: rm -f prisma/schema.auth-check.prisma prisma/schema.active.prisma
+
+  contract-sqlite:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: file:./prisma/contract.db
+      AUTH_RATE_LIMIT_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:schema -- --provider sqlite
+      - run: npm exec -- prisma generate --schema prisma/schema.active.prisma
+      - run: npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+      - run: npm run test:run tests/integration/database-contract.test.ts
+      - if: always()
+        run: rm -f prisma/contract.db prisma/schema.active.prisma
+
+  contract-postgresql:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env: { POSTGRES_USER: planner, POSTGRES_PASSWORD: planner, POSTGRES_DB: planner_test }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U planner -d planner_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test
+      AUTH_RATE_LIMIT_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:schema -- --provider postgresql
+      - run: npm exec -- prisma generate --schema prisma/schema.active.prisma
+      - run: npm exec -- prisma db push --schema prisma/schema.active.prisma --force-reset
+      - run: npm run test:run tests/integration/database-contract.test.ts
+      - if: always()
+        run: rm -f prisma/schema.active.prisma
+
+  browser:
+    needs: [quality, contract-sqlite, contract-postgresql]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env: { POSTGRES_USER: planner, POSTGRES_PASSWORD: planner, POSTGRES_DB: planner_test }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U planner -d planner_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=e2e_browser
+      ADAPTIVE_SLEEP_E2E_DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=e2e_browser
+      AUTH_RATE_LIMIT_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm exec -- playwright install --with-deps chromium
+      - run: PGPASSWORD=planner psql -h 127.0.0.1 -U planner -d planner_test -c 'CREATE SCHEMA IF NOT EXISTS e2e_browser'
+      - run: npm exec -- prisma generate && npm exec -- prisma migrate deploy && npm exec -- prisma migrate status
+      - run: npm exec -- playwright test --project=chromium
+      - name: Compare approved visual baselines only when committed
+        if: ${{ hashFiles('tests/visual/__screenshots__/visual/**') != '' }}
+        run: npm run test:visual
+      - run: npm run build
+      - if: always()
+        run: rm -f prisma/schema.auth-check.prisma prisma/schema.active.prisma

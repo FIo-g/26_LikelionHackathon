@@ -1,0 +1,46 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { AnalyzeScreen } from "@/modules/analysis/ui/analysis-report";
+import type { AnalyzeViewModel } from "@/modules/analysis/application/get-analyze-view-model";
+
+const viewModel = {
+  state: "ready",
+  metrics: [],
+  trend: [],
+  caffeineProfile: { signal: 50, wording: "관찰된 신호", whatIfEnabled: false },
+  explainability: [],
+  dataBasis: {
+    periodStart: "2026-08-06",
+    periodEnd: "2026-08-19",
+    sampleCount: 10,
+    excludedCount: 0,
+    missingFields: [],
+    completenessByCategory: {},
+    sourceDistribution: {},
+    computedAt: "2026-08-20T00:00:00.000Z",
+    algorithmVersion: "provisional-v1",
+    confidence: "low",
+  },
+  report: { status: "template-fallback", headline: "최근 수면 패턴", body: "본문", bullets: [] },
+  scheduleAdvice: {
+    id: "reroute-advice",
+    triggerType: "reroute",
+    status: "generated",
+    headline: "카페인 기록에 맞춰 수면 시간을 조정해요",
+    proposal: { days: [] },
+    diff: [],
+  },
+} as unknown as AnalyzeViewModel;
+
+describe("AnalyzeScreen advice and mobile details", () => {
+  it("renders reroute advice through the established confirmation dialog and retains the mobile disclosure", () => {
+    render(<AnalyzeScreen viewModel={viewModel} />);
+
+    expect(screen.getByText("카페인 기록에 맞춰 수면 시간을 조정해요")).toBeInTheDocument();
+    expect(screen.getByText("전체 지표·근거 보기")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button")[0]);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+});

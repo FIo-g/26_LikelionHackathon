@@ -1,7 +1,9 @@
 import { betterAuth } from "better-auth";
-import { PrismaAdapter } from "@better-auth/prisma-adapter";
+import * as betterAuthPrismaAdapter from "@better-auth/prisma-adapter";
 import { getPrismaClient } from "@/shared/db/prisma";
 import { resolveAuthOrigin } from "@/shared/auth/auth-origin";
+
+export const AUTH_SESSION_COOKIE = "better-auth.session_token";
 
 const createFallbackHandler = () => ({
   GET: async () => new Response("Authentication is not configured.", { status: 500 }),
@@ -24,9 +26,14 @@ export const auth = (() => {
     });
 
     const prisma = getPrismaClient();
+    const Adapter = (betterAuthPrismaAdapter as Record<string, unknown>).prismaAdapter
+      ?? (betterAuthPrismaAdapter as Record<string, unknown>).PrismaAdapter;
+    if (typeof Adapter !== "function") {
+      throw new Error("Unsupported better-auth prisma adapter export");
+    }
 
     return betterAuth({
-      database: PrismaAdapter(prisma),
+      database: (Adapter as (client: unknown) => unknown)(prisma),
       secret,
       baseURL: authOrigin.baseURL,
       trustedOrigins: authOrigin.trustedOrigins,
@@ -35,6 +42,9 @@ export const auth = (() => {
         autoSignIn: true,
         requireEmailVerification: false,
       },
+      rateLimit: process.env.AUTH_RATE_LIMIT_ENABLED === "true"
+        ? { storage: "database" }
+        : undefined,
       basePath: "/api/auth",
     });
   } catch {
