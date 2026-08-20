@@ -60,7 +60,7 @@ describePreview("deployed preview smoke", () => {
 
     await page.goto("/onboarding/profile");
     await page.getByLabel("닉네임").fill("Preview smoke");
-    await page.getByRole("button", { name: "다음" }).click();
+    await page.getByRole("button", { name: "완료" }).click();
     await page.goto("/onboarding/sleep-goal");
     await page.getByRole("button", { name: "다음" }).click();
     await page.goto("/onboarding/habits");
@@ -68,7 +68,13 @@ describePreview("deployed preview smoke", () => {
     await page.goto("/onboarding/connect");
     await page.getByRole("button", { name: "연결하기" }).click();
 
-    await page.goto("/record/caffeine?step=confirm&brand=Smoke&product=Coffee&caffeineMg=80&consumedAt=2026-08-19T12%3A00");
+    await page.goto("/record/caffeine");
+    await page.getByLabel("브랜드").fill("Smoke");
+    await page.getByRole("button", { name: "다음" }).click();
+    await page.getByLabel("제품명").fill("Coffee");
+    await page.getByLabel("카페인(mg)").fill("80");
+    await page.getByLabel("마신 시각").fill("2026-08-19T12:00");
+    await page.getByRole("button", { name: "다음" }).click();
     await page.getByRole("button", { name: "카페인 저장" }).click();
     await page.goto("/today");
     await expect(page.getByRole("heading", { name: "오늘" })).toBeVisible();

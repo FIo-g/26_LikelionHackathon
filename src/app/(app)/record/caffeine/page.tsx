@@ -19,14 +19,6 @@ export default async function CaffeinePage({ searchParams }: CaffeinePageProps) 
     <CaffeineFlow
       timezone={timezone}
       step={firstParam(query.step)}
-      initialValues={{
-        recordId: firstParam(query.recordId),
-        brand: firstParam(query.brand),
-        product: firstParam(query.product),
-        caffeineMg: firstParam(query.caffeineMg),
-        consumedAt: firstParam(query.consumedAt),
-        consumedAtDisambiguation: firstParam(query.consumedAtDisambiguation),
-      }}
     />
   );
 }

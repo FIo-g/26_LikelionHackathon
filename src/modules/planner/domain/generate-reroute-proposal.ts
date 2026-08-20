@@ -47,17 +47,24 @@ const dayForInstant = (
   )) ?? null
 );
 
-const hasProvisionalConflict = (trigger: RerouteTrigger, activeDays: readonly PlanDayEntity[]): boolean => {
+const hasProvisionalConflict = (
+  trigger: RerouteTrigger,
+  windowDays: readonly PlanDayEntity[],
+  sleepReferenceDays: readonly PlanDayEntity[],
+): boolean => {
   const { input } = trigger;
 
-  if (input.type === "caffeine") return dayForInstant(activeDays, input.consumedAt, "caffeineCutoffAt") !== null;
-  if (input.type === "meal") return dayForInstant(activeDays, input.eatenAt, "mealCutoffAt") !== null;
-  if (input.type === "exercise") return dayForInstant(activeDays, input.endedAt, "exerciseCutoffAt") !== null;
-  if (input.type === "phone-usage") return dayForInstant(activeDays, input.lastUseAt, "windDownAt") !== null;
-  if (input.type === "alcohol") return dayForInstant(activeDays, input.consumedAt, "windDownAt") !== null;
+  if (input.type === "caffeine") return dayForInstant(windowDays, input.consumedAt, "caffeineCutoffAt") !== null;
+  if (input.type === "meal") return dayForInstant(windowDays, input.eatenAt, "mealCutoffAt") !== null;
+  if (input.type === "exercise") return dayForInstant(windowDays, input.endedAt, "exerciseCutoffAt") !== null;
+  if (input.type === "phone-usage") return dayForInstant(windowDays, input.lastUseAt, "windDownAt") !== null;
+  if (input.type === "alcohol") return dayForInstant(windowDays, input.consumedAt, "windDownAt") !== null;
   if (input.type !== "sleep") return false;
 
-  const planDay = [...activeDays].sort((left, right) => (
+  // The night that just ended has a targetBedAt in the past, so it is excluded from
+  // `windowDays` (future-only). Match against the full active set instead, or an
+  // on-time sleep gets compared against the NEXT night's wake target.
+  const planDay = [...sleepReferenceDays].sort((left, right) => (
     Math.abs(new Date(left.targetWakeAt).getTime() - input.endedAt.getTime())
       - Math.abs(new Date(right.targetWakeAt).getTime() - input.endedAt.getTime())
   ))[0];
@@ -92,7 +99,8 @@ export const selectReroutePlanDays = (
 
 export const generateRerouteProposal = (input: RerouteProposalInput): ScheduleProposal | null => {
   const futureDays = selectReroutePlanDays(input.activeDays, input.trigger, input.now);
-  if (!hasProvisionalConflict(input.trigger, futureDays)) return null;
+  const activeDays = input.activeDays.filter((day) => day.status === "active");
+  if (!hasProvisionalConflict(input.trigger, futureDays, activeDays)) return null;
   const firstFutureDay = futureDays[0];
   if (!firstFutureDay) return null;
 

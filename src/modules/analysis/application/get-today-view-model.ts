@@ -252,16 +252,21 @@ const buildReadinessViewModel = (snapshot: SnapshotState): TodayViewModel["readi
     };
   }
 
-  const scoreLabel = snapshot.result.readiness === null
-    ? "점수 산출 불가"
-    : `${snapshot.result.readiness}점`;
+  if (snapshot.result.readiness === null) {
+    return {
+      state: "insufficient",
+      data: null,
+      message: "오늘 분석에 필요한 기록이 부족해요",
+      action: { label: "기록 시작", href: "/record" },
+    };
+  }
 
   return {
     state: snapshot.status,
     data: {
       score: snapshot.result.readiness,
       confidence: snapshot.result.confidence,
-      label: `${scoreLabel} (${parseConfidenceLabel(snapshot.result.confidence)})`.trim(),
+      label: `${snapshot.result.readiness}점 (${parseConfidenceLabel(snapshot.result.confidence)})`,
     },
     message: readinessMessageFromSnapshot(snapshot),
     action: null,
@@ -283,9 +288,10 @@ const buildDataStatusViewModel = (snapshot: SnapshotState): TodayViewModel["data
   const basis = snapshot.result.dataBasis;
   const missing = basis.missingFields.map((field) => missingFieldLabel(field));
   const completedCategories = 7 - missing.length;
+  const state: DisplayState = missing.length > 0 ? "insufficient" : snapshot.status === "stale" ? "stale" : "ready";
 
   return {
-    state: missing.length > 0 ? "insufficient" : "ready",
+    state,
     data: {
       completedCategories,
       totalCategories: 7,
@@ -396,13 +402,6 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
           localDate,
         },
       },
-      include: {
-        dailyLog: {
-          select: {
-            localDate: true,
-          },
-        },
-      },
       select: {
         id: true,
       },
@@ -412,13 +411,6 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
         userId: scope.userId,
         dailyLog: {
           localDate,
-        },
-      },
-      include: {
-        dailyLog: {
-          select: {
-            localDate: true,
-          },
         },
       },
       select: {

@@ -46,7 +46,7 @@ const narrationFactsSchema: z.ZodType<NarrationFacts> = z.object({
   }).strict()),
   event: z.object({ type: z.string().min(1), startsAt: z.string().min(1) }).strict().nullable(),
   proposal: scheduleProposalSchema.nullable(),
-  confidence: z.enum(["low", "medium", "high"]),
+  confidence: z.enum(["insufficient", "low", "medium", "high"]),
 }).strict();
 const narrationOutputEnvelopeSchema = versionedPayloadSchema(narrationOutputSchema.shape);
 

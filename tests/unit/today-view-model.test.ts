@@ -251,10 +251,9 @@ describe("getTodayViewModel", () => {
       }),
     });
 
-    expect(model.readiness.state).toBe("ready");
-    expect(model.readiness.data?.score).toBeNull();
-    expect(model.readiness.data?.label).toContain("점수 산출 불가");
-    expect(model.readiness.data?.label).toContain("낮음");
+    expect(model.readiness.state).toBe("insufficient");
+    expect(model.readiness.data).toBeNull();
+    expect(model.readiness.message).toBe("오늘 분석에 필요한 기록이 부족해요");
   });
 
   it("uses the active plan day cutoffs for today instead of the goal fallback", async () => {
