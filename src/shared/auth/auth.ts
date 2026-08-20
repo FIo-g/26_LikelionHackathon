@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
-import { getPrismaClient } from "@/shared/db/prisma";
+import type { PrismaClient } from "@/generated/prisma/client";
+import { createPrismaClient, getPrismaClient } from "@/shared/db/prisma";
 import { providerForUrl } from "@/shared/db/database-provider";
 import { resolveAuthOrigin } from "@/shared/auth/auth-origin";
 
@@ -16,7 +17,7 @@ export type AuthEnvironment = Readonly<{
   AUTH_RATE_LIMIT_ENABLED?: string;
 }>;
 
-export const createAuth = (environment: AuthEnvironment = process.env) => {
+export const createAuth = (environment: AuthEnvironment = process.env, prisma?: PrismaClient) => {
   const databaseUrl = environment.DATABASE_URL?.trim() ?? "";
   if (!databaseUrl) throw new Error("DATABASE_URL is required");
 
@@ -24,10 +25,10 @@ export const createAuth = (environment: AuthEnvironment = process.env) => {
   if (!secret) throw new Error("BETTER_AUTH_SECRET is required");
 
   const authOrigin = resolveAuthOrigin(environment);
-  const prisma = getPrismaClient();
+  const database = prisma ?? createPrismaClient(databaseUrl);
 
   return betterAuth({
-    database: prismaAdapter(prisma, { provider: providerForUrl(databaseUrl) }),
+    database: prismaAdapter(database, { provider: providerForUrl(databaseUrl) }),
     secret,
     baseURL: authOrigin.baseURL,
     trustedOrigins: authOrigin.trustedOrigins,
@@ -46,6 +47,6 @@ export const createAuth = (environment: AuthEnvironment = process.env) => {
 let authInstance: ReturnType<typeof createAuth> | undefined;
 
 export const getAuth = () => {
-  authInstance ??= createAuth();
+  authInstance ??= createAuth(process.env, getPrismaClient());
   return authInstance;
 };

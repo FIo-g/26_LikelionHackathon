@@ -41,13 +41,14 @@ describe("resolveAuthOrigin", () => {
   it("calls the auth API through the same-origin base path", async () => {
     const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
     vi.stubGlobal("fetch", fetch);
+    vi.stubGlobal("window", { location: { origin: "https://auth-origin.test" } });
 
     const { authClient } = await import("@/shared/auth/auth-client");
     await authClient.getSession();
 
     const requestUrl = String(fetch.mock.calls[0]?.[0]);
     expect(new URL(requestUrl).pathname).toMatch(/^\/api\/auth/);
-    expect(requestUrl).not.toMatch(/^http:\/\/127\.0\.0\.1:3000/);
+    expect(new URL(requestUrl).origin).toBe(window.location.origin);
   });
 });
 
