@@ -1,4 +1,7 @@
-import { auth } from "@/shared/auth/auth";
+import { getAuth } from "@/shared/auth/auth";
 
-export const { GET, POST } = auth.handler;
+const handleAuthRequest = async (request: Request): Promise<Response> => getAuth().handler(request);
+
+export const GET = handleAuthRequest;
+export const POST = handleAuthRequest;
 

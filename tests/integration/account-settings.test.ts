@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@/generated/prisma/client";
+import { createTestPrismaClient } from "../support/prisma-client";
 import { createUpdateProfileService } from "@/modules/account/application/update-profile";
 import { createUpdateSleepGoalService } from "@/modules/account/application/update-sleep-goal";
 import { createPrismaAccountRepository } from "@/modules/account/infrastructure/prisma-account-repository";
@@ -45,7 +45,7 @@ const describeSqlite = sqliteUrl ? describe : describe.skip;
 const persistedAlice = { userId: "account-sqlite-alice", timezone: "Asia/Seoul" };
 const persistedBob = { userId: "account-sqlite-bob", timezone: "Asia/Seoul" };
 const now = new Date("2026-08-20T03:00:00.000Z");
-const prisma = new PrismaClient();
+const prisma = createTestPrismaClient(sqliteUrl ?? "file:./prisma/unused-account-settings.sqlite");
 
 describeSqlite("Account Prisma transaction contract", () => {
   beforeAll(async () => {

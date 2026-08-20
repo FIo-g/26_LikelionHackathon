@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import { auth } from "@/shared/auth/auth";
+import { getAuth } from "@/shared/auth/auth";
 import { isIsolatedE2eTestMode } from "@/shared/auth/e2e-test-mode";
 import { UnauthorizedError } from "@/shared/auth/errors";
 
@@ -22,6 +22,13 @@ export const requireSessionIdentity = async (): Promise<SessionIdentity> => {
   const e2eUserId = (await cookies()).get("adaptive-sleep-e2e-user")?.value;
   if (isIsolatedE2eTestMode() && e2eUserId === "e2e-planner-user") {
     return { userId: e2eUserId, email: "e2e-planner-user@local.test" };
+  }
+
+  let auth: unknown;
+  try {
+    auth = getAuth();
+  } catch {
+    throw new UnauthorizedError("Authentication is unavailable");
   }
 
   if (!hasSessionApi(auth)) throw new UnauthorizedError("Authentication is unavailable");

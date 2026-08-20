@@ -11,7 +11,7 @@ const { mockGetSession, mockFindUnique, mockCookieGet, authContainer } = vi.hois
 }));
 
 vi.mock("@/shared/auth/auth", () => ({
-  auth: authContainer,
+  getAuth: () => authContainer,
 }));
 
 vi.mock("@/shared/db/prisma", () => ({

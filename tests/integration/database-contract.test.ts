@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { createPrismaClient } from "@/shared/db/prisma";
+import { createTestPrismaClient } from "../support/prisma-client";
 
 const databaseUrl = process.env.DATABASE_URL ?? "";
 const isContractDatabase = (
@@ -8,7 +12,7 @@ const isContractDatabase = (
   || /^postgresql:\/\/[^/]+@(?:127\.0\.0\.1|localhost)(?::\d+)?\/planner_test(?:\?|$)/i.test(databaseUrl)
 );
 const describeContract = isContractDatabase ? describe : describe.skip;
-const prisma = new PrismaClient();
+const prisma = createTestPrismaClient(databaseUrl || "file:./prisma/unused-contract.sqlite");
 
 const now = new Date("2026-08-19T12:00:00.000Z");
 const timezone = "Asia/Seoul";
@@ -144,5 +148,19 @@ describeContract("database contract", () => {
       transactionRolledBack: true,
       orderedLocalDates: ["2026-08-18", "2026-08-19"],
     });
+  });
+});
+
+describe("Prisma adapter factory", () => {
+  it("connects to SQLite through an explicit Prisma 7 adapter", async () => {
+    const databaseDirectory = await mkdtemp(join(tmpdir(), "adaptive-sleep-prisma-"));
+    const prisma = createPrismaClient(`file:${join(databaseDirectory, "adapter-test.db")}`);
+
+    try {
+      await expect(prisma.$queryRaw`SELECT 1 AS value`).resolves.toBeDefined();
+    } finally {
+      await prisma.$disconnect();
+      await rm(databaseDirectory, { recursive: true, force: true });
+    }
   });
 });

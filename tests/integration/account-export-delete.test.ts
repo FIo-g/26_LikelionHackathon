@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PrismaClient } from "@/generated/prisma/client";
+import { createTestPrismaClient } from "../support/prisma-client";
 import { createDeleteUserAccount } from "@/modules/account/application/delete-user-account";
 import { createExportUserData } from "@/modules/account/application/export-user-data";
 import { requireRecentAuthentication } from "@/modules/account/application/require-recent-authentication";
@@ -14,7 +14,7 @@ const isDedicatedAccountTestDatabase = typeof accountTestDatabaseUrl === "string
   && !/(?:prod(?:uction)?|dev(?:elopment)?|shared|staging|main|default)/i.test(accountTestDatabaseUrl)
   && process.env.DATABASE_URL === accountTestDatabaseUrl;
 const describeSqlite = isDedicatedAccountTestDatabase ? describe : describe.skip;
-const prisma = new PrismaClient();
+const prisma = createTestPrismaClient(accountTestDatabaseUrl ?? "file:./prisma/unused-account-export.sqlite");
 const now = new Date("2026-08-20T03:00:00.000Z");
 const clock = { now: () => now };
 const alice = { userId: "account-export-alice", timezone: "Asia/Seoul" };
