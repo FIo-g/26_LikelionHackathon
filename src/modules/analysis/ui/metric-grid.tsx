@@ -25,7 +25,7 @@ export const MetricGrid = ({ metrics }: { metrics: readonly MetricViewModel[] })
         >
           <p>
             <span className={styles.metricDesktopLabel}>{metric.label}</span>
-            <span aria-hidden="true" className={styles.metricMobileLabel}>{mobileMetricLabel[metric.key] ?? metric.label}</span>
+            <span className={styles.metricMobileLabel}>{mobileMetricLabel[metric.key] ?? metric.label}</span>
           </p>
           <strong>{metric.value === null ? "기록 필요" : `${metric.value}점`}</strong>
           <span className={styles[`status_${metric.state}`]}>

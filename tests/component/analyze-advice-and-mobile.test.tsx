@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AnalyzeScreen } from "@/modules/analysis/ui/analysis-report";
 import type { AnalyzeViewModel } from "@/modules/analysis/application/get-analyze-view-model";
 import { ScheduleAdviceCard } from "@/modules/planner/ui/schedule-advice-card";
+import { MetricGrid } from "@/modules/analysis/ui/metric-grid";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
@@ -71,5 +72,16 @@ describe("AnalyzeScreen advice and mobile details", () => {
     fireEvent.click(screen.getByRole("button", { name: "계획에 반영" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("keeps the mobile metric label available to assistive technology", () => {
+    render(<MetricGrid metrics={[{
+      key: "sleep-goal",
+      label: "수면 목표",
+      value: 80,
+      state: "ready",
+    }]} />);
+
+    expect(screen.getByText("목표 수면")).not.toHaveAttribute("aria-hidden", "true");
   });
 });

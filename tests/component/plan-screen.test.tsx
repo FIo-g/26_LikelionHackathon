@@ -111,4 +111,26 @@ describe("Plan screen", () => {
     expect(screen.getByRole("button", { name: "계획에 반영" })).toBeVisible();
     expect(screen.getByRole("button", { name: "제안 닫기" })).toBeVisible();
   });
+
+  it("shows upcoming events instead of truncating the oldest events", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-21T12:00:00.000Z"));
+
+    try {
+      render(<PlanMobileContent viewModel={{
+        ...viewModel,
+        events: [
+          { id: "past-1", type: "지난 일정 1", startsAt: "2026-08-18T12:00:00.000Z" },
+          { id: "past-2", type: "지난 일정 2", startsAt: "2026-08-19T12:00:00.000Z" },
+          { id: "past-3", type: "지난 일정 3", startsAt: "2026-08-20T12:00:00.000Z" },
+          { id: "upcoming", type: "다가오는 일정", startsAt: "2026-08-22T12:00:00.000Z" },
+        ],
+      }} />);
+
+      expect(screen.getByText("다가오는 일정")).toBeVisible();
+      expect(screen.queryByText("지난 일정 1")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

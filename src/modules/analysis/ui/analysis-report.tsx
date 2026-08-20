@@ -15,6 +15,10 @@ import styles from "./analyze.module.css";
 
 const initialRetryState: NarrationRetryActionState = { status: "idle" };
 
+const analysisStateText = (state: AnalyzeViewModel["state"]) => (
+  state === "ready" ? "분석 완료" : state === "stale" ? "이전 분석 표시" : "기록을 기다리는 중"
+);
+
 export const AnalysisReport = ({
   report,
   narration,
@@ -47,11 +51,14 @@ export const AnalysisReport = ({
 export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) => (
   <main data-lunar-screen="analyze" className={styles.page}>
     <FigmaMobileHeader title="최근 14일 분석" subtitle="계산 결과와 AI 설명을 함께 확인해요." />
+    <span aria-hidden="true" className={`${styles.mobileAnalysisState} ${styles[`status_${viewModel.state}`]}`}>
+      <span>●</span> {analysisStateText(viewModel.state)}
+    </span>
     <header className={styles.hero}>
       <p className={styles.eyebrow}>ANALYZE</p>
       <h1>분석</h1>
       <p>기록에서 보이는 수면 패턴을 차분하게 정리했어요.</p>
-      <span className={styles[`status_${viewModel.state}`]}><span aria-hidden="true">●</span> {viewModel.state === "ready" ? "분석 완료" : viewModel.state === "stale" ? "이전 분석 표시" : "기록을 기다리는 중"}</span>
+      <span className={styles[`status_${viewModel.state}`]}><span aria-hidden="true">●</span> {analysisStateText(viewModel.state)}</span>
     </header>
     <div className={styles.primaryLayout}>
       <MetricGrid metrics={viewModel.metrics} />

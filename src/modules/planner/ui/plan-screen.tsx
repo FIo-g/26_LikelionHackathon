@@ -50,6 +50,13 @@ const mobileEventTime = (value: string, timezone: string): string => {
   }
 };
 
+const upcomingMobileEvents = (events: PlanViewModel["events"], now = Date.now()) => (
+  events.filter((event) => {
+    const startsAt = Date.parse(event.startsAt);
+    return Number.isFinite(startsAt) && startsAt >= now;
+  }).slice(0, 3)
+);
+
 export const PlanDesktopContent = ({ viewModel }: { viewModel: PlanViewModel }) => (
   <>
     <CalendarConnectionCard availability={viewModel.calendarConnection.availability} />
@@ -60,8 +67,11 @@ export const PlanDesktopContent = ({ viewModel }: { viewModel: PlanViewModel }) 
   </>
 );
 
-export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) => (
-  <>
+export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) => {
+  const events = upcomingMobileEvents(viewModel.events);
+
+  return (
+    <>
     <section className={styles.mobileConnection} aria-labelledby="mobile-calendar-title">
       <span aria-hidden="true" className={styles.mobileCalendarMark}>캘</span>
       <div>
@@ -73,11 +83,11 @@ export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) =
 
     <section className={styles.mobileAgenda} aria-labelledby="mobile-agenda-title">
       <h2 id="mobile-agenda-title">주요 일정</h2>
-      {viewModel.events.length === 0 ? (
-        <p className={styles.mobileEmptyAgenda}>등록된 주요 일정이 없어요. 아래에서 직접 추가해보세요.</p>
+      {events.length === 0 ? (
+        <p className={styles.mobileEmptyAgenda}>예정된 주요 일정이 없어요. 아래에서 직접 추가해보세요.</p>
       ) : (
         <ol>
-          {viewModel.events.slice(0, 3).map((event) => (
+          {events.map((event) => (
             <li key={event.id}>
               <span aria-hidden="true" className={styles.mobileEventDot} />
               <time dateTime={event.startsAt}>{mobileEventDate(event.startsAt, viewModel.timezone)}</time>
@@ -102,8 +112,9 @@ export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) =
     <NearbyDayAdvice days={viewModel.days} timezone={viewModel.timezone} />
     {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} timezone={viewModel.timezone} /> : null}
     {!viewModel.advice && viewModel.dismissedAdvice ? <p className={styles.dismissedNotice} role="status">제안을 닫았습니다.</p> : null}
-  </>
-);
+    </>
+  );
+};
 
 export const PlanScreen = ({ viewModel }: { viewModel: PlanViewModel }) => (
   <main data-lunar-screen="plan" className={styles.planPage}>

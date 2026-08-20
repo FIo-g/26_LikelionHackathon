@@ -3,7 +3,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main, code-review]
+    branches: [main, code-review, frontend-merge]
 
 permissions:
   contents: read

@@ -46,7 +46,7 @@
 .dataBasisList dt { color: #65708d; font-size: 13px; }
 .dataBasisList dd { margin: 4px 0 0; font-weight: 700; }
 .emptyState { color: #66718e; }
-.mobileDetails, .mobileExplainabilityVisual { display: none; }
+.mobileDetails, .mobileExplainabilityVisual, .mobileAnalysisState { display: none; }
 @media (max-width: 767px) {
   .page {
     min-height: 100%;
@@ -86,15 +86,23 @@
   }
   .metricCard p { color: #766982; font-size: 14px; }
   .metricCard strong { margin: 19px 0 0; color: #21152e; font-size: 25px; letter-spacing: -0.06em; }
-  .metricCard .status_ready,
-  .metricCard .status_stale,
-  .metricCard .status_insufficient,
-  .metricCard .status_error { display: none; }
+  .primaryLayout .metricCard .status_ready,
+  .primaryLayout .metricCard .status_stale,
+  .primaryLayout .metricCard .status_insufficient,
+  .primaryLayout .metricCard .status_error { display: none; }
   .primaryLayout .metricGrid > [data-metric-key="sleep-rhythm"], .primaryLayout .metricGrid > [data-metric-key="phone-wind-down"] { display: none; }
   .primaryLayout .metricGrid > [data-metric-key="caffeine-signal"] { display: block; order: 2; }
   .primaryLayout .metricGrid > [data-metric-key="sleep-goal"] { display: block; order: 1; }
-  .metricDesktopLabel { display: none; }
-  .metricMobileLabel { display: inline; }
+  .primaryLayout .metricDesktopLabel { display: none; }
+  .primaryLayout .metricMobileLabel { display: inline; }
+  .mobileAnalysisState {
+    display: inline-block;
+    margin: 16px 24px 0;
+    padding: 7px 11px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: #ffffff;
+  }
   .desktopReportEyebrow { display: none; }
   .mobileReportEyebrow { display: block; }
   .reportSection {
