@@ -3007,6 +3007,7 @@ export type AnalysisSnapshotScalarFieldEnum = (typeof AnalysisSnapshotScalarFiel
 
 export const ImpactFactorScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   analysisSnapshotId: 'analysisSnapshotId',
   factor: 'factor',
   exposedCount: 'exposedCount',
@@ -3239,7 +3240,7 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'BigInt'
  */
 export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
-
+    
 
 
 /**
@@ -3505,3 +3506,4 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
+

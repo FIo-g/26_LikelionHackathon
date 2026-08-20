@@ -455,6 +455,6 @@ export const calculateAnalysis = (input: NormalizedAnalysisInput): AnalysisResul
     },
     dataBasis,
     evidence,
-    missingFields: readiness.missingFields,
+    missingFields: [...readiness.missingFields].sort(),
   };
 };

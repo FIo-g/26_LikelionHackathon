@@ -291,6 +291,7 @@ CREATE TABLE "AnalysisSnapshot" (
 -- CreateTable
 CREATE TABLE "ImpactFactor" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
     "analysisSnapshotId" TEXT NOT NULL,
     "factor" TEXT NOT NULL,
     "exposedCount" INTEGER NOT NULL,
@@ -298,7 +299,8 @@ CREATE TABLE "ImpactFactor" (
     "deltaMinutes" REAL,
     "confidence" TEXT NOT NULL,
     "evidence" JSONB NOT NULL,
-    CONSTRAINT "ImpactFactor_analysisSnapshotId_fkey" FOREIGN KEY ("analysisSnapshotId") REFERENCES "AnalysisSnapshot" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "ImpactFactor_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "ImpactFactor_analysisSnapshotId_userId_fkey" FOREIGN KEY ("analysisSnapshotId", "userId") REFERENCES "AnalysisSnapshot" ("id", "userId") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -516,7 +518,7 @@ CREATE INDEX "AnalysisSnapshot_userId_timezone_localDate_idx" ON "AnalysisSnapsh
 CREATE UNIQUE INDEX "AnalysisSnapshot_id_userId_key" ON "AnalysisSnapshot"("id", "userId");
 
 -- CreateIndex
-CREATE INDEX "ImpactFactor_analysisSnapshotId_idx" ON "ImpactFactor"("analysisSnapshotId");
+CREATE INDEX "ImpactFactor_userId_analysisSnapshotId_idx" ON "ImpactFactor"("userId", "analysisSnapshotId");
 
 -- CreateIndex
 CREATE INDEX "SpecialEvent_userId_startsAt_idx" ON "SpecialEvent"("userId", "startsAt");

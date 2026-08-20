@@ -54,11 +54,17 @@ const verifyObservableConstraints = async (connection: MigrationConnection): Pro
   await connection.execute(`INSERT INTO "UserHabit" ("id", "userId", "caffeine", "exercise", "meal", "phoneUsage", "createdAt", "updatedAt") VALUES ('habit', 'owner', 'none', 'rare', 'mixed', 'low', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "Connection" ("id", "userId", "selected", "mode", "availability", "state", "createdAt", "updatedAt") VALUES ('connection', 'owner', 'manual', 'manual', 'available', 'complete', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "AnalysisSnapshot" ("id", "userId", "localDate", "timezone", "status", "result", "generatedAt") VALUES ('snapshot', 'owner', '2026-08-20', 'Asia/Seoul', 'historical', '{}', '${timestamp}')`);
+  await connection.execute(`INSERT INTO "ImpactFactor" ("id", "userId", "analysisSnapshotId", "factor", "exposedCount", "unexposedCount", "confidence", "evidence") VALUES ('impact', 'owner', 'snapshot', 'caffeine', 1, 1, 'low', '{}')`);
   await connection.execute(`INSERT INTO "SleepPlan" ("id", "userId", "timezone", "status", "activeKey", "createdAt", "updatedAt") VALUES ('plan', 'owner', 'Asia/Seoul', 'active', 'owner:active', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "PlanDay" ("id", "userId", "planId", "localDate", "timezone", "targetBedAt", "targetWakeAt", "caffeineCutoffAt", "exerciseCutoffAt", "mealCutoffAt", "windDownAt", "status", "activeKey", "createdAt", "updatedAt") VALUES ('day', 'owner', 'plan', '2026-08-20', 'Asia/Seoul', '${timestamp}', '${timestamp}', '${timestamp}', '${timestamp}', '${timestamp}', '${timestamp}', 'active', 'plan:2026-08-20', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "SpecialEvent" ("id", "userId", "title", "type", "startsAt", "localDate", "timezone", "createdAt", "updatedAt") VALUES ('event', 'owner', 'Event', 'travel', '${timestamp}', '2026-08-20', 'Asia/Seoul', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "ScheduleAdvice" ("id", "userId", "eventId", "triggerType", "status", "algorithmVersion", "inputHash", "inputSnapshot", "proposal", "confidence", "generatedAt") VALUES ('advice', 'owner', 'event', 'event', 'pending', 'test', 'event-hash', '{}', '{}', 'low', '${timestamp}')`);
 
+  await expectConstraintFailure(
+    connection,
+    `INSERT INTO "ImpactFactor" ("id", "userId", "analysisSnapshotId", "factor", "exposedCount", "unexposedCount", "confidence", "evidence") VALUES ('foreign-impact', 'other', 'snapshot', 'phone', 1, 1, 'low', '{}')`,
+    "ImpactFactor same-user parent constraint",
+  );
   await expectConstraintFailure(
     connection,
     `INSERT INTO "RoutineCompletion" ("id", "userId", "localDate", "planDayId", "routineRevisionKey", "stepKey", "completedAt", "createdAt") VALUES ('foreign-routine', 'other', '2026-08-20', 'day', 'plan', 'wind-down', '${timestamp}', '${timestamp}')`,
@@ -111,7 +117,7 @@ const verifyObservableConstraints = async (connection: MigrationConnection): Pro
   );
 
   await connection.execute(`DELETE FROM "User" WHERE "id" = 'owner'`);
-  for (const table of ["UserProfile", "SleepGoal", "UserHabit", "Connection"] as const) {
+  for (const table of ["UserProfile", "SleepGoal", "UserHabit", "Connection", "ImpactFactor"] as const) {
     if (await connection.count(`SELECT COUNT(*) AS "count" FROM "${table}" WHERE "userId" = 'owner'`) !== 0) {
       throw new Error(`${table} did not cascade after direct User deletion`);
     }

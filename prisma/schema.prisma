@@ -33,6 +33,7 @@ model User {
   mutationReceipts   MutationReceipt[]
   baselineSnapshots  BaselineSnapshot[]
   analysisSnapshots  AnalysisSnapshot[]
+  impactFactors      ImpactFactor[]
   specialEvents      SpecialEvent[]
   scheduleAdvice     ScheduleAdvice[]
   narrations         Narration[]
@@ -345,6 +346,7 @@ model AnalysisSnapshot {
 
 model ImpactFactor {
   id                 String @id @default(cuid())
+  userId             String
   analysisSnapshotId String
   factor             String
   exposedCount       Int
@@ -353,9 +355,10 @@ model ImpactFactor {
   confidence         String
   evidence           Json
 
-  analysisSnapshot AnalysisSnapshot @relation(fields: [analysisSnapshotId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysisSnapshot AnalysisSnapshot @relation(fields: [analysisSnapshotId, userId], references: [id, userId], onDelete: Cascade)
 
-  @@index([analysisSnapshotId])
+  @@index([userId, analysisSnapshotId])
 }
 
 model SpecialEvent {

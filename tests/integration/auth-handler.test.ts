@@ -3,7 +3,6 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { GET, POST } from "@/app/api/auth/[...all]/route";
 import { AUTH_SESSION_COOKIE, createAuth } from "@/shared/auth/auth";
 import { createPrismaClient } from "@/shared/db/prisma";
 
@@ -26,6 +25,7 @@ describe("auth route handler", () => {
     vi.stubEnv("DATABASE_URL", "");
     vi.stubEnv("BETTER_AUTH_SECRET", "");
     const request = new Request("http://localhost/api/auth/unknown");
+    const { GET, POST } = await import("@/app/api/auth/[...all]/route");
 
     await expect(GET(request)).rejects.toThrow("DATABASE_URL is required");
     await expect(POST(request)).rejects.toThrow("DATABASE_URL is required");
@@ -49,7 +49,7 @@ describe("auth route handler", () => {
     expect(auth.handler).toBeTypeOf("function");
   });
 
-  it("persists signup, session, signout, and signin through real auth requests", async () => {
+  it("isolates two real sessions through the exported auth route and protected guard", async () => {
     const databaseDirectory = await mkdtemp(join(tmpdir(), "adaptive-sleep-auth-test-"));
     const databasePath = join(databaseDirectory, "dedicated-auth-test.sqlite");
     const migration = await readFile(
@@ -62,13 +62,14 @@ describe("auth route handler", () => {
 
     const databaseUrl = `file:${databasePath}`;
     const prisma = createPrismaClient(databaseUrl);
-    const auth = createAuth({
-      DATABASE_URL: databaseUrl,
-      BETTER_AUTH_SECRET: "dedicated-auth-test-secret-at-least-32-characters",
-      BETTER_AUTH_URL: "http://localhost",
-      AUTH_RATE_LIMIT_ENABLED: "false",
-      NODE_ENV: "test",
-    }, prisma);
+    vi.stubEnv("DATABASE_URL", databaseUrl);
+    vi.stubEnv("BETTER_AUTH_SECRET", "dedicated-auth-test-secret-at-least-32-characters");
+    vi.stubEnv("BETTER_AUTH_URL", "http://localhost");
+    vi.stubEnv("AUTH_RATE_LIMIT_ENABLED", "false");
+    vi.resetModules();
+    (globalThis as typeof globalThis & { __prisma?: unknown }).__prisma = undefined;
+    const route = await import("@/app/api/auth/[...all]/route");
+    const { requireUserScope } = await import("@/shared/auth/require-user-scope");
     const request = async (
       path: string,
       init: { method?: "GET" | "POST"; body?: Record<string, string>; cookie?: string } = {},
@@ -80,11 +81,12 @@ describe("auth route handler", () => {
         headers.set("content-type", "application/json");
         headers.set("origin", "http://localhost");
       }
-      return auth.handler(new Request(`http://localhost/api/auth${path}`, {
+      const authRequest = new Request(`http://localhost/api/auth${path}`, {
         method,
         headers,
         body: init.body ? JSON.stringify(init.body) : undefined,
-      }));
+      });
+      return method === "POST" ? route.POST(authRequest) : route.GET(authRequest);
     };
 
     try {
@@ -92,43 +94,53 @@ describe("auth route handler", () => {
       expect(anonymous.status).toBe(200);
       await expect(anonymous.json()).resolves.toBeNull();
 
-      const signup = await request("/sign-up/email", {
+      const aliceSignup = await request("/sign-up/email", {
         method: "POST",
-        body: { name: "Auth Owner", email: "auth-owner@example.test", password: "password123" },
+        body: { name: "Alice", email: "auth-alice@example.test", password: "password123" },
       });
-      expect(signup.status).toBe(200);
-      const signupCookie = sessionCookieFrom(signup);
-
-      const protectedSession = await request("/get-session", { cookie: signupCookie });
-      expect(protectedSession.status).toBe(200);
-      const sessionBody = await protectedSession.json() as { user: { id: string; email: string } };
-      expect(sessionBody.user.email).toBe("auth-owner@example.test");
-      await expect(prisma.session.findMany({ where: { userId: sessionBody.user.id } }))
-        .resolves.toHaveLength(1);
-
-      const foreignSession = await request("/get-session", {
-        cookie: `${AUTH_SESSION_COOKIE}=not-the-owner-session`,
+      const bobSignup = await request("/sign-up/email", {
+        method: "POST",
+        body: { name: "Bob", email: "auth-bob@example.test", password: "password123" },
       });
-      await expect(foreignSession.json()).resolves.toBeNull();
+      expect(aliceSignup.status).toBe(200);
+      expect(bobSignup.status).toBe(200);
+      const aliceCookie = sessionCookieFrom(aliceSignup);
+      const bobCookie = sessionCookieFrom(bobSignup);
 
-      const signout = await request("/sign-out", { method: "POST", cookie: signupCookie });
+      const aliceSession = await (await request("/get-session", { cookie: aliceCookie })).json() as { user: { id: string; email: string } };
+      const bobSession = await (await request("/get-session", { cookie: bobCookie })).json() as { user: { id: string; email: string } };
+      expect(aliceSession.user.email).toBe("auth-alice@example.test");
+      expect(bobSession.user.email).toBe("auth-bob@example.test");
+      expect(bobSession.user.id).not.toBe(aliceSession.user.id);
+
+      for (const userId of [aliceSession.user.id, bobSession.user.id]) {
+        await prisma.userProfile.create({ data: { userId, nickname: userId, timezone: "Asia/Seoul", onboardingCompletedAt: new Date() } });
+      }
+      await expect(requireUserScope(new Headers({ cookie: aliceCookie }))).resolves.toEqual({ userId: aliceSession.user.id, timezone: "Asia/Seoul" });
+      await expect(requireUserScope(new Headers({ cookie: bobCookie }))).resolves.toEqual({ userId: bobSession.user.id, timezone: "Asia/Seoul" });
+      await expect(requireUserScope(new Headers())).rejects.toMatchObject({ name: "UnauthorizedError" });
+
+      const signout = await request("/sign-out", { method: "POST", cookie: aliceCookie });
       expect(signout.status).toBe(200);
-      await expect(prisma.session.count({ where: { userId: sessionBody.user.id } })).resolves.toBe(0);
-      await expect((await request("/get-session", { cookie: signupCookie })).json()).resolves.toBeNull();
+      await expect(prisma.session.count({ where: { userId: aliceSession.user.id } })).resolves.toBe(0);
+      await expect((await request("/get-session", { cookie: aliceCookie })).json()).resolves.toBeNull();
 
       const signin = await request("/sign-in/email", {
         method: "POST",
-        body: { email: "auth-owner@example.test", password: "password123" },
+        body: { email: "auth-alice@example.test", password: "password123" },
       });
       expect(signin.status).toBe(200);
       const signinCookie = sessionCookieFrom(signin);
       const signedInSession = await (await request("/get-session", { cookie: signinCookie })).json() as {
         user: { id: string; email: string };
       };
-      expect(signedInSession.user.id).toBe(sessionBody.user.id);
-      expect(signedInSession.user.email).toBe("auth-owner@example.test");
+      expect(signedInSession.user.id).toBe(aliceSession.user.id);
+      expect(signedInSession.user.email).toBe("auth-alice@example.test");
     } finally {
       await prisma.$disconnect();
+      const sharedPrisma = (globalThis as typeof globalThis & { __prisma?: { $disconnect: () => Promise<void> } }).__prisma;
+      await sharedPrisma?.$disconnect();
+      (globalThis as typeof globalThis & { __prisma?: unknown }).__prisma = undefined;
       await rm(databaseDirectory, { recursive: true, force: true });
     }
   });

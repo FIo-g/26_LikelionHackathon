@@ -3,8 +3,8 @@ import { UserScope } from "@/shared/domain/contracts";
 import { OnboardingIncompleteError } from "@/shared/auth/errors";
 import { requireSessionUserId } from "@/shared/auth/require-session-user";
 
-export const requireUserScope = async (): Promise<UserScope> => {
-  const userId = await requireSessionUserId();
+export const requireUserScope = async (requestHeaders?: Headers): Promise<UserScope> => {
+  const userId = await requireSessionUserId(requestHeaders);
   const prisma = getPrismaClient() as {
     userProfile?: {
       findUnique: (args: unknown) => Promise<{

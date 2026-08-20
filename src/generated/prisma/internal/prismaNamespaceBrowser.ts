@@ -401,6 +401,7 @@ export type AnalysisSnapshotScalarFieldEnum = (typeof AnalysisSnapshotScalarFiel
 
 export const ImpactFactorScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   analysisSnapshotId: 'analysisSnapshotId',
   factor: 'factor',
   exposedCount: 'exposedCount',

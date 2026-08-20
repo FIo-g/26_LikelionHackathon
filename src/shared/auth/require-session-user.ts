@@ -18,8 +18,10 @@ const hasSessionApi = (value: unknown): value is SessionApi => (
   && typeof (value as { api?: { getSession?: unknown } }).api?.getSession === "function"
 );
 
-export const requireSessionIdentity = async (): Promise<SessionIdentity> => {
-  const e2eUserId = (await cookies()).get("adaptive-sleep-e2e-user")?.value;
+export const requireSessionIdentity = async (requestHeaders?: Headers): Promise<SessionIdentity> => {
+  const e2eUserId = requestHeaders
+    ? undefined
+    : (await cookies()).get("adaptive-sleep-e2e-user")?.value;
   if (isIsolatedE2eTestMode() && e2eUserId === "e2e-planner-user") {
     return { userId: e2eUserId, email: "e2e-planner-user@local.test" };
   }
@@ -34,7 +36,7 @@ export const requireSessionIdentity = async (): Promise<SessionIdentity> => {
   if (!hasSessionApi(auth)) throw new UnauthorizedError("Authentication is unavailable");
   let session: unknown;
   try {
-    session = await auth.api.getSession({ headers: await headers() });
+    session = await auth.api.getSession({ headers: requestHeaders ?? await headers() });
   } catch {
     throw new UnauthorizedError("Authentication is unavailable");
   }
@@ -47,4 +49,6 @@ export const requireSessionIdentity = async (): Promise<SessionIdentity> => {
   return { userId: user.id, email: typeof user.email === "string" ? user.email : null };
 };
 
-export const requireSessionUserId = async (): Promise<string> => (await requireSessionIdentity()).userId;
+export const requireSessionUserId = async (requestHeaders?: Headers): Promise<string> => (
+  await requireSessionIdentity(requestHeaders)
+).userId;

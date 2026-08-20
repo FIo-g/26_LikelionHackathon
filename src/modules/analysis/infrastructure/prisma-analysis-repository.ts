@@ -62,7 +62,6 @@ type PrismaAnalysisClient = TransactionClient & {
     findMany: (args: unknown) => Promise<Array<{
       startedAt: Date;
       endedAt: Date;
-      durationMinutes: number;
       updatedAt: Date;
       dailyLog?: {
         localDate: string;
@@ -340,7 +339,6 @@ const loadWindowFromDb = async (
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         caffeineMg: true,
         consumedAt: true,
@@ -357,7 +355,6 @@ const loadWindowFromDb = async (
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         servings: true,
         consumedAt: true,
@@ -374,7 +371,6 @@ const loadWindowFromDb = async (
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         eatenAt: true,
         dailyLog: { select: { localDate: true } },
@@ -390,12 +386,10 @@ const loadWindowFromDb = async (
         },
       },
       orderBy: { updatedAt: "asc" },
-      include: { dailyLog: { select: { localDate: true } } },
       select: {
         startedAt: true,
         endedAt: true,
         updatedAt: true,
-        durationMinutes: true,
       },
     }),
     db.phoneUsageEntry.findMany({
@@ -618,6 +612,7 @@ export const createAnalysisRepository = (db: TransactionClient, scope: UserScope
       if (impactFactors.length > 0) {
         await client.impactFactor.createMany({
           data: impactFactors.map((item) => ({
+            userId: scope.userId,
             analysisSnapshotId: snapshotId,
             factor: item.factor,
             exposedCount: item.exposedCount,

@@ -307,6 +307,7 @@ CREATE TABLE "AnalysisSnapshot" (
 -- CreateTable
 CREATE TABLE "ImpactFactor" (
     "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "analysisSnapshotId" TEXT NOT NULL,
     "factor" TEXT NOT NULL,
     "exposedCount" INTEGER NOT NULL,
@@ -528,7 +529,7 @@ CREATE INDEX "AnalysisSnapshot_userId_timezone_localDate_idx" ON "AnalysisSnapsh
 CREATE UNIQUE INDEX "AnalysisSnapshot_id_userId_key" ON "AnalysisSnapshot"("id", "userId");
 
 -- CreateIndex
-CREATE INDEX "ImpactFactor_analysisSnapshotId_idx" ON "ImpactFactor"("analysisSnapshotId");
+CREATE INDEX "ImpactFactor_userId_analysisSnapshotId_idx" ON "ImpactFactor"("userId", "analysisSnapshotId");
 
 -- CreateIndex
 CREATE INDEX "SpecialEvent_userId_startsAt_idx" ON "SpecialEvent"("userId", "startsAt");
@@ -669,7 +670,10 @@ ALTER TABLE "BaselineSnapshot" ADD CONSTRAINT "BaselineSnapshot_userId_fkey" FOR
 ALTER TABLE "AnalysisSnapshot" ADD CONSTRAINT "AnalysisSnapshot_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ImpactFactor" ADD CONSTRAINT "ImpactFactor_analysisSnapshotId_fkey" FOREIGN KEY ("analysisSnapshotId") REFERENCES "AnalysisSnapshot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ImpactFactor" ADD CONSTRAINT "ImpactFactor_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ImpactFactor" ADD CONSTRAINT "ImpactFactor_analysisSnapshotId_userId_fkey" FOREIGN KEY ("analysisSnapshotId", "userId") REFERENCES "AnalysisSnapshot"("id", "userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SpecialEvent" ADD CONSTRAINT "SpecialEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

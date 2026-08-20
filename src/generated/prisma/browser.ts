@@ -39,7 +39,7 @@ export type Account = Prisma.AccountModel
 export type Verification = Prisma.VerificationModel
 /**
  * Model RateLimit
- *
+ * 
  */
 export type RateLimit = Prisma.RateLimitModel
 /**

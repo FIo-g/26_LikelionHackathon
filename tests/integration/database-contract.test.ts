@@ -31,7 +31,7 @@ const isForeignKeyViolation = (error: unknown): boolean => (
 const clean = async (userId: string): Promise<void> => {
   await prisma.rateLimit.deleteMany({ where: { key: `${userId}:rate-limit` } });
   await prisma.narration.deleteMany({ where: { userId } });
-  await prisma.impactFactor.deleteMany({ where: { analysisSnapshot: { userId } } });
+  await prisma.impactFactor.deleteMany({ where: { userId } });
   await prisma.analysisSnapshot.deleteMany({ where: { userId } });
   await prisma.baselineSnapshot.deleteMany({ where: { userId } });
   await prisma.planRevision.deleteMany({ where: { userId } });
@@ -91,7 +91,7 @@ export const runDatabaseContract = async () => {
   await prisma.mutationReceipt.create({ data: { userId: alice, operation: "record.create", idempotencyKey: "contract-key", requestHash: "contract-hash", status: "completed", expiresAt: new Date(now.getTime() + 60_000) } });
   await prisma.baselineSnapshot.create({ data: { userId: alice, timezone, status: "current", result: { schemaVersion: 1 }, currentKey: `${alice}:baseline` } });
   const snapshot = await prisma.analysisSnapshot.create({ data: { userId: alice, localDate: secondLog.localDate, timezone, status: "current", result: { schemaVersion: 1, readiness: 80 }, currentKey: `${alice}:${secondLog.localDate}` } });
-  await prisma.impactFactor.create({ data: { analysisSnapshotId: snapshot.id, factor: "caffeine", exposedCount: 1, unexposedCount: 1, confidence: "low", evidence: { schemaVersion: 1 } } });
+  await prisma.impactFactor.create({ data: { userId: alice, analysisSnapshotId: snapshot.id, factor: "caffeine", exposedCount: 1, unexposedCount: 1, confidence: "low", evidence: { schemaVersion: 1 } } });
   const plan = await prisma.sleepPlan.create({ data: { userId: alice, timezone, status: "active", activeKey: `${alice}:active` } });
   const day = await prisma.planDay.create({ data: { userId: alice, planId: plan.id, localDate: secondLog.localDate, timezone, targetBedAt: now, targetWakeAt: new Date(now.getTime() + 480 * 60_000), caffeineCutoffAt: now, exerciseCutoffAt: now, mealCutoffAt: now, windDownAt: now, status: "active", activeKey: `${plan.id}:${secondLog.localDate}` } });
   const event = await prisma.specialEvent.create({ data: { userId: alice, title: "contract event", type: "travel", startsAt: now, localDate: secondLog.localDate, timezone } });
@@ -122,6 +122,17 @@ export const runDatabaseContract = async () => {
       status: "template-fallback",
     },
   }).then(() => false).catch(isForeignKeyViolation);
+  const impactFactorOwnership = await prisma.impactFactor.create({
+    data: {
+      userId: bob,
+      analysisSnapshotId: snapshot.id,
+      factor: "phone",
+      exposedCount: 1,
+      unexposedCount: 1,
+      confidence: "low",
+      evidence: { schemaVersion: 1 },
+    },
+  }).then(() => false).catch(isForeignKeyViolation);
 
   const dailyLogCompositeUnique = await prisma.dailyLog.create({ data: { userId: alice, localDate: secondLog.localDate, timezone } }).then(() => false).catch(isUniqueViolation);
   const activeKeyInvariant = await prisma.sleepPlan.create({ data: { userId: alice, timezone, status: "active", activeKey: plan.activeKey } }).then(() => false).catch(isUniqueViolation);
@@ -133,8 +144,12 @@ export const runDatabaseContract = async () => {
   await createUser(cascadeUser);
   const cascadeLog = await prisma.dailyLog.create({ data: { userId: cascadeUser, localDate: "2026-08-19", timezone } });
   await prisma.caffeineEntry.create({ data: { userId: cascadeUser, dailyLogId: cascadeLog.id, brand: "test", product: "coffee", caffeineMg: 100, consumedAt: now, timezone } });
+  const cascadeSnapshot = await prisma.analysisSnapshot.create({ data: { userId: cascadeUser, localDate: "2026-08-19", timezone, status: "historical", result: { schemaVersion: 1 } } });
+  await prisma.impactFactor.create({ data: { userId: cascadeUser, analysisSnapshotId: cascadeSnapshot.id, factor: "meal", exposedCount: 1, unexposedCount: 1, confidence: "low", evidence: { schemaVersion: 1 } } });
   await prisma.user.delete({ where: { id: cascadeUser } });
-  const userCascade = (await prisma.dailyLog.count({ where: { userId: cascadeUser } })) === 0 && (await prisma.caffeineEntry.count({ where: { userId: cascadeUser } })) === 0;
+  const userCascade = (await prisma.dailyLog.count({ where: { userId: cascadeUser } })) === 0
+    && (await prisma.caffeineEntry.count({ where: { userId: cascadeUser } })) === 0
+    && (await prisma.impactFactor.count({ where: { userId: cascadeUser } })) === 0;
   const onboardingCascade = await Promise.all([
     prisma.userProfile.count({ where: { userId: cascadeUser } }),
     prisma.sleepGoal.count({ where: { userId: cascadeUser } }),
@@ -157,6 +172,7 @@ export const runDatabaseContract = async () => {
     onboardingCascade,
     routineOwnership,
     narrationOwnership,
+    impactFactorOwnership,
     transactionRolledBack,
     orderedLocalDates,
   };
@@ -183,6 +199,7 @@ describeContract("database contract", () => {
       onboardingCascade: true,
       routineOwnership: true,
       narrationOwnership: true,
+      impactFactorOwnership: true,
       transactionRolledBack: true,
       orderedLocalDates: ["2026-08-18", "2026-08-19"],
     });
