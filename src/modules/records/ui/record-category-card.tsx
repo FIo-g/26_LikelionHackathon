@@ -20,6 +20,8 @@ type RecordCategoryCardProps = Readonly<{
   featured?: boolean;
 }>;
 
+const draftPathnameFor = (href: string): string => href.split("?", 1)[0] || href;
+
 export const RecordCategoryCard = ({
   category,
   presence,
@@ -30,6 +32,7 @@ export const RecordCategoryCard = ({
   editDraft = null,
   featured = false,
 }: RecordCategoryCardProps) => {
+  const draftPathname = draftPathnameFor(href);
   const [deleteState, deleteAction, deleting] = useActionState(
     async (_previous: null | Awaited<ReturnType<typeof deleteRecordBatchAction>>, formData: FormData) => {
       formData.set("idempotencyKey", crypto.randomUUID());
@@ -67,13 +70,13 @@ export const RecordCategoryCard = ({
       <div className={styles.categoryFooter}>
         <span className={styles.statusPill} data-status={presence}>{statusLabel}</span>
         <div className={styles.categoryActions}>
-      <Link className={styles.textAction} href={href} onClick={() => clearRecordDraft(href)}>추가</Link>
+      <Link className={styles.textAction} href={href} onClick={() => clearRecordDraft(draftPathname)}>추가</Link>
       {presence !== "empty" ? (
         <Link
           className={styles.textAction}
           href={href}
           onClick={() => {
-            if (editDraft) writeRecordDraft(href, editDraft);
+            if (editDraft) writeRecordDraft(draftPathname, editDraft);
           }}
         >
           수정

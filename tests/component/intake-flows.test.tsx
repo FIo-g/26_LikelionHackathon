@@ -313,6 +313,25 @@ describe("intake flows", () => {
     expect(screen.getByRole("button", { name: "수면/휴대폰 저장" })).toBeVisible();
   });
 
+  it("keeps focused meal and sleep cards scoped to the records their forms display", () => {
+    const meal = render(<MealHealthFlow timezone="Asia/Seoul" step="confirm" focus="meal" />);
+    expect(screen.getByRole("button", { name: "식사 저장" })).toBeVisible();
+    expect(JSON.parse(meal.container.querySelector<HTMLInputElement>('input[name="items"]')?.value ?? "[]"))
+      .toEqual([expect.objectContaining({ type: "meal" })]);
+    meal.unmount();
+
+    const sleep = render(<SleepPhoneFlow timezone="Asia/Seoul" step="confirm" focus="sleep" />);
+    expect(screen.getByRole("button", { name: "수면 저장" })).toBeVisible();
+    expect(JSON.parse(sleep.container.querySelector<HTMLInputElement>('input[name="items"]')?.value ?? "[]"))
+      .toEqual([expect.objectContaining({ type: "sleep" })]);
+    sleep.unmount();
+
+    const phone = render(<SleepPhoneFlow timezone="Asia/Seoul" step="confirm" focus="phone" />);
+    expect(screen.getByRole("button", { name: "휴대폰 저장" })).toBeVisible();
+    expect(JSON.parse(phone.container.querySelector<HTMLInputElement>('input[name="items"]')?.value ?? "[]"))
+      .toEqual([expect.objectContaining({ type: "phone-usage" })]);
+  });
+
   it("advances caffeine without a query string and restores its pathname draft on back and refresh", async () => {
     window.history.replaceState({}, "", "/record/caffeine");
     const view = render(<CaffeineFlow timezone="Asia/Seoul" />);

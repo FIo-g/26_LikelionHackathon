@@ -29,6 +29,51 @@ describe("Care routine and tool sessions", () => {
     expect(repository.findActivePlanDay).toHaveBeenCalledWith({ userId: "user-1", localDate: "2026-08-21", timezone: "Asia/Seoul" });
   });
 
+  it("only exposes optional Care cards from persisted reroute, phone, and next-plan data", async () => {
+    const activePlan = {
+      id: "plan-day-1", localDate: "2026-08-21",
+      targetBedAt: "2026-08-20T14:00:00.000Z", targetWakeAt: "2026-08-20T22:00:00.000Z",
+      caffeineCutoffAt: "2026-08-20T05:00:00.000Z", exerciseCutoffAt: "2026-08-20T10:00:00.000Z",
+      mealCutoffAt: "2026-08-20T11:00:00.000Z", windDownAt: "2026-08-20T13:00:00.000Z",
+    };
+    const tomorrowPlan = { ...activePlan, id: "plan-day-2", localDate: "2026-08-22" };
+    const repository = {
+      findActivePlanDay: vi.fn().mockImplementation(async (query: { localDate: string }) => (
+        query.localDate === "2026-08-21" ? activePlan : query.localDate === "2026-08-22" ? tomorrowPlan : null
+      )),
+      findGoal: vi.fn().mockResolvedValue(null),
+      listCompletions: vi.fn().mockResolvedValue(new Set()),
+      findGeneratedRerouteAdvice: vi.fn().mockResolvedValue({ id: "reroute-1" }),
+      listRecentPhoneUsage: vi.fn().mockResolvedValue([
+        { localDate: "2026-08-19", durationMinutes: 40 },
+        { localDate: "2026-08-18", durationMinutes: 50 },
+        { localDate: "2026-08-17", durationMinutes: 30 },
+      ]),
+    };
+
+    const result = await getCareViewModel(scope, { repository: repository as never, clock: { now: () => new Date("2026-08-20T12:00:00.000Z") } });
+
+    expect(result.rerouteAdvice).toEqual({ id: "reroute-1" });
+    expect(result.phonePattern).toEqual({ sampleCount: 3, averageDurationMinutes: 40 });
+    expect(result.tomorrowPlan?.localDate).toBe("2026-08-22");
+  });
+
+  it("does not create Care signal claims from incomplete or missing data", async () => {
+    const repository = {
+      findActivePlanDay: vi.fn().mockResolvedValue(null),
+      findGoal: vi.fn().mockResolvedValue(null),
+      listCompletions: vi.fn().mockResolvedValue(new Set()),
+      findGeneratedRerouteAdvice: vi.fn().mockResolvedValue(null),
+      listRecentPhoneUsage: vi.fn().mockResolvedValue([{ localDate: "2026-08-19", durationMinutes: 45 }]),
+    };
+
+    const result = await getCareViewModel(scope, { repository: repository as never, clock: { now: () => new Date("2026-08-20T12:00:00.000Z") } });
+
+    expect(result.rerouteAdvice).toBeNull();
+    expect(result.phonePattern).toBeNull();
+    expect(result.tomorrowPlan).toBeNull();
+  });
+
   it("allows same-day completion/undo but rejects a closed local day", async () => {
     const repository = { findActivePlanDay: findTonightPlanDay, completeStep: vi.fn(), undoStep: vi.fn() };
     const complete = createCompleteRoutineStepService(scope, { clock, repository: repository as never });

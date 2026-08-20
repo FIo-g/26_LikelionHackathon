@@ -1,4 +1,4 @@
-export type EntryPath = "/sign-in" | "/onboarding/connect" | "/today";
+export type EntryPath = "/sign-in" | "/onboarding/profile" | "/today";
 
 export function resolveEntryPath(input: Readonly<{
   userId: string | null;
@@ -8,7 +8,7 @@ export function resolveEntryPath(input: Readonly<{
     return "/sign-in";
   }
 
-  return input.onboardingCompletedAt ? "/today" : "/onboarding/connect";
+  return input.onboardingCompletedAt ? "/today" : "/onboarding/profile";
 }
 
 export function safeReturnTo(value: string | null): string {

@@ -12,8 +12,10 @@ test("renders the manual Care routine and bounded tools", async ({ page }, testI
   const careScreen = page.locator('main[data-lunar-screen="care"]');
   const breathingProgress = page.getByRole("progressbar", { name: "호흡 가이드 진행" });
   const whiteNoiseProgress = page.getByRole("progressbar", { name: "백색소음 진행" });
+  const relaxationProgress = page.getByRole("progressbar", { name: "5분 이완 진행" });
   const breathingCard = breathingProgress.locator("xpath=ancestor::article[1]");
   const whiteNoiseCard = whiteNoiseProgress.locator("xpath=ancestor::article[1]");
+  const asmrCard = page.getByLabel("ASMR 음원 준비 중");
 
   await expect(careScreen).toBeVisible();
   await expect(page.getByRole("heading", { name: "오늘 밤 케어" })).toBeVisible();
@@ -21,6 +23,10 @@ test("renders the manual Care routine and bounded tools", async ({ page }, testI
   await expect(page.getByRole("button", { name: "완료" }).first()).toBeVisible();
   await expect(breathingProgress).toBeVisible();
   await expect(whiteNoiseProgress).toBeVisible();
+  await expect(relaxationProgress).toBeVisible();
+  await expect(asmrCard).toContainText("지원 음원을 준비하고 있어요.");
+  await expect(asmrCard.getByRole("button")).toHaveCount(0);
+  await expect(page.getByText("5분 이완", { exact: true })).toBeVisible();
   await expect(breathingCard.getByRole("button", { name: "시작" })).toBeVisible();
   await expect(breathingCard.getByRole("button", { name: "멈추기" })).toBeVisible();
   await expect(whiteNoiseCard.getByRole("button", { name: "시작" })).toBeVisible();

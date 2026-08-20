@@ -33,6 +33,13 @@ export type SpecialEventInput = Readonly<{
   timezone: string;
 }>;
 
+export type SpecialEventSummary = Readonly<{
+  id: string;
+  title: string;
+  type: string;
+  startsAt: string;
+}>;
+
 export type PlannerInputSnapshot = VersionedPayload<{
   timezone: string;
   goal: {

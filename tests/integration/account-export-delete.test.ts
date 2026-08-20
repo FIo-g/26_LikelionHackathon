@@ -62,9 +62,20 @@ const clean = async (userId: string) => {
 const seed = async (scope: typeof alice | typeof bob) => {
   const email = emailFor(scope.userId);
   await prisma.user.create({ data: { id: scope.userId, name: scope.userId, email, emailVerified: false, createdAt: now, updatedAt: now } });
-  await prisma.userProfile.create({ data: { userId: scope.userId, nickname: scope.userId, timezone: scope.timezone, onboardingCompletedAt: now } });
+  await prisma.userProfile.create({
+    data: {
+      userId: scope.userId,
+      nickname: scope.userId,
+      timezone: scope.timezone,
+      age: 28,
+      gender: "prefer-not-to-say",
+      heightCm: 171,
+      weightKg: 62.5,
+      onboardingCompletedAt: now,
+    },
+  });
   await prisma.sleepGoal.create({ data: { userId: scope.userId, targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 } });
-  await prisma.userHabit.create({ data: { userId: scope.userId, caffeine: "sometimes", exercise: "light", meal: "regular", phoneUsage: "moderate" } });
+  await prisma.userHabit.create({ data: { userId: scope.userId, caffeine: "sometimes", exercise: "light", meal: "regular", alcohol: "monthly", phoneUsage: "moderate" } });
   await prisma.connection.create({ data: { userId: scope.userId, selected: "manual", mode: "manual", availability: "available", state: "complete" } });
   const dailyLog = await prisma.dailyLog.create({ data: { userId: scope.userId, localDate: "2026-08-20", timezone: scope.timezone } });
   await prisma.sleepSession.create({ data: { userId: scope.userId, dailyLogId: dailyLog.id, sleepDate: "2026-08-20", startedAt: new Date("2026-08-19T14:00:00.000Z"), endedAt: new Date("2026-08-19T22:00:00.000Z"), morningFatigue: 2, timezone: scope.timezone } });
@@ -93,7 +104,13 @@ describeSqlite("account export and atomic deletion", () => {
   it("exports only validated domain data and never auth credentials", async () => {
     const exported = await createExportUserData(createPrismaAccountDataRepository(prisma), clock)(alice);
     const keys = collectObjectKeys(exported);
-    expect(exported).toMatchObject({ schemaVersion: 1, identity: { email: emailFor(alice.userId) }, records: [{ type: "sleep" }] });
+    expect(exported).toMatchObject({
+      schemaVersion: 1,
+      identity: { email: emailFor(alice.userId) },
+      profile: { age: 28, gender: "prefer-not-to-say", heightCm: 171, weightKg: 62.5 },
+      habits: expect.arrayContaining([{ category: "alcohol", value: "monthly" }]),
+      records: [{ type: "sleep" }],
+    });
     expect(Object.keys(exported)).not.toEqual(expect.arrayContaining(["user", "accounts", "sessions", "verifications", "rateLimits"]));
     expect(keys).not.toEqual(expect.arrayContaining(["password", "accessToken", "refreshToken", "idToken", "sessionToken", "verificationToken", "secret", "value", "token"]));
   });

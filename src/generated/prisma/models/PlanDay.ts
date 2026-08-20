@@ -700,6 +700,7 @@ export type PlanDayCreateOrConnectWithoutUserInput = {
 
 export type PlanDayCreateManyUserInputEnvelope = {
   data: Prisma.PlanDayCreateManyUserInput | Prisma.PlanDayCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type PlanDayUpsertWithWhereUniqueWithoutUserInput = {
@@ -869,6 +870,7 @@ export type PlanDayCreateOrConnectWithoutPlanInput = {
 
 export type PlanDayCreateManyPlanInputEnvelope = {
   data: Prisma.PlanDayCreateManyPlanInput | Prisma.PlanDayCreateManyPlanInput[]
+  skipDuplicates?: boolean
 }
 
 export type PlanDayUpsertWithWhereUniqueWithoutPlanInput = {
@@ -1849,6 +1851,7 @@ export type PlanDayCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * The data used to create many PlanDays.
    */
   data: Prisma.PlanDayCreateManyInput | Prisma.PlanDayCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1867,6 +1870,7 @@ export type PlanDayCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many PlanDays.
    */
   data: Prisma.PlanDayCreateManyInput | Prisma.PlanDayCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

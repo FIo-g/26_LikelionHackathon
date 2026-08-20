@@ -9,6 +9,7 @@ import { RecordFlowHeader } from "./record-flow-header";
 import styles from "./records.module.css";
 
 type SleepPhoneStep = "sleep" | "phone" | "confirm";
+type SleepPhoneFocus = "all" | "sleep" | "phone";
 
 export const INTAKE_STEPS = {
   sleepPhone: ["sleep", "phone", "confirm"] as const,
@@ -30,15 +31,23 @@ type RawValue = Readonly<{
 type SleepPhoneFlowProps = Readonly<{
   timezone: string;
   step?: SleepPhoneStep | string;
+  focus?: SleepPhoneFocus | string;
   successRedirectPath?: string;
   initialValues?: RawValue;
 }>;
 
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
-const normalizeStep = (step?: string): SleepPhoneStep => step === "phone" || step === "confirm" ? step : "sleep";
+const normalizeFocus = (focus?: string): SleepPhoneFocus => (
+  focus === "sleep" || focus === "phone" ? focus : "all"
+);
+const normalizeStep = (step: string | undefined, focus: SleepPhoneFocus): SleepPhoneStep => {
+  if (step === "confirm") return "confirm";
+  if (step === "phone" || focus === "phone") return "phone";
+  return "sleep";
+};
 
-const payloadFor = (values: Record<string, string>): string => JSON.stringify([
-  {
+const payloadFor = (values: Record<string, string>, focus: SleepPhoneFocus): string => {
+  const sleep = {
     clientKey: "sleep",
     ...(values.sleepRecordId ? { recordId: values.sleepRecordId } : {}),
     type: "sleep",
@@ -48,8 +57,8 @@ const payloadFor = (values: Record<string, string>): string => JSON.stringify([
     endedAtDisambiguation: values.sleepEndedAtDisambiguation,
     morningFatigue: values.morningFatigue,
     timezone: values.timezone,
-  },
-  {
+  };
+  const phone = {
     clientKey: "phone",
     ...(values.phoneRecordId ? { recordId: values.phoneRecordId } : {}),
     type: "phone-usage",
@@ -57,16 +66,25 @@ const payloadFor = (values: Record<string, string>): string => JSON.stringify([
     lastUseAtDisambiguation: values.lastUseAtDisambiguation,
     durationMinutes: values.durationMinutes,
     timezone: values.timezone,
-  },
-]);
+  };
 
-const buildSummary = (values: Record<string, string>) => [
+  if (focus === "sleep") return JSON.stringify([sleep]);
+  if (focus === "phone") return JSON.stringify([phone]);
+  return JSON.stringify([sleep, phone]);
+};
+
+const buildSummary = (values: Record<string, string>, focus: SleepPhoneFocus) => {
+  const fields = [
   { label: "수면 시작", value: values.sleepStartedAt || "-" },
   { label: "수면 종료", value: values.sleepEndedAt || "-" },
   { label: "아침 피로", value: values.morningFatigue || "-" },
   { label: "마지막 휴대폰 사용", value: values.lastUseAt || "-" },
   { label: "휴대폰 사용 시간", value: `${values.durationMinutes || "0"} 분` },
-];
+  ];
+  if (focus === "sleep") return fields.slice(0, 3);
+  if (focus === "phone") return fields.slice(3);
+  return fields;
+};
 
 const Disambiguation = ({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) => (
   <label className={styles.fieldLabel}>
@@ -82,9 +100,17 @@ const Disambiguation = ({ name, value, onChange }: { name: string; value: string
 export const SleepPhoneFlow = ({
   timezone,
   step: requestedStep,
+  focus: requestedFocus,
   successRedirectPath = "/record",
   initialValues = {},
 }: SleepPhoneFlowProps) => {
+  const focus = normalizeFocus(requestedFocus);
+  const section = focus === "sleep" ? "수면" : focus === "phone" ? "휴대폰" : "수면 · 휴대폰";
+  const submitButtonLabel = focus === "sleep"
+    ? "수면 저장"
+    : focus === "phone"
+      ? "휴대폰 저장"
+      : "수면/휴대폰 저장";
   const initial = useMemo(() => {
     const localNow = formatRecordWallTimeInput(new Date(), timezone);
     const sleepStartedAt = safeText(initialValues.sleepStartedAt);
@@ -113,13 +139,13 @@ export const SleepPhoneFlow = ({
       pathname="/record/sleep-phone"
       action={saveRecordBatchAction}
       successRedirectPath={successRedirectPath}
-      submitButtonLabel="수면/휴대폰 저장"
+      submitButtonLabel={submitButtonLabel}
       initialValues={initial}
-      initialStep={normalizeStep(requestedStep)}
+      initialStep={normalizeStep(requestedStep, focus)}
     >
       {({ values, step, setValue, setStep }) => (
         <main className={styles.flowPage} data-lunar-screen="record">
-          <RecordFlowHeader section="수면 · 휴대폰" />
+          <RecordFlowHeader section={section} />
           <div className={styles.flowContent}>
           {step === "sleep" ? (
             <section className={styles.flowStep} aria-labelledby="sleep-title">
@@ -133,7 +159,7 @@ export const SleepPhoneFlow = ({
               <Disambiguation name="sleepEndedAtDisambiguation" value={values.sleepEndedAtDisambiguation} onChange={(value) => setValue("sleepEndedAtDisambiguation", value)} />
               <label className={styles.fieldLabel}>아침 피로(1-5)<input type="number" min="1" max="5" name="morningFatigue" value={values.morningFatigue} onChange={(event) => setValue("morningFatigue", event.currentTarget.value)} required /></label>
               </section>
-              <button className={styles.nextButton} type="button" onClick={() => setStep("phone")}>오늘 휴대폰 기록</button>
+              <button className={styles.nextButton} type="button" onClick={() => setStep(focus === "sleep" ? "confirm" : "phone")}>{focus === "sleep" ? "기록 확인" : "오늘 휴대폰 기록"}</button>
             </section>
           ) : null}
           {step === "phone" ? (
@@ -150,18 +176,18 @@ export const SleepPhoneFlow = ({
               </section>
               <p className={styles.flowNote}>수면과 휴대폰 기록은 서로 다른 날짜 기준으로 저장됩니다.</p>
               <div className={styles.stepActions}>
-                <button className={styles.secondaryButton} type="button" onClick={() => setStep("sleep")}>이전</button>
+                {focus === "all" ? <button className={styles.secondaryButton} type="button" onClick={() => setStep("sleep")}>이전</button> : null}
                 <button className={styles.nextButton} type="button" onClick={() => setStep("confirm")}>기록 확인</button>
               </div>
             </section>
           ) : null}
           {step === "confirm" ? (
             <section className={styles.flowStep} aria-labelledby="sleep-confirm-title">
-              <h1 id="sleep-confirm-title">수면 · 휴대폰 기록을 확인해요</h1>
+              <h1 id="sleep-confirm-title">{focus === "sleep" ? "수면 기록을 확인해요" : focus === "phone" ? "휴대폰 기록을 확인해요" : "수면 · 휴대폰 기록을 확인해요"}</h1>
               <p className={styles.flowLead}>어젯밤 수면과 오늘 휴대폰 값이 각각 올바른지 확인해주세요.</p>
-              <input type="hidden" name="items" value={payloadFor(values)} readOnly />
-              <RecordConfirmation title="입력 확인" fields={buildSummary(values)} />
-              <button className={styles.secondaryButton} type="button" onClick={() => setStep("phone")}>직접 수정</button>
+              <input type="hidden" name="items" value={payloadFor(values, focus)} readOnly />
+              <RecordConfirmation title="입력 확인" fields={buildSummary(values, focus)} />
+              <button className={styles.secondaryButton} type="button" onClick={() => setStep(focus === "phone" ? "phone" : "sleep")}>직접 수정</button>
             </section>
           ) : null}
           </div>

@@ -4,7 +4,7 @@ import { resolveEntryPath, safeReturnTo } from "@/shared/auth/entry-path";
 describe("entry-path", () => {
   it.each([
     [{ userId: null, onboardingCompletedAt: null }, "/sign-in"],
-    [{ userId: "u1", onboardingCompletedAt: null }, "/onboarding/connect"],
+    [{ userId: "u1", onboardingCompletedAt: null }, "/onboarding/profile"],
     [{ userId: "u1", onboardingCompletedAt: new Date("2026-08-19T00:00:00Z") }, "/today"],
   ] as const)("resolves entry route", (context, expected) => {
     expect(resolveEntryPath(context)).toBe(expected);

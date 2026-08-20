@@ -1,6 +1,6 @@
-import { profileSchema, sleepGoalSchema } from "@/modules/onboarding/domain/schemas";
+import { profileUpdateSchema, sleepGoalSchema } from "@/modules/onboarding/domain/schemas";
 
-export const accountProfileSchema = profileSchema;
+export const accountProfileSchema = profileUpdateSchema;
 export const accountSleepGoalSchema = sleepGoalSchema;
 
 export type AccountActionState = Readonly<{

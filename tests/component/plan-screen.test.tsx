@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 const router = vi.hoisted(() => ({
   push: vi.fn(),
@@ -21,7 +21,7 @@ const viewModel: PlanViewModel = {
   calendarConnection: { availability: "coming-soon" },
   planStatus: "none",
   dismissedAdvice: false,
-  events: [{ id: "event-1", type: "travel", startsAt: "2026-08-22T00:00:00.000Z" }],
+  events: [{ id: "event-1", title: "아침 비행", type: "travel", startsAt: "2026-08-22T00:00:00.000Z" }],
   advice: {
     id: "advice-1",
     timezone: "America/New_York",
@@ -82,17 +82,36 @@ describe("Plan screen", () => {
   it("places real events in the anchored month and keeps events outside that month visible", () => {
     render(<PlanCalendar
       anchorLocalDate="2026-08-21"
+      todayLocalDate="2026-08-21"
       events={[
-        { id: "august", type: "발표", startsAt: "2026-08-22T00:00:00.000Z" },
-        { id: "september", type: "출장", startsAt: "2026-09-02T14:00:00.000Z" },
+        { id: "august", title: "졸업 발표", type: "발표", startsAt: "2026-08-22T00:00:00.000Z" },
+        { id: "september", title: "해외 출장", type: "출장", startsAt: "2026-09-02T14:00:00.000Z" },
       ]}
       timezone="America/New_York"
     />);
 
     expect(screen.getByRole("heading", { name: "2026년 8월" })).toBeVisible();
+    expect(screen.getByText("졸업 발표")).toBeVisible();
     expect(screen.getByText("발표")).toBeVisible();
     expect(screen.getByRole("heading", { name: "다른 달 일정" })).toBeVisible();
-    expect(screen.getByText("출장")).toBeVisible();
+    expect(screen.getByText("해외 출장")).toBeVisible();
+    expect(screen.getByLabelText("일정 범례")).toHaveTextContent("직접 입력한 주요 일정");
+  });
+
+  it("navigates calendar months and marks the current day without changing saved event data", () => {
+    const { container } = render(<PlanCalendar
+      anchorLocalDate="2026-08-21"
+      todayLocalDate="2026-08-21"
+      events={[{ id: "september", title: "해외 출장", type: "출장", startsAt: "2026-09-02T14:00:00.000Z" }]}
+      timezone="America/New_York"
+    />);
+
+    expect(container.querySelector('time[aria-current="date"]')).toHaveTextContent("21");
+    fireEvent.click(screen.getByRole("button", { name: "다음 달" }));
+    expect(screen.getByRole("heading", { name: "2026년 9월" })).toBeVisible();
+    expect(screen.getByText("해외 출장")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "이번 달" }));
+    expect(screen.getByRole("heading", { name: "2026년 8월" })).toBeVisible();
   });
 
   it("renders direct event entry and generated advice controls", () => {
@@ -139,13 +158,13 @@ describe("Plan screen", () => {
       render(<PlanMobileContent viewModel={{
         ...viewModel,
         events: [
-          { id: "past-1", type: "지난 일정 1", startsAt: "2026-08-18T12:00:00.000Z" },
-          { id: "past-2", type: "지난 일정 2", startsAt: "2026-08-19T12:00:00.000Z" },
-          { id: "past-3", type: "지난 일정 3", startsAt: "2026-08-20T12:00:00.000Z" },
-          { id: "upcoming-1", type: "다가오는 일정", startsAt: "2026-08-22T12:00:00.000Z" },
-          { id: "upcoming-2", type: "다가오는 일정 2", startsAt: "2026-08-23T12:00:00.000Z" },
-          { id: "upcoming-3", type: "다가오는 일정 3", startsAt: "2026-08-24T12:00:00.000Z" },
-          { id: "upcoming-4", type: "다가오는 일정 4", startsAt: "2026-08-25T12:00:00.000Z" },
+          { id: "past-1", title: "지난 일정 1", type: "여행", startsAt: "2026-08-18T12:00:00.000Z" },
+          { id: "past-2", title: "지난 일정 2", type: "여행", startsAt: "2026-08-19T12:00:00.000Z" },
+          { id: "past-3", title: "지난 일정 3", type: "여행", startsAt: "2026-08-20T12:00:00.000Z" },
+          { id: "upcoming-1", title: "다가오는 일정", type: "여행", startsAt: "2026-08-22T12:00:00.000Z" },
+          { id: "upcoming-2", title: "다가오는 일정 2", type: "여행", startsAt: "2026-08-23T12:00:00.000Z" },
+          { id: "upcoming-3", title: "다가오는 일정 3", type: "여행", startsAt: "2026-08-24T12:00:00.000Z" },
+          { id: "upcoming-4", title: "다가오는 일정 4", type: "여행", startsAt: "2026-08-25T12:00:00.000Z" },
         ],
       }} />);
 
@@ -165,8 +184,8 @@ describe("Plan screen", () => {
       render(<PlanDesktopContent viewModel={{
         ...viewModel,
         events: [
-          { id: "past", type: "지난 발표", startsAt: "2026-08-20T12:00:00.000Z" },
-          { id: "future", type: "다가오는 발표", startsAt: "2026-08-22T12:00:00.000Z" },
+          { id: "past", title: "지난 발표", type: "발표", startsAt: "2026-08-20T12:00:00.000Z" },
+          { id: "future", title: "다가오는 발표", type: "발표", startsAt: "2026-08-22T12:00:00.000Z" },
         ],
       }} />);
 

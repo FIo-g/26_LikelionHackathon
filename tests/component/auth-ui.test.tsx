@@ -41,7 +41,7 @@ describe("Auth UI behavior", () => {
     });
   });
 
-  it("keeps the onboarding connection step as the sign-up callback", async () => {
+  it("starts a new account at the profile onboarding step", async () => {
     render(<SignUpForm />);
 
     fireEvent.change(screen.getByLabelText("이메일"), { target: { value: "new-user@example.com" } });
@@ -53,7 +53,7 @@ describe("Auth UI behavior", () => {
         email: "new-user@example.com",
         password: "long-enough-password",
         name: "new-user",
-        callbackURL: "/onboarding/connect",
+        callbackURL: "/onboarding/profile",
       });
     });
   });

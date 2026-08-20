@@ -8,6 +8,8 @@
 .onboardingCard {
   width: min(390px, 100%);
   min-height: 844px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   color: #21152e;
   background: #f4eef8;
@@ -100,6 +102,10 @@
 }
 
 .onboardingBody {
+  min-height: 762px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 13px 24px 40px;
 }
 
@@ -113,7 +119,7 @@
 }
 
 .lead {
-  margin: 6px 0 26px;
+  margin: 6px 0 31px;
   color: #766982;
   font-size: 12px;
   font-weight: 400;
@@ -121,7 +127,10 @@
 }
 
 .onboardingForm {
-  display: grid;
+  min-height: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   gap: 22px;
 }
 
@@ -161,7 +170,7 @@
 }
 
 .choiceFieldset legend {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #766982;
   font-size: 11px;
   font-weight: 600;
@@ -215,6 +224,8 @@
 }
 
 .cta {
+  flex: 0 0 auto;
+  margin-top: auto;
   width: 100%;
   min-height: 48px;
   border: 0;
@@ -270,14 +281,14 @@
 
 .rabbitNote {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  min-height: 112px;
+  min-height: 122px;
 }
 
 .rabbitNote p {
-  margin: 0;
+  margin: 14px 0 0;
   color: #766982;
   font-size: 11px;
   font-weight: 400;
@@ -286,8 +297,8 @@
 
 .rabbitNote span {
   flex: 0 0 auto;
-  width: 110px;
-  height: 110px;
+  width: 122px;
+  height: 122px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -295,15 +306,18 @@
 }
 
 .rabbitNote img {
-  width: 78px;
-  height: 78px;
+  width: 82px;
+  height: 82px;
   object-fit: contain;
 }
 
 .goalCard {
+  position: relative;
+  min-height: 190px;
   overflow: hidden;
-  border-radius: 18px;
-  padding: 17px 16px 12px;
+  border: 1px solid #7b548b;
+  border-radius: 20px;
+  padding: 14px 23px 13px;
   color: #fff;
   background:
     radial-gradient(circle at 92% 2%, #704480 0 95px, transparent 96px),
@@ -317,63 +331,100 @@
   line-height: 16px;
 }
 
-.timeRow {
+.goalTimeRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
   align-items: center;
-  gap: 4px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
-.timeRow > span {
-  font-size: 24px;
+.goalTimeRow > span {
+  color: #fff4d9;
+  font-size: 20px;
   font-weight: 800;
+  line-height: 28px;
   text-align: center;
 }
 
-.timeRow label {
+.goalTimeRow > div {
   display: grid;
-  gap: 2px;
+  gap: 0;
 }
 
-.timeRow input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  padding: 0;
+.goalTimeRow time {
   color: #fff;
-  background: transparent;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 800;
-  line-height: 36px;
+  line-height: 38px;
 }
 
-.timeRow input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.7;
-}
-
-.timeRow label span {
+.goalTimeRow div span {
   color: #eaddf1;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
+  line-height: 18px;
+}
+
+.goalEditButton {
+  position: absolute;
+  right: 23px;
+  bottom: 13px;
+  left: 23px;
+  min-height: 40px;
+  border: 1px solid #e2d6e9;
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: #5f346f;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
+}
+
+.goalTimeEditor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  border: 1px solid #e2d6e9;
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff;
+}
+
+.goalTimeEditor legend {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-bottom: 8px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
   line-height: 16px;
 }
 
-.goalCard > p {
-  margin: 14px -8px 0;
-  border-radius: 12px;
-  padding: 10px;
-  color: #5f346f;
+.goalTimeEditor label {
+  display: grid;
+  gap: 4px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.goalTimeEditor input {
+  min-width: 0;
+  height: 40px;
+  border: 1px solid #e2d6e9;
+  border-radius: 10px;
+  padding: 0 8px;
+  color: #21152e;
   background: #fff;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 18px;
-  text-align: center;
+  font-size: 14px;
 }
 
 .scheduleHint {
-  margin: 12px 0 0;
+  margin: 6px 0 0;
   color: #766982;
   font-size: 11px;
   font-weight: 400;
@@ -433,8 +484,59 @@
 .manualTip {
   display: block;
   min-height: 82px;
-  margin-top: 26px;
   background: #fff0dc;
+}
+
+.profileForm {
+  gap: 20px;
+}
+
+.profileForm .tipCard {
+  min-height: 108px;
+  margin-top: 24px;
+  align-items: flex-start;
+}
+
+.measureRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.timezoneField {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: #766982;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.timezoneField select {
+  min-width: 0;
+  height: 28px;
+  border: 1px solid #e2d6e9;
+  border-radius: 8px;
+  padding: 0 8px;
+  color: #21152e;
+  background: #fff;
+  font-size: 11px;
+}
+
+.habitReassurance {
+  margin-top: 20px;
+}
+
+.goalReassurance {
+  margin-top: 52px;
+}
+
+.connectCompletion {
+  margin-top: 16px;
 }
 
 .errorList {
@@ -476,7 +578,7 @@
     gap: 6px;
   }
 
-  .timeRow input {
+  .goalTimeRow time {
     font-size: 24px;
   }
 }

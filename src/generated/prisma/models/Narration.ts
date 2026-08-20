@@ -716,6 +716,7 @@ export type NarrationCreateOrConnectWithoutUserInput = {
 
 export type NarrationCreateManyUserInputEnvelope = {
   data: Prisma.NarrationCreateManyUserInput | Prisma.NarrationCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type NarrationUpsertWithWhereUniqueWithoutUserInput = {
@@ -792,6 +793,7 @@ export type NarrationCreateOrConnectWithoutAnalysisSnapshotInput = {
 
 export type NarrationCreateManyAnalysisSnapshotInputEnvelope = {
   data: Prisma.NarrationCreateManyAnalysisSnapshotInput | Prisma.NarrationCreateManyAnalysisSnapshotInput[]
+  skipDuplicates?: boolean
 }
 
 export type NarrationUpsertWithWhereUniqueWithoutAnalysisSnapshotInput = {
@@ -848,6 +850,7 @@ export type NarrationCreateOrConnectWithoutScheduleAdviceInput = {
 
 export type NarrationCreateManyScheduleAdviceInputEnvelope = {
   data: Prisma.NarrationCreateManyScheduleAdviceInput | Prisma.NarrationCreateManyScheduleAdviceInput[]
+  skipDuplicates?: boolean
 }
 
 export type NarrationUpsertWithWhereUniqueWithoutScheduleAdviceInput = {
@@ -1844,6 +1847,7 @@ export type NarrationCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many Narrations.
    */
   data: Prisma.NarrationCreateManyInput | Prisma.NarrationCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1862,6 +1866,7 @@ export type NarrationCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many Narrations.
    */
   data: Prisma.NarrationCreateManyInput | Prisma.NarrationCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

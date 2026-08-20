@@ -34,7 +34,7 @@ const createRepository = () => {
       targetDurationMinutes: 480,
     }),
     findCurrentBaseline: async () => null,
-    listEvents: async () => events.map(({ id, type, startsAt }) => ({ id, type, startsAt })),
+    listEvents: async () => events.map(({ id, title, type, startsAt }) => ({ id, title, type, startsAt })),
     findLatestGeneratedAdvice: async () => [...advice.values()].find((item) => item.status === "generated") ?? null,
     findLatestDismissedAdvice: async () => null,
     findPlanForEvent: async () => null,

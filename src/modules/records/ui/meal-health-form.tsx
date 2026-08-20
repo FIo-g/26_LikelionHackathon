@@ -9,6 +9,7 @@ import { RecordFlowHeader } from "./record-flow-header";
 import styles from "./records.module.css";
 
 type MealHealthStep = "meal" | "exercise-and-wellness" | "confirm";
+type MealHealthFocus = "all" | "meal" | "exercise";
 
 export const INTAKE_STEPS = {
   mealHealth: ["meal", "exercise-and-wellness", "confirm"] as const,
@@ -37,14 +38,20 @@ type RawValue = Readonly<{
 type MealHealthFlowProps = Readonly<{
   timezone: string;
   step?: MealHealthStep | string;
+  focus?: MealHealthFocus | string;
   successRedirectPath?: string;
   initialValues?: RawValue;
 }>;
 
 const safeText = (value: string | undefined): string => value?.trim() ?? "";
-const normalizeStep = (step?: string): MealHealthStep => (
-  step === "exercise-and-wellness" || step === "confirm" ? step : "meal"
+const normalizeFocus = (focus?: string): MealHealthFocus => (
+  focus === "meal" || focus === "exercise" ? focus : "all"
 );
+const normalizeStep = (step: string | undefined, focus: MealHealthFocus): MealHealthStep => {
+  if (step === "confirm") return "confirm";
+  if (focus === "exercise") return "exercise-and-wellness";
+  return step === "exercise-and-wellness" && focus === "all" ? step : "meal";
+};
 
 const toNumberOrNull = (value: string): number | null => {
   if (!value.trim()) return null;
@@ -52,8 +59,8 @@ const toNumberOrNull = (value: string): number | null => {
   return Number.isNaN(parsed) ? null : parsed;
 };
 
-const payloadFor = (values: Record<string, string>): string => JSON.stringify([
-  {
+const payloadFor = (values: Record<string, string>, focus: MealHealthFocus): string => {
+  const meal = {
     clientKey: "meal",
     ...(values.mealRecordId ? { recordId: values.mealRecordId } : {}),
     type: "meal",
@@ -62,8 +69,8 @@ const payloadFor = (values: Record<string, string>): string => JSON.stringify([
     eatenAtDisambiguation: values.mealEatenAtDisambiguation,
     notes: values.mealNotes,
     timezone: values.timezone,
-  },
-  {
+  };
+  const exercise = {
     clientKey: "exercise",
     ...(values.exerciseRecordId ? { recordId: values.exerciseRecordId } : {}),
     type: "exercise",
@@ -75,8 +82,8 @@ const payloadFor = (values: Record<string, string>): string => JSON.stringify([
     endedAtDisambiguation: values.exerciseEndedAtDisambiguation,
     averageHeartRate: toNumberOrNull(values.exerciseAverageHeartRate ?? ""),
     timezone: values.timezone,
-  },
-  {
+  };
+  const wellness = {
     clientKey: "wellness",
     ...(values.wellnessRecordId ? { recordId: values.wellnessRecordId } : {}),
     type: "wellness",
@@ -84,16 +91,25 @@ const payloadFor = (values: Record<string, string>): string => JSON.stringify([
     fatigueLevel: values.fatigueLevel,
     stressLevel: values.stressLevel,
     timezone: values.timezone,
-  },
-]);
+  };
 
-const buildSummary = (values: Record<string, string>) => [
+  if (focus === "meal") return JSON.stringify([meal]);
+  if (focus === "exercise") return JSON.stringify([exercise, wellness]);
+  return JSON.stringify([meal, exercise, wellness]);
+};
+
+const buildSummary = (values: Record<string, string>, focus: MealHealthFocus) => {
+  const fields = [
   { label: "식사 규모", value: values.mealSize || "-" },
   { label: "식사 시각", value: values.mealEatenAt || "-" },
   { label: "운동", value: values.exerciseType || "-" },
   { label: "강도", value: values.exerciseIntensity || "-" },
   { label: "컨디션", value: `${values.fatigueLevel || "-"}/${values.stressLevel || "-"}` },
-];
+  ];
+  if (focus === "meal") return fields.slice(0, 2);
+  if (focus === "exercise") return fields.slice(2);
+  return fields;
+};
 
 const Disambiguation = ({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) => (
   <label className={styles.fieldLabel}>
@@ -109,9 +125,18 @@ const Disambiguation = ({ name, value, onChange }: { name: string; value: string
 export const MealHealthFlow = ({
   timezone,
   step: requestedStep,
+  focus: requestedFocus,
   successRedirectPath = "/record",
   initialValues = {},
 }: MealHealthFlowProps) => {
+  const focus = normalizeFocus(requestedFocus);
+  const section = focus === "meal" ? "식사" : focus === "exercise" ? "운동 · 컨디션" : "식사 · 운동";
+  const title = focus === "meal" ? "오늘의 식사 기록" : focus === "exercise" ? "오늘의 운동과 컨디션" : "오늘의 식사와 운동";
+  const submitButtonLabel = focus === "meal"
+    ? "식사 저장"
+    : focus === "exercise"
+      ? "운동·컨디션 저장"
+      : "식사/운동/컨디션 저장";
   const initial = useMemo(() => {
     const localNow = formatRecordWallTimeInput(new Date(), timezone);
     const mealEatenAt = safeText(initialValues.mealEatenAt);
@@ -147,17 +172,17 @@ export const MealHealthFlow = ({
       pathname="/record/meal-health"
       action={saveRecordBatchAction}
       successRedirectPath={successRedirectPath}
-      submitButtonLabel="식사/운동/컨디션 저장"
+      submitButtonLabel={submitButtonLabel}
       initialValues={initial}
-      initialStep={normalizeStep(requestedStep)}
+      initialStep={normalizeStep(requestedStep, focus)}
     >
       {({ values, step, setValue, setStep }) => (
         <main className={styles.flowPage} data-lunar-screen="record">
-          <RecordFlowHeader section="식사 · 운동" />
+          <RecordFlowHeader section={section} />
           <div className={styles.flowContent}>
           {step === "meal" ? (
             <section className={styles.flowStep} aria-labelledby="meal-title">
-              <h1 id="meal-title">오늘의 식사와 운동</h1>
+              <h1 id="meal-title">{title}</h1>
               <h2 className={styles.subsectionTitle}>식사</h2>
               <label className={styles.fieldLabel}>
                 식사량
@@ -178,12 +203,18 @@ export const MealHealthFlow = ({
                 <strong>식사 시간도 수면 준비에 반영돼요</strong>
                 <p>저녁을 추가하면 오늘 타임라인이 함께 조정됩니다.</p>
               </aside>
-              <button className={styles.nextButton} type="button" onClick={() => setStep("exercise-and-wellness")}>운동 · 컨디션 입력</button>
+              <button
+                className={styles.nextButton}
+                type="button"
+                onClick={() => setStep(focus === "meal" ? "confirm" : "exercise-and-wellness")}
+              >
+                {focus === "meal" ? "기록 확인" : "운동 · 컨디션 입력"}
+              </button>
             </section>
           ) : null}
           {step === "exercise-and-wellness" ? (
             <section className={styles.flowStep} aria-labelledby="exercise-title">
-              <h1 id="exercise-title">오늘의 식사와 운동</h1>
+              <h1 id="exercise-title">{title}</h1>
               <h2 className={styles.subsectionTitle}>운동</h2>
               <div className={styles.infoCard}>
                 <label className={styles.fieldLabel}>운동<input name="exerciseType" value={values.exerciseType} onChange={(event) => setValue("exerciseType", event.currentTarget.value)} required /></label>
@@ -210,18 +241,18 @@ export const MealHealthFlow = ({
                 <p>운동과 컨디션까지 저장하면 오늘 분석에 함께 반영됩니다.</p>
               </aside>
               <div className={styles.stepActions}>
-                <button className={styles.secondaryButton} type="button" onClick={() => setStep("meal")}>이전</button>
+                {focus === "all" ? <button className={styles.secondaryButton} type="button" onClick={() => setStep("meal")}>이전</button> : null}
                 <button className={styles.nextButton} type="button" onClick={() => setStep("confirm")}>기록 확인</button>
               </div>
             </section>
           ) : null}
           {step === "confirm" ? (
             <section className={styles.flowStep} aria-labelledby="meal-confirm-title">
-              <h1 id="meal-confirm-title">식사 · 운동 기록을 확인해요</h1>
+              <h1 id="meal-confirm-title">{focus === "meal" ? "식사 기록을 확인해요" : focus === "exercise" ? "운동 · 컨디션 기록을 확인해요" : "식사 · 운동 기록을 확인해요"}</h1>
               <p className={styles.flowLead}>입력한 생활 기록과 컨디션을 저장하기 전에 확인해주세요.</p>
-              <input type="hidden" name="items" value={payloadFor(values)} readOnly />
-              <RecordConfirmation title="입력 확인" fields={buildSummary(values)} />
-              <button className={styles.secondaryButton} type="button" onClick={() => setStep("exercise-and-wellness")}>직접 수정</button>
+              <input type="hidden" name="items" value={payloadFor(values, focus)} readOnly />
+              <RecordConfirmation title="입력 확인" fields={buildSummary(values, focus)} />
+              <button className={styles.secondaryButton} type="button" onClick={() => setStep(focus === "meal" ? "meal" : "exercise-and-wellness")}>직접 수정</button>
             </section>
           ) : null}
           </div>

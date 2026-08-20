@@ -21,7 +21,7 @@ export const SignUpForm = () => {
       email,
       password,
       name: email.split("@")[0],
-      callbackURL: "/onboarding/connect",
+      callbackURL: "/onboarding/profile",
     });
 
     if (result.error) {
@@ -32,7 +32,7 @@ export const SignUpForm = () => {
     }
 
     setIsSubmitting(false);
-    window.location.href = "/onboarding/connect";
+    window.location.href = "/onboarding/profile";
   };
 
   return (

@@ -34,6 +34,7 @@ const nowReadyModel: TodayViewModel = {
       { key: "exercise", label: "운동 마감", scheduledAt: "18:00", status: "current" },
       { key: "meal", label: "식사 마감", scheduledAt: "19:00", status: "upcoming" },
       { key: "windDown", label: "휴대폰 디지털 디톡스 시작", scheduledAt: "22:00", status: "upcoming" },
+      { key: "target-bed", label: "취침 준비", scheduledAt: "23:00", status: "upcoming" },
     ],
     message: "오늘 목표 취침 23:00 기준",
     action: null,
@@ -129,7 +130,8 @@ describe("TodayScreen", () => {
 
     const timeline = screen.getByRole("list", { name: "준비 타임라인" });
     expect(timeline).toBeVisible();
-    expect(within(timeline).getAllByRole("listitem")).toHaveLength(4);
+    expect(within(timeline).getAllByRole("listitem")).toHaveLength(5);
+    expect(within(timeline).getByText("취침 준비")).toBeVisible();
 
     expect(screen.getByRole("link", { name: "기록하기" })).toHaveAttribute("href", "/record/meal-health?step=meal");
 

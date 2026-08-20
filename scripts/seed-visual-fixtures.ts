@@ -84,14 +84,15 @@ export const seedVisualFixtureData = async (fixture: VisualFixture, email: strin
 
     const onboardingComplete = fixture === "complete-user" || fixture === "planned-user" || fixture.endsWith("draft") || fixture.includes("brand") || fixture.includes("type") || fixture.includes("amount") || fixture.includes("meal") || fixture.includes("sleep") || fixture.includes("phone");
     await transaction.userProfile.create({ data: { userId: user.id, nickname: "Visual User", timezone: TIMEZONE, onboardingCompletedAt: onboardingComplete ? FIXTURE_NOW : null } });
-    await transaction.connection.create({ data: { userId: user.id, selected: "manual", mode: "manual", availability: "available", state: "complete" } });
-    if (fixture === "onboarding-connect") return;
+    if (fixture === "onboarding-profile") return;
 
-    await transaction.sleepGoal.create({ data: { userId: user.id, targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 } });
+    await transaction.userHabit.create({ data: { userId: user.id, caffeine: "sometimes", exercise: "weekly", meal: "mixed", alcohol: "weekly", phoneUsage: "medium" } });
+    if (fixture === "onboarding-habits") return;
+
+    await transaction.sleepGoal.create({ data: { userId: user.id, targetBedTime: "23:30", targetWakeTime: "07:00", targetDurationMinutes: 450 } });
     if (fixture === "onboarding-goal") return;
 
-    await transaction.userHabit.create({ data: { userId: user.id, caffeine: "sometimes", exercise: "light", meal: "regular", phoneUsage: "moderate" } });
-    if (fixture === "onboarding-habits") return;
+    await transaction.connection.create({ data: { userId: user.id, selected: "manual", mode: "manual", availability: "available", state: "complete" } });
 
     const log = await transaction.dailyLog.create({ data: { userId: user.id, localDate: "2026-08-19", timezone: TIMEZONE } });
     await transaction.sleepSession.create({ data: { userId: user.id, dailyLogId: log.id, sleepDate: "2026-08-19", startedAt: new Date("2026-08-18T14:00:00.000Z"), endedAt: new Date("2026-08-18T22:00:00.000Z"), morningFatigue: 2, timezone: TIMEZONE } });

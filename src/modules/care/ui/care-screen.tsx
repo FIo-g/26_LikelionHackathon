@@ -87,6 +87,9 @@ export const CareScreen = ({ viewModel }: { viewModel: CareViewModel }) => {
           <CareSignalPanel
             inputState={viewModel.inputState}
             planDay={viewModel.planDay}
+            phonePattern={viewModel.phonePattern}
+            rerouteAdvice={viewModel.rerouteAdvice}
+            tomorrowPlan={viewModel.tomorrowPlan}
             timezone={viewModel.timezone}
           />
         </aside>

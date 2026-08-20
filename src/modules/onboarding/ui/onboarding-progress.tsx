@@ -5,10 +5,10 @@ import styles from "./onboarding.module.css";
 
 const STEPS = [1, 2, 3, 4] as const;
 const STEP_LABELS: Readonly<Record<OnboardingStep, string>> = {
-  1: "연결 설정",
-  2: "수면 목표",
-  3: "평균 습관",
-  4: "기본 정보",
+  1: "기본 정보",
+  2: "평균 습관",
+  3: "수면 목표",
+  4: "연동 설정",
 };
 
 type OnboardingProgressProps = Readonly<{

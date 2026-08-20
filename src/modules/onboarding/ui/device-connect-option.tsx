@@ -11,12 +11,12 @@ type DeviceConnectOptionProps = Readonly<{
 }>;
 
 const TYPE_LABEL_BY_TYPE: Readonly<Record<DeviceType, string>> = {
-  wearable: "위치·수면·운동",
+  wearable: "워치 수면·운동",
   phone: "휴대폰 활동 시간",
 };
 
 const TYPE_DESCRIPTION_BY_TYPE: Readonly<Record<DeviceType, string>> = {
-  wearable: "지원 기기를 연결하면 수면과 활동 기록을 자동으로 채워요.",
+  wearable: "지원 기기를 연결하면 자동으로 채워져요.",
   phone: "지원되는 경우 오늘 수치를 자동으로 반영해요.",
 };
 

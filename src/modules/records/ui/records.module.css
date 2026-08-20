@@ -15,6 +15,23 @@
 .recordEyebrow { margin: 0 0 10px; color: #e7d8f2; font-size: 11px; font-weight: 700; line-height: 16px; }
 .recordTitle { margin: 0; color: #fff; font-size: 28px; font-weight: 800; line-height: 38px; }
 .recordSubtitle { margin: 4px 0 0; color: #d9c8e5; font-size: 14px; line-height: 22px; }
+.quickRecordAction {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 0 16px;
+  border: 1px solid #b998c7;
+  border-radius: 12px;
+  color: #fff;
+  background: #653374;
+  box-shadow: 0 4px 12px rgb(38 18 56 / 15%);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.quickRecordAction:hover, .quickRecordAction:focus-visible { background: #704480; }
 .recordContent { width: min(1090px, calc(100% - 48px)); margin: 28px auto 0; }
 .recordGuidance { display: none; }
 
@@ -242,6 +259,7 @@
   .recordEyebrow { display: none; }
   .recordTitle { font-size: 28px; line-height: 38px; }
   .recordSubtitle { font-size: 12px; line-height: 18px; }
+  .quickRecordAction { min-height: 34px; margin-top: 10px; padding-inline: 13px; font-size: 11px; }
   .recordContent { width: auto; margin: 20px 24px 0; }
   .recordGuidance {
     display: flex;

@@ -108,6 +108,7 @@ const createLegacyRerouteAdviceInput = (): GeneratedAdviceInput => {
 const createMockPlannerDb = () => {
   const state = {
     advice: [] as AdviceRow[],
+    events: [] as Array<Record<string, unknown>>,
     plans: [] as Array<Record<string, unknown>>,
     days: [] as Array<Record<string, unknown>>,
     revisions: [] as Array<Record<string, unknown>>,
@@ -116,6 +117,16 @@ const createMockPlannerDb = () => {
   const nextId = (prefix: string) => `${prefix}-${sequence++}`;
 
   const db = {
+    specialEvent: {
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const row = { ...data, id: nextId("event") };
+        state.events.push(row);
+        return row;
+      },
+      findMany: async ({ where }: { where: { userId: string } }) => (
+        state.events.filter((event) => event.userId === where.userId)
+      ),
+    },
     scheduleAdvice: {
       create: async ({ data }: { data: Omit<AdviceRow, "id" | "generatedAt"> }) => {
         const row: AdviceRow = { ...data, id: nextId("advice"), generatedAt: new Date("2026-08-20T00:00:00.000Z") };
@@ -177,6 +188,22 @@ const createMockPlannerDb = () => {
 };
 
 describe("prisma planner repository", () => {
+  it("returns a scoped event title with its type and instant for Plan reloads", async () => {
+    const fixture = createMockPlannerDb();
+    const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });
+    fixture.state.events.push(
+      { id: "alice-event", userId: "alice", title: "졸업 발표 리허설", type: "발표", startsAt: new Date("2026-09-12T00:00:00.000Z") },
+      { id: "bob-event", userId: "bob", title: "다른 사용자의 일정", type: "여행", startsAt: new Date("2026-09-13T00:00:00.000Z") },
+    );
+
+    await expect(repository.listEvents()).resolves.toEqual([{
+      id: "alice-event",
+      title: "졸업 발표 리허설",
+      type: "발표",
+      startsAt: "2026-09-12T00:00:00.000Z",
+    }]);
+  });
+
   it("reads a legacy reroute advice that predates canonical plan identity fields", async () => {
     const fixture = createMockPlannerDb();
     const repository = createPrismaPlannerRepository(fixture.db as unknown as TransactionClient, { userId: "alice", timezone: "Asia/Seoul" });

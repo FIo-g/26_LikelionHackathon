@@ -50,6 +50,10 @@ type PrismaRecordHubClient = {
   wellnessEntry: CategoryRecordQuery;
 };
 
+export type GetRecordHubDependencies = Readonly<{
+  getPrisma?: () => PrismaRecordHubClient;
+}>;
+
 type LoadedRecord = Readonly<{ type: RecordType; row: CategoryRecordRow }>;
 type LoadedCategory = Readonly<{
   type: RecordType;
@@ -58,6 +62,7 @@ type LoadedCategory = Readonly<{
   href: string;
   step: string;
   records: readonly LoadedRecord[];
+  editRecords?: readonly LoadedRecord[];
 }>;
 
 const selectLatest = async (
@@ -207,16 +212,73 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
     }),
   ]);
 
+  const mealRecords = present("meal", meal);
+  const exerciseRecords = present("exercise", exercise);
+  const wellnessRecords = present("wellness", wellness);
+  const sleepRecords = present("sleep", sleep);
+  const phoneRecords = present("phone-usage", phone);
+
   return [
-    { type: "caffeine", label: "카페인", requiredCount: 1, href: "/record/caffeine", step: "brand", records: present("caffeine", caffeine) },
-    { type: "alcohol", label: "음주", requiredCount: 1, href: "/record/alcohol", step: "type", records: present("alcohol", alcohol) },
-    { type: "meal", label: "식사/운동/컨디션", requiredCount: 3, href: "/record/meal-health", step: "meal", records: [...present("meal", meal), ...present("exercise", exercise), ...present("wellness", wellness)] },
-    { type: "sleep", label: "수면/휴대폰", requiredCount: 2, href: "/record/sleep-phone", step: "sleep", records: [...present("sleep", sleep), ...present("phone-usage", phone)] },
+    {
+      type: "caffeine",
+      label: "카페인",
+      requiredCount: 1,
+      href: "/record/caffeine?step=brand",
+      step: "brand",
+      records: present("caffeine", caffeine),
+    },
+    {
+      type: "alcohol",
+      label: "알코올",
+      requiredCount: 1,
+      href: "/record/alcohol?step=type",
+      step: "type",
+      records: present("alcohol", alcohol),
+    },
+    {
+      type: "meal",
+      label: "식사",
+      requiredCount: 1,
+      href: "/record/meal-health?step=meal&focus=meal",
+      step: "meal",
+      records: mealRecords,
+    },
+    {
+      type: "exercise",
+      label: "운동",
+      requiredCount: 1,
+      href: "/record/meal-health?step=exercise-and-wellness&focus=exercise",
+      step: "exercise-and-wellness",
+      records: exerciseRecords,
+      editRecords: [...exerciseRecords, ...wellnessRecords],
+    },
+    {
+      type: "phone-usage",
+      label: "휴대폰",
+      requiredCount: 1,
+      href: "/record/sleep-phone?step=phone&focus=phone",
+      step: "phone",
+      records: phoneRecords,
+    },
+    {
+      type: "sleep",
+      label: "수면",
+      requiredCount: 1,
+      href: "/record/sleep-phone?step=sleep&focus=sleep",
+      step: "sleep",
+      records: sleepRecords,
+    },
   ];
 };
 
-export const getRecordHub = async (scope: UserScope): Promise<RecordHubViewModel> => {
-  const loaded = await loadCategories(getPrismaClient() as unknown as PrismaRecordHubClient, scope.userId);
+export const getRecordHub = async (
+  scope: UserScope,
+  dependencies: GetRecordHubDependencies = {},
+): Promise<RecordHubViewModel> => {
+  const prisma = dependencies.getPrisma
+    ? dependencies.getPrisma()
+    : getPrismaClient() as unknown as PrismaRecordHubClient;
+  const loaded = await loadCategories(prisma, scope.userId);
   return {
     categories: loaded.map((category) => ({
       type: category.type,
@@ -228,7 +290,7 @@ export const getRecordHub = async (scope: UserScope): Promise<RecordHubViewModel
       records: category.records.map(({ type, row }) => ({ recordId: row.id, recordType: type })),
       editDraft: category.records.length === 0
         ? null
-        : { step: category.step, values: draftValues(category.records, scope.timezone) },
+        : { step: category.step, values: draftValues(category.editRecords ?? category.records, scope.timezone) },
     })),
   };
 };

@@ -77,13 +77,13 @@ export const SleepGuide = ({ localDate }: { localDate: string }) => {
       <div className={styles.toolCardHeader}>
         <span className={styles.toolIcon} aria-hidden="true">~</span>
         <div className={styles.toolCopy}>
-          <h3>ASMR·수면 가이드</h3>
+          <h3>5분 이완</h3>
           <p>5분 이완 가이드</p>
         </div>
       </div>
       <div
         className={styles.toolProgress}
-        aria-label="수면 가이드 진행"
+        aria-label="5분 이완 진행"
         aria-valuemax={DURATION_SECONDS}
         aria-valuemin={0}
         aria-valuenow={elapsed}

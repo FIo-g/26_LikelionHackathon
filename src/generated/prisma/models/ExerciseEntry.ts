@@ -579,14 +579,6 @@ export type ExerciseEntryUncheckedUpdateManyWithoutDailyLogNestedInput = {
   deleteMany?: Prisma.ExerciseEntryScalarWhereInput | Prisma.ExerciseEntryScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type ExerciseEntryCreateWithoutUserInput = {
   id?: string
   exerciseType: string
@@ -620,6 +612,7 @@ export type ExerciseEntryCreateOrConnectWithoutUserInput = {
 
 export type ExerciseEntryCreateManyUserInputEnvelope = {
   data: Prisma.ExerciseEntryCreateManyUserInput | Prisma.ExerciseEntryCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type ExerciseEntryUpsertWithWhereUniqueWithoutUserInput = {
@@ -687,6 +680,7 @@ export type ExerciseEntryCreateOrConnectWithoutDailyLogInput = {
 
 export type ExerciseEntryCreateManyDailyLogInputEnvelope = {
   data: Prisma.ExerciseEntryCreateManyDailyLogInput | Prisma.ExerciseEntryCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type ExerciseEntryUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1572,6 +1566,7 @@ export type ExerciseEntryCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many ExerciseEntries.
    */
   data: Prisma.ExerciseEntryCreateManyInput | Prisma.ExerciseEntryCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1590,6 +1585,7 @@ export type ExerciseEntryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * The data used to create many ExerciseEntries.
    */
   data: Prisma.ExerciseEntryCreateManyInput | Prisma.ExerciseEntryCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

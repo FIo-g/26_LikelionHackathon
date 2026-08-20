@@ -496,6 +496,7 @@ export type CareToolSessionCreateOrConnectWithoutUserInput = {
 
 export type CareToolSessionCreateManyUserInputEnvelope = {
   data: Prisma.CareToolSessionCreateManyUserInput | Prisma.CareToolSessionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type CareToolSessionUpsertWithWhereUniqueWithoutUserInput = {
@@ -1308,6 +1309,7 @@ export type CareToolSessionCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many CareToolSessions.
    */
   data: Prisma.CareToolSessionCreateManyInput | Prisma.CareToolSessionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1326,6 +1328,7 @@ export type CareToolSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    * The data used to create many CareToolSessions.
    */
   data: Prisma.CareToolSessionCreateManyInput | Prisma.CareToolSessionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

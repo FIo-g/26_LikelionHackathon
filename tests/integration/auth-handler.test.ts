@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DatabaseSync } from "node:sqlite";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { AUTH_SESSION_COOKIE, createAuth } from "@/shared/auth/auth";
@@ -54,12 +54,14 @@ describe("auth route handler", () => {
   it("isolates two real sessions through the exported auth route and protected guard", async () => {
     const databaseDirectory = await mkdtemp(join(tmpdir(), "adaptive-sleep-auth-test-"));
     const databasePath = join(databaseDirectory, "dedicated-auth-test.sqlite");
-    const migration = await readFile(
-      "prisma/migrations-sqlite/20260819000000_initial_sqlite/migration.sql",
-      "utf8",
-    );
     const sqlite = new DatabaseSync(databasePath);
-    sqlite.exec(migration);
+    const migrationDirectories = (await readdir("prisma/migrations-sqlite", { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+    for (const directory of migrationDirectories) {
+      sqlite.exec(await readFile(`prisma/migrations-sqlite/${directory}/migration.sql`, "utf8"));
+    }
     sqlite.close();
 
     const databaseUrl = `file:${databasePath}`;

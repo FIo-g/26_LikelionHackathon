@@ -94,13 +94,14 @@ const planRange = (viewModel: PlanViewModel): string => {
 
 export const PlanDesktopContent = ({ viewModel }: { viewModel: PlanViewModel }) => {
   const anchorLocalDate = planAnchorDate(viewModel);
+  const todayLocalDate = eventLocalDate(new Date().toISOString(), viewModel.timezone) ?? anchorLocalDate;
   const events = upcomingEvents(viewModel.events);
 
   return (
     <>
       <CalendarConnectionCard availability={viewModel.calendarConnection.availability} />
       <div className={styles.desktopGrid}>
-        <PlanCalendar events={events} timezone={viewModel.timezone} anchorLocalDate={anchorLocalDate} />
+        <PlanCalendar events={events} timezone={viewModel.timezone} anchorLocalDate={anchorLocalDate} todayLocalDate={todayLocalDate} />
         <aside className={styles.desktopRail} aria-label="일정 입력과 조정 제안">
           <MajorEventForm />
           {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} timezone={viewModel.timezone} /> : null}
@@ -137,8 +138,9 @@ export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) =
               <span aria-hidden="true" className={styles.mobileEventDot} />
               <time dateTime={event.startsAt}>{mobileEventDate(event.startsAt, viewModel.timezone)}</time>
               <div>
-                <strong>{event.type || "주요 일정"}</strong>
-                <span>{mobileEventTime(event.startsAt, viewModel.timezone)}</span>
+                <strong>{event.title}</strong>
+                <span className={styles.mobileEventType}>{event.type || "주요 일정"}</span>
+                <span className={styles.mobileEventTime}>{mobileEventTime(event.startsAt, viewModel.timezone)}</span>
               </div>
             </li>
           ))}

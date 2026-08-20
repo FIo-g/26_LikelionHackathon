@@ -564,6 +564,7 @@ export type PhoneUsageEntryCreateOrConnectWithoutUserInput = {
 
 export type PhoneUsageEntryCreateManyUserInputEnvelope = {
   data: Prisma.PhoneUsageEntryCreateManyUserInput | Prisma.PhoneUsageEntryCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type PhoneUsageEntryUpsertWithWhereUniqueWithoutUserInput = {
@@ -625,6 +626,7 @@ export type PhoneUsageEntryCreateOrConnectWithoutDailyLogInput = {
 
 export type PhoneUsageEntryCreateManyDailyLogInputEnvelope = {
   data: Prisma.PhoneUsageEntryCreateManyDailyLogInput | Prisma.PhoneUsageEntryCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type PhoneUsageEntryUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1482,6 +1484,7 @@ export type PhoneUsageEntryCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many PhoneUsageEntries.
    */
   data: Prisma.PhoneUsageEntryCreateManyInput | Prisma.PhoneUsageEntryCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1500,6 +1503,7 @@ export type PhoneUsageEntryCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    * The data used to create many PhoneUsageEntries.
    */
   data: Prisma.PhoneUsageEntryCreateManyInput | Prisma.PhoneUsageEntryCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

@@ -588,6 +588,7 @@ export type SleepSessionCreateOrConnectWithoutUserInput = {
 
 export type SleepSessionCreateManyUserInputEnvelope = {
   data: Prisma.SleepSessionCreateManyUserInput | Prisma.SleepSessionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type SleepSessionUpsertWithWhereUniqueWithoutUserInput = {
@@ -652,6 +653,7 @@ export type SleepSessionCreateOrConnectWithoutDailyLogInput = {
 
 export type SleepSessionCreateManyDailyLogInputEnvelope = {
   data: Prisma.SleepSessionCreateManyDailyLogInput | Prisma.SleepSessionCreateManyDailyLogInput[]
+  skipDuplicates?: boolean
 }
 
 export type SleepSessionUpsertWithWhereUniqueWithoutDailyLogInput = {
@@ -1523,6 +1525,7 @@ export type SleepSessionCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many SleepSessions.
    */
   data: Prisma.SleepSessionCreateManyInput | Prisma.SleepSessionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1541,6 +1544,7 @@ export type SleepSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many SleepSessions.
    */
   data: Prisma.SleepSessionCreateManyInput | Prisma.SleepSessionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

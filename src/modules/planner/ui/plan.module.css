@@ -222,6 +222,32 @@
 
 .calendarHeading h2 { font-size: 20px; }
 
+.calendarControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.calendarControls button {
+  min-width: 30px;
+  min-height: 30px;
+  border: 1px solid #e2d6e9;
+  border-radius: 9px;
+  background: #fff;
+  color: #5f346f;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.calendarControls button[aria-label="이전 달"],
+.calendarControls button[aria-label="다음 달"] { font-size: 20px; line-height: 1; }
+.calendarControls button:hover:not(:disabled),
+.calendarControls button:focus-visible { border-color: #8e68a1; background: #f8f3fa; }
+.calendarControls button:disabled { color: #94869e; cursor: default; opacity: .75; }
+
 .calendarWeekdays,
 .calendarGrid {
   display: grid;
@@ -256,12 +282,16 @@
 
 .calendarBlank { border-color: transparent; background: transparent; }
 .calendarCell time { display: block; margin-bottom: 8px; font-size: 12px; }
+.calendarToday { border: 2px solid #744282; background: #faf6fc; }
+.calendarToday time { color: #5f346f; font-weight: 900; }
 
 .calendarEvent {
-  display: flex;
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr);
+  column-gap: 5px;
+  row-gap: 1px;
   min-width: 0;
-  align-items: center;
-  gap: 5px;
+  align-items: start;
   margin-top: 4px;
   color: #73647b;
   font-size: 10px;
@@ -269,9 +299,11 @@
 }
 
 .calendarEvent i {
+  grid-row: 1 / span 2;
   flex: 0 0 7px;
   width: 7px;
   height: 7px;
+  margin-top: 3px;
   border-radius: 50%;
   background: #744282;
 }
@@ -282,6 +314,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.calendarEventTitle,
+.calendarEventType { grid-column: 2; }
+.calendarEventTitle { font-weight: 800; }
+.calendarEventType { color: #8a7893; }
 
 .calendarLegend {
   display: flex;
@@ -301,7 +337,7 @@
   content: "";
 }
 
-.calendarLegend span:last-child::before { background: #5bc9a7; }
+.calendarLegend span:last-child::before { display: none; }
 
 .outsideMonthEvents {
   margin-top: 16px;
@@ -312,7 +348,7 @@
 
 .outsideMonthEvents h3 { margin: 0 0 9px; font-size: 12px; }
 .outsideMonthEvents ol { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
-.outsideMonthEvents li { display: flex; justify-content: space-between; gap: 12px; color: #73647b; font-size: 11px; }
+.outsideMonthEvents li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; gap: 8px; color: #73647b; font-size: 11px; }
 .outsideMonthEvents strong { color: #3d2949; }
 
 .eventFormCard > p:not(.eyebrow),
@@ -542,7 +578,8 @@
   .mobileAgenda strong,
   .mobileAgenda span { display: block; }
   .mobileAgenda strong { font-size: 12px; letter-spacing: -.035em; }
-  .mobileAgenda div span { margin-top: 8px; color: #73647b; font-size: 11px; }
+  .mobileAgenda .mobileEventType { margin-top: 5px; color: #5f346f; font-size: 11px; font-weight: 800; }
+  .mobileAgenda .mobileEventTime { margin-top: 4px; color: #73647b; font-size: 11px; }
 
   .mobileEmptyAgenda {
     display: block;

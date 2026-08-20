@@ -9,7 +9,6 @@ const navigation = [
   { href: "/plan", label: "Plan", lunarLabel: "계획", mobileLabel: "계획" },
   { href: "/analyze", label: "Analyze", lunarLabel: "분석", mobileLabel: "분석" },
   { href: "/care", label: "Care", lunarLabel: "케어", mobileLabel: "케어" },
-  { href: "/account", label: "Account", lunarLabel: "개인정보 · 목표", mobileLabel: "프로필" },
 ] as const;
 
 const NavigationLinks = () => (
@@ -26,7 +25,7 @@ const NavigationLinks = () => (
   </ul>
 );
 
-export const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => (
+export const AppShell = ({ children, profileName = "내 프로필" }: Readonly<{ children: ReactNode; profileName?: string }>) => (
   <div className={styles.page}>
     <aside className={styles.desktopNavigation}>
       <Link className={styles.brand} href="/today">SLEEP LOOP</Link>
@@ -49,15 +48,16 @@ export const AppShell = ({ children }: Readonly<{ children: ReactNode }>) => (
           width={240}
         />
       </div>
-      <Link className={styles.lunarProfileLink} href="/account">
+      <Link aria-label="프로필 및 수면 목표" className={styles.lunarProfileLink} href="/account">
         <span aria-hidden="true" className={styles.lunarProfileMark}>토</span>
         <span>
-          <strong>계정 설정</strong>
-          <small>개인정보 · 목표</small>
+          <strong>{profileName}</strong>
+          <small>프로필 · 수면 목표</small>
         </span>
       </Link>
     </aside>
     <div className={styles.content}>{children}</div>
+    <Link aria-label="프로필 및 수면 목표" className={styles.mobileProfileLink} href="/account">프로필</Link>
     <nav aria-label="모바일 주요 메뉴" className={styles.mobileNavigation}><NavigationLinks /></nav>
   </div>
 );

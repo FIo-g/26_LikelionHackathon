@@ -33,6 +33,9 @@ describe("Care Figma integration contract", () => {
       routineRevisionKey: "plan-day:plan-day-1",
       planDay: null,
       inputState: "complete",
+      rerouteAdvice: null,
+      phonePattern: null,
+      tomorrowPlan: null,
       routineSteps: [{
         key: "target-bed",
         label: "잠자리",
@@ -54,7 +57,7 @@ describe("Care Figma integration contract", () => {
     }));
   });
 
-  it("keeps breathing and white-noise controls available inside the Care screen", () => {
+  it("keeps the three backed tools interactive and leaves unavailable ASMR honestly non-interactive", () => {
     const { container } = render(<CareScreen viewModel={{
       localDate: "2026-08-19",
       timezone: "Asia/Seoul",
@@ -62,14 +65,19 @@ describe("Care Figma integration contract", () => {
       routineRevisionKey: "goal:22:30:06:30:480",
       planDay: null,
       inputState: "complete",
+      rerouteAdvice: null,
+      phonePattern: null,
+      tomorrowPlan: null,
       routineSteps: [],
     }} />);
 
     const careScreen = container.querySelector('main[data-lunar-screen="care"]');
     expect(careScreen).toBeInTheDocument();
-    for (const label of ["호흡 가이드", "백색소음"]) {
+    for (const label of ["호흡 가이드", "백색소음", "5분 이완"]) {
       expect(screen.getByRole("progressbar", { name: `${label} 진행` })).toBeVisible();
     }
+    expect(screen.getByLabelText("ASMR 음원 준비 중")).toHaveTextContent("지원 음원을 준비하고 있어요.");
+    expect(screen.queryByRole("button", { name: "ASMR 시작" })).not.toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "시작" }).length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByRole("button", { name: "멈추기" }).length).toBeGreaterThanOrEqual(2);
   });

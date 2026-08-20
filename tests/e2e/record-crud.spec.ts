@@ -19,6 +19,30 @@ test("protects every intake flow without session", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "반가워요" })).toBeVisible();
 });
 
+test("shows distinct record cards and routes the quick-record CTA to a live form", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
+  await page.goto("/record");
+
+  await expect(page.getByRole("link", { name: "빠른 기록 시작" })).toHaveAttribute("href", "/record/caffeine?step=brand");
+
+  const expectedRoutes = [
+    ["카페인", "/record/caffeine?step=brand"],
+    ["알코올", "/record/alcohol?step=type"],
+    ["식사", "/record/meal-health?step=meal&focus=meal"],
+    ["운동", "/record/meal-health?step=exercise-and-wellness&focus=exercise"],
+    ["휴대폰", "/record/sleep-phone?step=phone&focus=phone"],
+    ["어젯밤 수면", "/record/sleep-phone?step=sleep&focus=sleep"],
+  ] as const;
+
+  for (const [name, href] of expectedRoutes) {
+    const card = page.locator("article").filter({ has: page.getByRole("heading", { name }) });
+    await expect(card.getByRole("link", { name: "추가" })).toHaveAttribute("href", href);
+  }
+
+  await page.getByRole("link", { name: "빠른 기록 시작" }).click();
+  await expect(page.getByRole("heading", { name: "어디서 마셨나요?" })).toBeVisible();
+});
+
 test("creates, edits, and deletes a caffeine record through the visible intake controls", async ({ page }, testInfo) => {
   await setupE2eUser(page.request, testInfo);
 

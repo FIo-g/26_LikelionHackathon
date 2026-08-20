@@ -8,5 +8,5 @@ const firstParam = (value: string | string[] | undefined): string | undefined =>
 export default async function MealHealthPage({ searchParams }: MealHealthPageProps) {
   const { timezone } = await requireUserScope();
   const query = await searchParams;
-  return <MealHealthFlow timezone={timezone} step={firstParam(query.step)} />;
+  return <MealHealthFlow focus={firstParam(query.focus)} timezone={timezone} step={firstParam(query.step)} />;
 }

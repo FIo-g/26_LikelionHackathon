@@ -20,8 +20,16 @@ const successState = (formData: FormData): AccountActionState => ({ status: "suc
 const revalidateAccount = () => { revalidatePath("/account"); revalidatePath("/today"); revalidatePath("/analyze"); revalidatePath("/plan"); revalidatePath("/care"); };
 
 export async function updateProfileAction(_previousState: AccountActionState = accountActionIdle, formData: FormData): Promise<AccountActionState> {
+  void _previousState;
   const values = valuesFor(formData);
-  const parsed = accountProfileSchema.safeParse({ nickname: values.nickname, timezone: values.timezone });
+  const parsed = accountProfileSchema.safeParse({
+    nickname: values.nickname,
+    timezone: values.timezone,
+    age: values.age,
+    gender: values.gender,
+    heightCm: values.heightCm,
+    weightKg: values.weightKg,
+  });
   if (!parsed.success) return errorState(formData, parsed.error.flatten().fieldErrors as Record<string, readonly string[]>);
   try {
     const scope = await requireUserScope();
@@ -34,6 +42,7 @@ export async function updateProfileAction(_previousState: AccountActionState = a
 }
 
 export async function updateSleepGoalAction(_previousState: AccountActionState = accountActionIdle, formData: FormData): Promise<AccountActionState> {
+  void _previousState;
   const values = valuesFor(formData);
   const parsed = accountSleepGoalSchema.safeParse({ targetBedTime: values.targetBedTime, targetWakeTime: values.targetWakeTime });
   if (!parsed.success) return errorState(formData, parsed.error.flatten().fieldErrors as Record<string, readonly string[]>);
@@ -48,6 +57,7 @@ export async function updateSleepGoalAction(_previousState: AccountActionState =
 }
 
 export async function deleteUserAccountAction(_previousState: DeleteAccountActionState = deleteAccountActionIdle, formData: FormData): Promise<DeleteAccountActionState> {
+  void _previousState;
   try {
     const requestHeaders = new Headers(await headers());
     assertTrustedMutationOrigin(requestHeaders.get("origin"));

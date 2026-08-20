@@ -3,6 +3,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 
 import { analysisResultSchemaEnvelope } from "@/modules/analysis/domain/schemas";
 import { narrationOutputSchema } from "@/modules/narration/domain/narration-schema";
+import { profileSchema } from "@/modules/onboarding/domain/schemas";
 import { planDayTargetSchema, storedGeneratedAdviceInputSchema } from "@/modules/planner/domain/schemas";
 import type { ScheduleAdviceEntity, SleepPlanEntity } from "@/modules/planner/domain/types";
 import { versionedPayloadSchema } from "@/shared/validation/versioned-json";
@@ -107,15 +108,24 @@ const mapPlans = (rows: readonly Row[]): readonly SleepPlanEntity[] => rows.map(
   return { id: string(row.id), status: status as SleepPlanEntity["status"] };
 });
 
+const exportProfile = (row: Row): UserDataExport["profile"] => parse(profileSchema, {
+  nickname: row.nickname,
+  timezone: row.timezone,
+  age: row.age,
+  gender: row.gender,
+  heightCm: row.heightCm,
+  weightKg: row.weightKg,
+});
+
 export const createPrismaAccountDataRepository = (client: PrismaClient): AccountDataExportRepository => {
   return {
     load: async (scope) => {
       const where = { userId: scope.userId };
       const [user, profile, goal, habits, connection, sleep, caffeine, alcohol, meal, exercise, phoneUsage, wellness, revisions, events, plans, advice, planRevisions, analyses, narrations, completions, sessions] = await Promise.all([
         client.user.findFirst({ where: { id: scope.userId }, select: { email: true, createdAt: true } }),
-        client.userProfile.findUnique({ where: { userId: scope.userId }, select: { nickname: true, timezone: true } }),
+        client.userProfile.findUnique({ where: { userId: scope.userId }, select: { nickname: true, timezone: true, age: true, gender: true, heightCm: true, weightKg: true } }),
         client.sleepGoal.findUnique({ where: { userId: scope.userId }, select: { targetBedTime: true, targetWakeTime: true, targetDurationMinutes: true } }),
-        client.userHabit.findUnique({ where: { userId: scope.userId }, select: { caffeine: true, exercise: true, meal: true, phoneUsage: true } }),
+        client.userHabit.findUnique({ where: { userId: scope.userId }, select: { caffeine: true, exercise: true, meal: true, alcohol: true, phoneUsage: true } }),
         client.connection.findUnique({ where: { userId: scope.userId }, select: { selected: true, mode: true, availability: true, state: true } }),
         client.sleepSession.findMany({ where, orderBy: { createdAt: "asc" } }),
         client.caffeineEntry.findMany({ where, include: { dailyLog: { select: { localDate: true } } }, orderBy: { createdAt: "asc" } }),
@@ -146,9 +156,12 @@ export const createPrismaAccountDataRepository = (client: PrismaClient): Account
 
       return {
         identity: { email: string(userRow.email), createdAt: iso(userRow.createdAt) },
-        profile: { nickname: string(profileRow.nickname), timezone: string(profileRow.timezone) },
+        profile: exportProfile(profileRow),
         sleepGoal: { targetBedTime: string(goalRow.targetBedTime), targetWakeTime: string(goalRow.targetWakeTime), targetDurationMinutes: integer(goalRow.targetDurationMinutes) },
-        habits: habitRow ? ["caffeine", "exercise", "meal", "phoneUsage"].map((category) => ({ category, value: string(habitRow[category]) })) : [],
+        habits: habitRow ? ["caffeine", "exercise", "meal", "alcohol", "phoneUsage"].map((category) => ({
+          category,
+          value: category === "alcohol" ? nullableString(habitRow[category]) : string(habitRow[category]),
+        })) : [],
         connections: [{ type: "manual", label: "직접 입력", mode: connectionRow?.mode === "automatic" ? "automatic" : "manual", availability: connectionRow?.availability === "coming-soon" ? "coming-soon" : "available", state: connectionState as "complete" | "needs-input" | "unavailable", lastSyncedAt: null }],
         records: mapRecords({ sleep: sleep.map(asRow), caffeine: caffeine.map(asRow), alcohol: alcohol.map(asRow), meal: meal.map(asRow), exercise: exercise.map(asRow), phoneUsage: phoneUsage.map(asRow), wellness: wellness.map(asRow) }),
         recordRevisions: revisions.map((value) => {

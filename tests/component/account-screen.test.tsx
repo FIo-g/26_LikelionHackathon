@@ -24,7 +24,8 @@ afterEach(() => {
 
 const viewModel = {
   identity: { email: "alice@example.test" },
-  profile: { nickname: "Alice", timezone: "Asia/Seoul" },
+  profile: { nickname: "Alice", timezone: "Asia/Seoul", age: 28, gender: "female", heightCm: 165, weightKg: 52.5 },
+  habits: { caffeine: "sometimes", alcohol: "monthly", meal: "mixed", exercise: "weekly", phoneUsage: "medium" },
   sleepGoal: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
   connections: [
     { type: "manual", label: "직접 입력", mode: "manual", availability: "available", state: "needs-input", lastSyncedAt: null },
@@ -48,6 +49,10 @@ describe("AccountScreen", () => {
     expect(screen.getAllByDisplayValue("alice@example.test")).toHaveLength(2);
     expect(screen.getAllByDisplayValue("alice@example.test")[0]).toHaveAttribute("readonly");
     expect(screen.getAllByDisplayValue("Asia/Seoul")).toHaveLength(2);
+    expect(screen.getAllByDisplayValue("28")).toHaveLength(2);
+    expect(screen.getAllByDisplayValue("165")).toHaveLength(2);
+    expect(screen.getAllByDisplayValue("52.5")).toHaveLength(2);
+    expect(screen.getByText("월 1회 이하")).toBeInTheDocument();
     expect(screen.getByText("내보내기와 계정 데이터 삭제는 본인 확인 후에만 진행할 수 있습니다.")).toBeInTheDocument();
   });
 
@@ -58,7 +63,7 @@ describe("AccountScreen", () => {
   });
 
   it("associates a profile field error and politely announces the submit result", async () => {
-    actions.updateProfile.mockResolvedValue({ status: "error", values: { nickname: "Alice", timezone: "Asia/Seoul" }, fieldErrors: { nickname: ["필수 입력입니다."] } });
+    actions.updateProfile.mockResolvedValue({ status: "error", values: { nickname: "Alice", timezone: "Asia/Seoul", age: "28", gender: "female", heightCm: "165", weightKg: "52.5" }, fieldErrors: { nickname: ["필수 입력입니다."] } });
     render(<AccountScreen viewModel={viewModel} />);
 
     await userEvent.click(screen.getAllByRole("button", { name: "개인 정보 저장" })[0]);

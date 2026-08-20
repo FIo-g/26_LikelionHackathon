@@ -1,7 +1,7 @@
 export const CARE_TOOL_CATALOG = [
   { key: "breathing", label: "호흡 가이드", defaultSeconds: 180 },
   { key: "white-noise", label: "백색소음", defaultSeconds: 900 },
-  { key: "sleep-guide", label: "ASMR·수면 가이드", defaultSeconds: 300 },
+  { key: "sleep-guide", label: "5분 이완", defaultSeconds: 300 },
 ] as const;
 
 export type CareToolKey = (typeof CARE_TOOL_CATALOG)[number]["key"];

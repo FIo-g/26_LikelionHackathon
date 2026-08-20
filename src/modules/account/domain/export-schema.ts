@@ -19,7 +19,7 @@ export type UserDataExport = VersionedPayload<{
   identity: { email: string; createdAt: string };
   profile: AccountData["profile"];
   sleepGoal: AccountData["sleepGoal"];
-  habits: readonly { category: string; value: string }[];
+  habits: readonly { category: string; value: string | null }[];
   connections: AccountData["connections"];
   records: readonly SerializedRecord[];
   recordRevisions: readonly {

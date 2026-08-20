@@ -46,6 +46,14 @@ describeSqlite("prisma onboarding repository persistence", () => {
   it("stores each onboarding step and returns resumable progress", async () => {
     const repository = repositoryFor(userId, prisma);
 
+    await repository.saveProfile({
+      nickname: "tester",
+      timezone: "Asia/Seoul",
+      age: 26,
+      gender: "prefer-not-to-say",
+      heightCm: 172,
+      weightKg: 63.5,
+    });
     await repository.saveConnect({ selected: "manual" });
     await repository.saveSleepGoal({
       targetBedTime: "23:00",
@@ -56,6 +64,7 @@ describeSqlite("prisma onboarding repository persistence", () => {
       caffeine: "none",
       exercise: "rare",
       meal: "mixed",
+      alcohol: "monthly",
       phoneUsage: "low",
     });
 
@@ -70,18 +79,30 @@ describeSqlite("prisma onboarding repository persistence", () => {
         caffeine: "none",
         exercise: "rare",
         meal: "mixed",
+        alcohol: "monthly",
         phoneUsage: "low",
       },
-      profile: null,
+      profile: {
+        nickname: "tester",
+        timezone: "Asia/Seoul",
+        age: 26,
+        gender: "prefer-not-to-say",
+        heightCm: 172,
+        weightKg: 63.5,
+      },
+    });
+    await expect(prisma.userProfile.findUnique({ where: { userId } })).resolves.toMatchObject({
+      onboardingCompletedAt: null,
     });
   });
 
-  it("requires complete steps before final completion", async () => {
+  it("requires the persisted profile and every other owned step before final completion", async () => {
     const repository = repositoryFor(userId, prisma);
 
-    await expect(repository.complete({ nickname: "tester", timezone: "Asia/Seoul" }))
+    await expect(repository.complete())
       .rejects.toThrow("INCOMPLETE_ONBOARDING");
 
+    await repository.saveProfile({ nickname: "tester", timezone: "Asia/Seoul" });
     await repository.saveConnect({ selected: "manual" });
     await repository.saveSleepGoal({
       targetBedTime: "23:00",
@@ -92,10 +113,11 @@ describeSqlite("prisma onboarding repository persistence", () => {
       caffeine: "none",
       exercise: "rare",
       meal: "mixed",
+      alcohol: "none",
       phoneUsage: "low",
     });
 
-    await expect(repository.complete({ nickname: "tester", timezone: "Asia/Seoul" }))
+    await expect(repository.complete())
       .resolves.toBeUndefined();
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
     expect(profile).toMatchObject({
@@ -107,6 +129,7 @@ describeSqlite("prisma onboarding repository persistence", () => {
 
   it("leaves one complete onboarding state after concurrent writes", async () => {
     const repository = repositoryFor(userId, prisma);
+    await repository.saveProfile({ nickname: "first", timezone: "Asia/Seoul", age: 24, gender: "female", heightCm: 165, weightKg: 55 });
     await repository.saveConnect({ selected: "manual" });
     await repository.saveSleepGoal({
       targetBedTime: "23:00",
@@ -117,17 +140,24 @@ describeSqlite("prisma onboarding repository persistence", () => {
       caffeine: "none",
       exercise: "rare",
       meal: "mixed",
+      alcohol: "weekly",
       phoneUsage: "low",
     });
 
     await Promise.all([
-      repository.complete({ nickname: "first", timezone: "Asia/Seoul" }),
-      repository.complete({ nickname: "second", timezone: "Asia/Seoul" }),
+      repository.complete(),
+      repository.complete(),
     ]);
 
     await expect(prisma.userProfile.count({ where: { userId } })).resolves.toBe(1);
     const profile = await prisma.userProfile.findUniqueOrThrow({ where: { userId } });
-    expect(["first", "second"]).toContain(profile.nickname);
+    expect(profile).toMatchObject({
+      nickname: "first",
+      age: 24,
+      gender: "female",
+      heightCm: 165,
+      weightKg: 55,
+    });
     expect(profile.onboardingCompletedAt).toBeInstanceOf(Date);
   });
 });

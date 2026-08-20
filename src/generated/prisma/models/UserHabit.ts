@@ -30,6 +30,7 @@ export type UserHabitMinAggregateOutputType = {
   caffeine: string | null
   exercise: string | null
   meal: string | null
+  alcohol: string | null
   phoneUsage: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -41,6 +42,7 @@ export type UserHabitMaxAggregateOutputType = {
   caffeine: string | null
   exercise: string | null
   meal: string | null
+  alcohol: string | null
   phoneUsage: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +54,7 @@ export type UserHabitCountAggregateOutputType = {
   caffeine: number
   exercise: number
   meal: number
+  alcohol: number
   phoneUsage: number
   createdAt: number
   updatedAt: number
@@ -65,6 +68,7 @@ export type UserHabitMinAggregateInputType = {
   caffeine?: true
   exercise?: true
   meal?: true
+  alcohol?: true
   phoneUsage?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +80,7 @@ export type UserHabitMaxAggregateInputType = {
   caffeine?: true
   exercise?: true
   meal?: true
+  alcohol?: true
   phoneUsage?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +92,7 @@ export type UserHabitCountAggregateInputType = {
   caffeine?: true
   exercise?: true
   meal?: true
+  alcohol?: true
   phoneUsage?: true
   createdAt?: true
   updatedAt?: true
@@ -171,6 +177,7 @@ export type UserHabitGroupByOutputType = {
   caffeine: string
   exercise: string
   meal: string
+  alcohol: string | null
   phoneUsage: string
   createdAt: Date
   updatedAt: Date
@@ -203,6 +210,7 @@ export type UserHabitWhereInput = {
   caffeine?: Prisma.StringFilter<"UserHabit"> | string
   exercise?: Prisma.StringFilter<"UserHabit"> | string
   meal?: Prisma.StringFilter<"UserHabit"> | string
+  alcohol?: Prisma.StringNullableFilter<"UserHabit"> | string | null
   phoneUsage?: Prisma.StringFilter<"UserHabit"> | string
   createdAt?: Prisma.DateTimeFilter<"UserHabit"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserHabit"> | Date | string
@@ -215,6 +223,7 @@ export type UserHabitOrderByWithRelationInput = {
   caffeine?: Prisma.SortOrder
   exercise?: Prisma.SortOrder
   meal?: Prisma.SortOrder
+  alcohol?: Prisma.SortOrderInput | Prisma.SortOrder
   phoneUsage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -230,6 +239,7 @@ export type UserHabitWhereUniqueInput = Prisma.AtLeast<{
   caffeine?: Prisma.StringFilter<"UserHabit"> | string
   exercise?: Prisma.StringFilter<"UserHabit"> | string
   meal?: Prisma.StringFilter<"UserHabit"> | string
+  alcohol?: Prisma.StringNullableFilter<"UserHabit"> | string | null
   phoneUsage?: Prisma.StringFilter<"UserHabit"> | string
   createdAt?: Prisma.DateTimeFilter<"UserHabit"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserHabit"> | Date | string
@@ -242,6 +252,7 @@ export type UserHabitOrderByWithAggregationInput = {
   caffeine?: Prisma.SortOrder
   exercise?: Prisma.SortOrder
   meal?: Prisma.SortOrder
+  alcohol?: Prisma.SortOrderInput | Prisma.SortOrder
   phoneUsage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -259,6 +270,7 @@ export type UserHabitScalarWhereWithAggregatesInput = {
   caffeine?: Prisma.StringWithAggregatesFilter<"UserHabit"> | string
   exercise?: Prisma.StringWithAggregatesFilter<"UserHabit"> | string
   meal?: Prisma.StringWithAggregatesFilter<"UserHabit"> | string
+  alcohol?: Prisma.StringNullableWithAggregatesFilter<"UserHabit"> | string | null
   phoneUsage?: Prisma.StringWithAggregatesFilter<"UserHabit"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserHabit"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserHabit"> | Date | string
@@ -269,6 +281,7 @@ export type UserHabitCreateInput = {
   caffeine: string
   exercise: string
   meal: string
+  alcohol?: string | null
   phoneUsage: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -281,6 +294,7 @@ export type UserHabitUncheckedCreateInput = {
   caffeine: string
   exercise: string
   meal: string
+  alcohol?: string | null
   phoneUsage: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -291,6 +305,7 @@ export type UserHabitUpdateInput = {
   caffeine?: Prisma.StringFieldUpdateOperationsInput | string
   exercise?: Prisma.StringFieldUpdateOperationsInput | string
   meal?: Prisma.StringFieldUpdateOperationsInput | string
+  alcohol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneUsage?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -303,6 +318,7 @@ export type UserHabitUncheckedUpdateInput = {
   caffeine?: Prisma.StringFieldUpdateOperationsInput | string
   exercise?: Prisma.StringFieldUpdateOperationsInput | string
   meal?: Prisma.StringFieldUpdateOperationsInput | string
+  alcohol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneUsage?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -314,6 +330,7 @@ export type UserHabitCreateManyInput = {
   caffeine: string
   exercise: string
   meal: string
+  alcohol?: string | null
   phoneUsage: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -324,6 +341,7 @@ export type UserHabitUpdateManyMutationInput = {
   caffeine?: Prisma.StringFieldUpdateOperationsInput | string
   exercise?: Prisma.StringFieldUpdateOperationsInput | string
   meal?: Prisma.StringFieldUpdateOperationsInput | string
+  alcohol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneUsage?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -335,6 +353,7 @@ export type UserHabitUncheckedUpdateManyInput = {
   caffeine?: Prisma.StringFieldUpdateOperationsInput | string
   exercise?: Prisma.StringFieldUpdateOperationsInput | string
   meal?: Prisma.StringFieldUpdateOperationsInput | string
+  alcohol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneUsage?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -351,6 +370,7 @@ export type UserHabitCountOrderByAggregateInput = {
   caffeine?: Prisma.SortOrder
   exercise?: Prisma.SortOrder
   meal?: Prisma.SortOrder
+  alcohol?: Prisma.SortOrder
   phoneUsage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -362,6 +382,7 @@ export type UserHabitMaxOrderByAggregateInput = {
   caffeine?: Prisma.SortOrder
   exercise?: Prisma.SortOrder
   meal?: Prisma.SortOrder
+  alcohol?: Prisma.SortOrder
   phoneUsage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -373,6 +394,7 @@ export type UserHabitMinOrderByAggregateInput = {
   caffeine?: Prisma.SortOrder
   exercise?: Prisma.SortOrder
   meal?: Prisma.SortOrder
+  alcohol?: Prisma.SortOrder
   phoneUsage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -415,6 +437,7 @@ export type UserHabitCreateWithoutUserInput = {
   caffeine: string
   exercise: string
   meal: string
+  alcohol?: string | null
   phoneUsage: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -425,6 +448,7 @@ export type UserHabitUncheckedCreateWithoutUserInput = {
   caffeine: string
   exercise: string
   meal: string
+  alcohol?: string | null
   phoneUsage: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -451,6 +475,7 @@ export type UserHabitUpdateWithoutUserInput = {
   caffeine?: Prisma.StringFieldUpdateOperationsInput | string
   exercise?: Prisma.StringFieldUpdateOperationsInput | string
   meal?: Prisma.StringFieldUpdateOperationsInput | string
+  alcohol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneUsage?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,6 +486,7 @@ export type UserHabitUncheckedUpdateWithoutUserInput = {
   caffeine?: Prisma.StringFieldUpdateOperationsInput | string
   exercise?: Prisma.StringFieldUpdateOperationsInput | string
   meal?: Prisma.StringFieldUpdateOperationsInput | string
+  alcohol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneUsage?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -474,6 +500,7 @@ export type UserHabitSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   caffeine?: boolean
   exercise?: boolean
   meal?: boolean
+  alcohol?: boolean
   phoneUsage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -486,6 +513,7 @@ export type UserHabitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   caffeine?: boolean
   exercise?: boolean
   meal?: boolean
+  alcohol?: boolean
   phoneUsage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -498,6 +526,7 @@ export type UserHabitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   caffeine?: boolean
   exercise?: boolean
   meal?: boolean
+  alcohol?: boolean
   phoneUsage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -510,12 +539,13 @@ export type UserHabitSelectScalar = {
   caffeine?: boolean
   exercise?: boolean
   meal?: boolean
+  alcohol?: boolean
   phoneUsage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserHabitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "caffeine" | "exercise" | "meal" | "phoneUsage" | "createdAt" | "updatedAt", ExtArgs["result"]["userHabit"]>
+export type UserHabitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "caffeine" | "exercise" | "meal" | "alcohol" | "phoneUsage" | "createdAt" | "updatedAt", ExtArgs["result"]["userHabit"]>
 export type UserHabitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -537,6 +567,7 @@ export type $UserHabitPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     caffeine: string
     exercise: string
     meal: string
+    alcohol: string | null
     phoneUsage: string
     createdAt: Date
     updatedAt: Date
@@ -969,6 +1000,7 @@ export interface UserHabitFieldRefs {
   readonly caffeine: Prisma.FieldRef<"UserHabit", 'String'>
   readonly exercise: Prisma.FieldRef<"UserHabit", 'String'>
   readonly meal: Prisma.FieldRef<"UserHabit", 'String'>
+  readonly alcohol: Prisma.FieldRef<"UserHabit", 'String'>
   readonly phoneUsage: Prisma.FieldRef<"UserHabit", 'String'>
   readonly createdAt: Prisma.FieldRef<"UserHabit", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserHabit", 'DateTime'>
@@ -1206,6 +1238,7 @@ export type UserHabitCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many UserHabits.
    */
   data: Prisma.UserHabitCreateManyInput | Prisma.UserHabitCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1224,6 +1257,7 @@ export type UserHabitCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many UserHabits.
    */
   data: Prisma.UserHabitCreateManyInput | Prisma.UserHabitCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

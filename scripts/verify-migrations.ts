@@ -49,9 +49,9 @@ const verifyObservableConstraints = async (connection: MigrationConnection): Pro
     await connection.execute(`INSERT INTO "User" ("id", "email", "emailVerified", "createdAt", "updatedAt") VALUES ('${id}', '${email}', false, '${timestamp}', '${timestamp}')`);
   }
 
-  await connection.execute(`INSERT INTO "UserProfile" ("id", "userId", "nickname", "timezone", "createdAt", "updatedAt") VALUES ('profile', 'owner', 'Owner', 'Asia/Seoul', '${timestamp}', '${timestamp}')`);
+  await connection.execute(`INSERT INTO "UserProfile" ("id", "userId", "nickname", "timezone", "age", "gender", "heightCm", "weightKg", "createdAt", "updatedAt") VALUES ('profile', 'owner', 'Owner', 'Asia/Seoul', 26, 'prefer-not-to-say', 172, 63.5, '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "SleepGoal" ("id", "userId", "targetBedTime", "targetWakeTime", "targetDurationMinutes", "createdAt", "updatedAt") VALUES ('goal', 'owner', '23:00', '07:00', 480, '${timestamp}', '${timestamp}')`);
-  await connection.execute(`INSERT INTO "UserHabit" ("id", "userId", "caffeine", "exercise", "meal", "phoneUsage", "createdAt", "updatedAt") VALUES ('habit', 'owner', 'none', 'rare', 'mixed', 'low', '${timestamp}', '${timestamp}')`);
+  await connection.execute(`INSERT INTO "UserHabit" ("id", "userId", "caffeine", "exercise", "meal", "alcohol", "phoneUsage", "createdAt", "updatedAt") VALUES ('habit', 'owner', 'none', 'rare', 'mixed', 'monthly', 'low', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "Connection" ("id", "userId", "selected", "mode", "availability", "state", "createdAt", "updatedAt") VALUES ('connection', 'owner', 'manual', 'manual', 'available', 'complete', '${timestamp}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "AnalysisSnapshot" ("id", "userId", "localDate", "timezone", "status", "result", "generatedAt") VALUES ('snapshot', 'owner', '2026-08-20', 'Asia/Seoul', 'historical', '{}', '${timestamp}')`);
   await connection.execute(`INSERT INTO "ImpactFactor" ("id", "userId", "analysisSnapshotId", "factor", "exposedCount", "unexposedCount", "confidence", "evidence") VALUES ('impact', 'owner', 'snapshot', 'caffeine', 1, 1, 'low', '{}')`);
@@ -147,8 +147,26 @@ const verifySqliteHistory = async (): Promise<void> => {
   const database = new DatabaseSync(join(directory, "migration-test.sqlite"));
   try {
     database.exec("PRAGMA foreign_keys=ON");
-    for (const migration of await migrationFiles("prisma/migrations-sqlite")) {
+    const migrations = await migrationFiles("prisma/migrations-sqlite");
+    const [initialMigration, ...forwardMigrations] = migrations;
+    if (!initialMigration) throw new Error("SQLite initial migration is missing");
+    database.exec(await readFile(initialMigration, "utf8"));
+
+    // A production database can already contain users before this release.
+    // Seed that old shape before applying forward-only migrations and assert
+    // that nullable additions preserve it unchanged.
+    const timestamp = "2026-08-20T00:00:00.000Z";
+    database.exec(`INSERT INTO "User" ("id", "email", "emailVerified", "createdAt", "updatedAt") VALUES ('legacy', 'legacy@example.test', false, '${timestamp}', '${timestamp}')`);
+    database.exec(`INSERT INTO "UserProfile" ("id", "userId", "nickname", "timezone", "createdAt", "updatedAt") VALUES ('legacy-profile', 'legacy', 'Legacy', 'Asia/Seoul', '${timestamp}', '${timestamp}')`);
+    database.exec(`INSERT INTO "UserHabit" ("id", "userId", "caffeine", "exercise", "meal", "phoneUsage", "createdAt", "updatedAt") VALUES ('legacy-habit', 'legacy', 'none', 'rare', 'mixed', 'low', '${timestamp}', '${timestamp}')`);
+
+    for (const migration of forwardMigrations) {
       database.exec(await readFile(migration, "utf8"));
+    }
+    const legacyProfile = database.prepare('SELECT "age", "gender", "heightCm", "weightKg" FROM "UserProfile" WHERE "userId" = \'legacy\'').get() as Record<string, unknown> | undefined;
+    const legacyHabit = database.prepare('SELECT "alcohol" FROM "UserHabit" WHERE "userId" = \'legacy\'').get() as Record<string, unknown> | undefined;
+    if (!legacyProfile || Object.values(legacyProfile).some((value) => value !== null) || legacyHabit?.alcohol !== null) {
+      throw new Error("nullable profile and habit migration does not preserve legacy users");
     }
     const connection: MigrationConnection = {
       execute: async (sql) => { database.exec(sql); },
@@ -169,13 +187,17 @@ const verifyPostgresqlHistory = async (rawUrl: string): Promise<void> => {
     throw new Error("verify:migrations accepts only local planner_test?schema=migration_verification");
   }
 
-  const [lock, sql] = await Promise.all([
+  const [lock, migrationSources] = await Promise.all([
     readFile("prisma/migrations/migration_lock.toml", "utf8"),
-    readFile("prisma/migrations/20260819000000_initial_postgresql/migration.sql", "utf8"),
+    Promise.all((await migrationFiles("prisma/migrations")).map((migration) => readFile(migration, "utf8"))),
   ]);
+  const sql = migrationSources.join("\n");
   if (lock.trim() !== 'provider = "postgresql"') throw new Error("unexpected migration provider lock");
   for (const name of checkConstraints) {
     if (!sql.includes(name)) throw new Error(`missing PostgreSQL constraint: ${name}`);
+  }
+  for (const column of ["age", "gender", "heightCm", "weightKg", "alcohol"] as const) {
+    if (!sql.includes(`\"${column}\"`)) throw new Error(`missing profile or habit migration column: ${column}`);
   }
   if (/\b(DROP\s+TABLE|TRUNCATE|PRAGMA|AUTOINCREMENT)\b/i.test(sql)) {
     throw new Error("unsafe or SQLite SQL in release migration");

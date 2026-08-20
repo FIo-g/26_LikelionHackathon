@@ -4,10 +4,13 @@ import { AppShell } from "@/shared/ui/app-shell/app-shell";
 import { ScheduleConfirmationDialog } from "@/modules/planner/ui/schedule-confirmation-dialog";
 
 describe("AppShell", () => {
-  it("renders one content tree and Account in desktop and mobile navigation", () => {
-    render(<AppShell><p>protected content</p></AppShell>);
+  it("renders one content tree, five primary navigation destinations, and a separate profile affordance", () => {
+    render(<AppShell profileName="써니"><p>protected content</p></AppShell>);
 
-    expect(screen.getAllByRole("link", { name: "Account" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Today" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Care" })).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "프로필 및 수면 목표" })).toHaveAttribute("href", "/account");
+    expect(screen.getByText("써니")).toBeInTheDocument();
     expect(screen.getAllByText("protected content")).toHaveLength(1);
     expect(screen.getByRole("navigation", { name: "데스크톱 주요 메뉴" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "모바일 주요 메뉴" })).toBeInTheDocument();

@@ -2,7 +2,7 @@
 
 import { profileSchema } from "@/modules/onboarding/domain/schemas";
 import { requireSessionUserId } from "@/shared/auth/require-session-user";
-import { completeOnboarding } from "@/modules/onboarding/application/complete-onboarding";
+import { saveProfileStep } from "@/modules/onboarding/application/save-profile-step";
 import { redirect } from "next/navigation";
 import { readOnboardingFormValues } from "../form-values";
 
@@ -16,15 +16,6 @@ export async function submitProfileAction(formData: FormData): Promise<void> {
     return;
   }
 
-  try {
-    await completeOnboarding(userId, parsed.data);
-  } catch (error) {
-    if (error instanceof Error && error.message === "INCOMPLETE_ONBOARDING") {
-      redirect("/onboarding/connect");
-    }
-
-    throw error;
-  }
-
-  redirect("/today");
+  await saveProfileStep(userId, parsed.data);
+  redirect("/onboarding/habits");
 }

@@ -219,10 +219,11 @@ export const createPrismaPlannerRepository = (
       const events = await client.specialEvent.findMany({
         where: { userId: scope.userId },
         orderBy: { startsAt: "asc" },
-        select: { id: true, type: true, startsAt: true },
+        select: { id: true, title: true, type: true, startsAt: true },
       });
       return events.map((event) => ({
         id: toStringValue(event.id),
+        title: toStringValue(event.title),
         type: toStringValue(event.type),
         startsAt: toInstant(event.startsAt),
       }));

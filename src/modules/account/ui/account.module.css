@@ -198,6 +198,61 @@
 
 .desktopConnectionCard h2 { margin-bottom: 14px; }
 
+.habitSummary {
+  display: grid;
+  grid-template-columns: minmax(220px, .9fr) minmax(0, 1.1fr);
+  gap: 22px;
+  margin: 28px 50px 0;
+  padding: 22px 26px;
+  border: 1px solid #d7e4f1;
+  border-radius: 22px;
+  background: #eef6fd;
+}
+
+.habitSummary h2 {
+  margin: 0;
+  color: #21152e;
+  font-size: 18px;
+}
+
+.habitSummary > div > p {
+  margin: 7px 0 0;
+  color: #566b7f;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.habitSummary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.habitSummary dl > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(79, 120, 168, .18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .72);
+}
+
+.habitSummary dt {
+  color: #45698f;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.habitSummary dd {
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: #21152e;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .form {
   display: grid;
   gap: 12px;
@@ -584,6 +639,7 @@
   .headerCopy { padding-inline: 32px; }
   .desktopTabs,
   .desktopDetails,
+  .habitSummary,
   .accountLayout > .rules,
   .dataSummary,
   .dataManagement { margin-inline: 32px; }
@@ -614,6 +670,7 @@
 
   .desktopTabs,
   .desktopDetails,
+  .habitSummary,
   .accountLayout > .rules,
   .dataSummary { display: none; }
 

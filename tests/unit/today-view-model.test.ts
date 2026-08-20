@@ -33,22 +33,22 @@ const createPrisma = (entries: {
     findFirst: vi.fn(async () => (entries.caffeine ? { id: "caffeine-id" } : null)),
   },
   alcoholEntry: {
-    findFirst: async () => (entries.alcohol ? { id: "alcohol-id" } : null),
+    findFirst: vi.fn(async () => (entries.alcohol ? { id: "alcohol-id" } : null)),
   },
   mealEntry: {
-    findFirst: async () => (entries.meal ? { id: "meal-id", dailyLog: { localDate: "2026-08-20" } } : null),
+    findFirst: vi.fn(async () => (entries.meal ? { id: "meal-id", dailyLog: { localDate: "2026-08-20" } } : null)),
   },
   exerciseEntry: {
-    findFirst: async () => (entries.exercise ? { id: "exercise-id", dailyLog: { localDate: "2026-08-20" } } : null),
+    findFirst: vi.fn(async () => (entries.exercise ? { id: "exercise-id", dailyLog: { localDate: "2026-08-20" } } : null)),
   },
   sleepSession: {
-    findFirst: async () => (entries.sleep ? { id: "sleep-id", sleepDate: "2026-08-20" } : null),
+    findFirst: vi.fn(async () => (entries.sleep ? { id: "sleep-id", sleepDate: "2026-08-20" } : null)),
   },
   phoneUsageEntry: {
-    findFirst: async () => (entries.phone ? { id: "phone-id", localDate: "2026-08-20" } : null),
+    findFirst: vi.fn(async () => (entries.phone ? { id: "phone-id", localDate: "2026-08-20" } : null)),
   },
   wellnessEntry: {
-    findFirst: async () => (entries.wellness ? { id: "wellness-id", localDate: "2026-08-20" } : null),
+    findFirst: vi.fn(async () => (entries.wellness ? { id: "wellness-id", localDate: "2026-08-20" } : null)),
   },
 });
 
@@ -287,6 +287,11 @@ describe("getTodayViewModel", () => {
 
     expect(model.preparationTimeline.message).toBe("오늘 목표 취침 21:00 기준");
     expect(model.preparationTimeline.data?.find((step) => step.key === "caffeine")?.scheduledAt).toBe("15:00");
+    expect(model.preparationTimeline.data?.at(-1)).toMatchObject({
+      key: "target-bed",
+      label: "취침 준비",
+      scheduledAt: "21:00",
+    });
     expect(db.planDay.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: {
         userId: scope.userId,
@@ -295,5 +300,60 @@ describe("getTodayViewModel", () => {
         status: "active",
       },
     }));
+    expect(db.mealEntry.findFirst).toHaveBeenCalledWith({
+      where: {
+        userId: scope.userId,
+        timezone: scope.timezone,
+        dailyLog: {
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate: "2026-08-20",
+          },
+        },
+      },
+      select: { id: true },
+    });
+    expect(db.mealEntry.findFirst).toHaveBeenCalledWith(expect.not.objectContaining({
+      include: expect.anything(),
+    }));
+  });
+
+  it("keeps a post-midnight goal as the final preparation step", async () => {
+    createAnalysisRepositoryMock.mockReturnValue({
+      findCurrent: async () => ({ ok: true, value: fallbackSnapshot }),
+      findLastSuccessful: async () => null,
+      loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
+      supersedeCurrent: async () => {},
+      saveCurrent: async () => ({ snapshotId: "noop" }),
+    });
+
+    const model = await getTodayViewModel(scope, {
+      clock,
+      getPrisma: () => ({
+        ...createPrisma({
+          caffeine: false, alcohol: false, meal: false, exercise: false, sleep: false, phone: false, wellness: false,
+        }),
+        sleepGoal: {
+          findUnique: vi.fn(async () => ({
+            targetBedTime: "00:30",
+            targetWakeTime: "08:30",
+            targetDurationMinutes: 480,
+          })),
+        },
+      }),
+    });
+
+    expect(model.preparationTimeline.data?.map((step) => step.key)).toEqual([
+      "caffeine",
+      "meal",
+      "exercise",
+      "windDown",
+      "target-bed",
+    ]);
+    expect(model.preparationTimeline.data?.at(-1)?.scheduledAt).toBe("00:30");
   });
 });

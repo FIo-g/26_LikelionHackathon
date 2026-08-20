@@ -1218,6 +1218,7 @@ export type SleepGoalCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many SleepGoals.
    */
   data: Prisma.SleepGoalCreateManyInput | Prisma.SleepGoalCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1236,6 +1237,7 @@ export type SleepGoalCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many SleepGoals.
    */
   data: Prisma.SleepGoalCreateManyInput | Prisma.SleepGoalCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

@@ -1,6 +1,6 @@
 import { generateGoalPlanTargets } from "../domain/generate-schedule-proposal";
 import { diffScheduleProposal, type ScheduleDiff } from "../domain/diff-schedule-proposal";
-import type { PlanDayTarget, ScheduleProposal } from "../domain/types";
+import type { PlanDayTarget, ScheduleProposal, SpecialEventSummary } from "../domain/types";
 import type { PlannerRepository } from "./ports";
 
 export type ScheduleAdviceViewModel = Readonly<{
@@ -18,7 +18,7 @@ export type PlanViewModel = Readonly<{
   calendarConnection: { availability: "coming-soon" };
   planStatus: "active" | "none";
   dismissedAdvice: boolean;
-  events: readonly { id: string; type: string; startsAt: string }[];
+  events: readonly SpecialEventSummary[];
   advice: ScheduleAdviceViewModel | null;
   days: readonly PlanDayTarget[];
 }>;

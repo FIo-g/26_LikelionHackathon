@@ -90,6 +90,9 @@ export type ModelName = (typeof ModelName)[keyof typeof ModelName]
  */
 
 export const TransactionIsolationLevel = runtime.makeStrictEnum({
+  ReadUncommitted: 'ReadUncommitted',
+  ReadCommitted: 'ReadCommitted',
+  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 } as const)
 
@@ -170,6 +173,10 @@ export const UserProfileScalarFieldEnum = {
   userId: 'userId',
   nickname: 'nickname',
   timezone: 'timezone',
+  age: 'age',
+  gender: 'gender',
+  heightCm: 'heightCm',
+  weightKg: 'weightKg',
   onboardingCompletedAt: 'onboardingCompletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -197,6 +204,7 @@ export const UserHabitScalarFieldEnum = {
   caffeine: 'caffeine',
   exercise: 'exercise',
   meal: 'meal',
+  alcohol: 'alcohol',
   phoneUsage: 'phoneUsage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -571,6 +579,14 @@ export const JsonNullValueInput = {
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
@@ -586,12 +602,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 

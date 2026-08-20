@@ -97,4 +97,30 @@ describe("record category card", () => {
         },
       });
   });
+
+  it("keeps the draft pathname-scoped when a focused card uses safe query parameters", () => {
+    render(
+      <RecordCategoryCard
+        category="식사"
+        presence="completed"
+        inputMode="manual"
+        summary="마지막: 2026-08-20"
+        href="/record/meal-health?step=meal&focus=meal"
+        records={[{ recordId: "meal-secret", recordType: "meal" }]}
+        editDraft={{
+          step: "meal",
+          values: { mealRecordId: "meal-secret", mealNotes: "개인 메모" },
+        }}
+      />,
+    );
+
+    const editLink = screen.getByRole("link", { name: "수정" });
+    editLink.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(editLink);
+
+    expect(window.sessionStorage.getItem("record-draft:/record/meal-health")).not.toBeNull();
+    expect(window.sessionStorage.getItem("record-draft:/record/meal-health?step=meal&focus=meal")).toBeNull();
+    expect(window.location.href).not.toContain("meal-secret");
+    expect(window.location.href).not.toContain(encodeURIComponent("개인 메모"));
+  });
 });

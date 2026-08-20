@@ -1,5 +1,12 @@
 import { getPrismaClient } from "@/shared/db/prisma";
-import type { OnboardingProgressData, SleepGoalInput, HabitValues, ProfileInput, ConnectInput } from "../domain/types";
+import type {
+  ConnectInput,
+  HabitValues,
+  OnboardingProgressData,
+  ProfileDetails,
+  ProfileInput,
+  SleepGoalInput,
+} from "../domain/types";
 import type { OnboardingRepository } from "../application/ports";
 
 type OnboardingStore = {
@@ -17,6 +24,7 @@ type OnboardingStore = {
   };
   userProfile: {
     upsert: (args: unknown) => Promise<unknown>;
+    updateMany: (args: unknown) => Promise<{ count: number }>;
     findUnique: (args: unknown) => Promise<unknown>;
   };
 };
@@ -42,18 +50,20 @@ type StoredSleepGoal = {
 };
 
 type StoredHabit = {
-  userId: string;
   caffeine: string;
   exercise: string;
   meal: string;
+  alcohol: string | null;
   phoneUsage: string;
 };
 
 type StoredProfile = {
-  userId: string;
   nickname: string | null;
   timezone: string | null;
-  onboardingCompletedAt: Date | null;
+  age: number | null;
+  gender: string | null;
+  heightCm: number | null;
+  weightKg: number | null;
 };
 
 const toProgress = async (
@@ -81,6 +91,7 @@ const toProgress = async (
         caffeine: true,
         exercise: true,
         meal: true,
+        alcohol: true,
         phoneUsage: true,
       },
     }) as Promise<StoredHabit | null>,
@@ -89,6 +100,10 @@ const toProgress = async (
       select: {
         nickname: true,
         timezone: true,
+        age: true,
+        gender: true,
+        heightCm: true,
+        weightKg: true,
       },
     }) as Promise<StoredProfile | null>,
   ]);
@@ -107,6 +122,7 @@ const toProgress = async (
         caffeine: habits.caffeine as HabitValues["caffeine"],
         exercise: habits.exercise as HabitValues["exercise"],
         meal: habits.meal as HabitValues["meal"],
+        alcohol: habits.alcohol as HabitValues["alcohol"],
         phoneUsage: habits.phoneUsage as HabitValues["phoneUsage"],
       }
       : null,
@@ -114,6 +130,10 @@ const toProgress = async (
       ? {
         nickname: profile.nickname,
         timezone: profile.timezone,
+        age: profile.age,
+        gender: profile.gender as ProfileDetails["gender"],
+        heightCm: profile.heightCm,
+        weightKg: profile.weightKg,
       }
       : null,
   };
@@ -126,12 +146,27 @@ export const createOnboardingRepository = (
   const prisma = client;
 
   const verifyComplete = (progress: OnboardingProgressData): void => {
-    if (!progress.connect || !progress.sleepGoal || !progress.habits) {
+    if (!progress.profile || !progress.connect || !progress.sleepGoal || !progress.habits) {
       throw new Error("INCOMPLETE_ONBOARDING");
     }
   };
 
   return {
+    saveProfile: async (input: ProfileInput) => {
+      const profile = {
+        nickname: input.nickname,
+        timezone: input.timezone,
+        age: input.age ?? null,
+        gender: input.gender ?? null,
+        heightCm: input.heightCm ?? null,
+        weightKg: input.weightKg ?? null,
+      };
+      await prisma.userProfile.upsert({
+        where: { userId },
+        create: { userId, ...profile },
+        update: profile,
+      });
+    },
     saveConnect: async (input: ConnectInput) => {
       await prisma.connection.upsert({
         where: { userId },
@@ -176,38 +211,29 @@ export const createOnboardingRepository = (
           caffeine: input.caffeine,
           exercise: input.exercise,
           meal: input.meal,
+          alcohol: input.alcohol ?? null,
           phoneUsage: input.phoneUsage,
         },
         update: {
           caffeine: input.caffeine,
           exercise: input.exercise,
           meal: input.meal,
+          alcohol: input.alcohol ?? null,
           phoneUsage: input.phoneUsage,
         },
       });
     },
-    complete: async (input: ProfileInput) => {
+    complete: async () => {
       await prisma.$transaction(async (tx) => {
         const progress = await toProgress(tx, userId);
 
         verifyComplete(progress);
 
-        const now = new Date();
-
-        await tx.userProfile.upsert({
+        const result = await tx.userProfile.updateMany({
           where: { userId },
-          create: {
-            userId,
-            nickname: input.nickname,
-            timezone: input.timezone,
-            onboardingCompletedAt: now,
-          },
-          update: {
-            nickname: input.nickname,
-            timezone: input.timezone,
-            onboardingCompletedAt: now,
-          },
+          data: { onboardingCompletedAt: new Date() },
         });
+        if (result.count !== 1) throw new Error("INCOMPLETE_ONBOARDING");
       });
     },
     getProgress: async () => {

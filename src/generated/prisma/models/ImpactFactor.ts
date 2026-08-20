@@ -541,14 +541,6 @@ export type ImpactFactorUncheckedUpdateManyWithoutAnalysisSnapshotNestedInput = 
   deleteMany?: Prisma.ImpactFactorScalarWhereInput | Prisma.ImpactFactorScalarWhereInput[]
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type ImpactFactorCreateWithoutUserInput = {
   id?: string
   factor: string
@@ -578,6 +570,7 @@ export type ImpactFactorCreateOrConnectWithoutUserInput = {
 
 export type ImpactFactorCreateManyUserInputEnvelope = {
   data: Prisma.ImpactFactorCreateManyUserInput | Prisma.ImpactFactorCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type ImpactFactorUpsertWithWhereUniqueWithoutUserInput = {
@@ -639,6 +632,7 @@ export type ImpactFactorCreateOrConnectWithoutAnalysisSnapshotInput = {
 
 export type ImpactFactorCreateManyAnalysisSnapshotInputEnvelope = {
   data: Prisma.ImpactFactorCreateManyAnalysisSnapshotInput | Prisma.ImpactFactorCreateManyAnalysisSnapshotInput[]
+  skipDuplicates?: boolean
 }
 
 export type ImpactFactorUpsertWithWhereUniqueWithoutAnalysisSnapshotInput = {
@@ -1496,6 +1490,7 @@ export type ImpactFactorCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many ImpactFactors.
    */
   data: Prisma.ImpactFactorCreateManyInput | Prisma.ImpactFactorCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1514,6 +1509,7 @@ export type ImpactFactorCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many ImpactFactors.
    */
   data: Prisma.ImpactFactorCreateManyInput | Prisma.ImpactFactorCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

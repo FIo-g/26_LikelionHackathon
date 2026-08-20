@@ -304,6 +304,7 @@ const buildPreparationTimeline = (
   timezone: string,
 ): TodayViewModel["preparationTimeline"] => {
   const nowMinute = minutesNow(clock, timezone);
+  const targetBedMinute = toMinutes(source.targetBedAt) ?? 0;
   const steps = [
     {
       key: "caffeine",
@@ -329,9 +330,34 @@ const buildPreparationTimeline = (
       scheduledAt: source.windDownAt,
       minute: toMinutes(source.windDownAt) ?? 0,
     },
-  ].sort((left, right) => left.minute - right.minute);
+    {
+      key: "target-bed",
+      label: "취침 준비",
+      scheduledAt: source.targetBedAt,
+      minute: targetBedMinute,
+    },
+  ].sort((left, right) => {
+    const leftPosition = left.key === "target-bed"
+      ? 1440
+      : addMinutes(left.minute - targetBedMinute);
+    const rightPosition = right.key === "target-bed"
+      ? 1440
+      : addMinutes(right.minute - targetBedMinute);
+    return leftPosition - rightPosition;
+  });
 
-  const firstUpcoming = nowMinute === null ? 0 : steps.findIndex((step) => addMinutes(step.minute) > nowMinute);
+  // Calculate the current point within the goal-to-goal cycle rather than
+  // comparing clock values directly. This keeps a post-midnight goal ordered
+  // after its preceding cutoffs (for example, 00:30 after 23:30).
+  const nowPosition = nowMinute === null ? null : addMinutes(nowMinute - targetBedMinute);
+  const firstUpcoming = nowPosition === null
+    ? 0
+    : steps.findIndex((step) => {
+      const position = step.key === "target-bed"
+        ? 1440
+        : addMinutes(step.minute - targetBedMinute);
+      return position > nowPosition;
+    });
   const timeline = steps.map((step, index) => ({
     key: step.key,
     label: step.label,
@@ -370,7 +396,11 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
+          },
         },
       },
       select: {
@@ -382,7 +412,11 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
         userId: scope.userId,
         timezone: scope.timezone,
         dailyLog: {
-          localDate,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
+          },
         },
       },
       select: {
@@ -392,14 +426,12 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
     db.mealEntry.findFirst({
       where: {
         userId: scope.userId,
+        timezone: scope.timezone,
         dailyLog: {
-          localDate,
-        },
-      },
-      include: {
-        dailyLog: {
-          select: {
-            localDate: true,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
           },
         },
       },
@@ -410,14 +442,12 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
     db.exerciseEntry.findFirst({
       where: {
         userId: scope.userId,
+        timezone: scope.timezone,
         dailyLog: {
-          localDate,
-        },
-      },
-      include: {
-        dailyLog: {
-          select: {
-            localDate: true,
+          is: {
+            userId: scope.userId,
+            timezone: scope.timezone,
+            localDate,
           },
         },
       },

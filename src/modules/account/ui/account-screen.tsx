@@ -19,6 +19,13 @@ const mobileConnectionState = (availability: AccountViewModel["connections"][num
   availability === "available" ? "직접 입력" : "준비 중"
 );
 
+const habitLabels = {
+  caffeine: { none: "거의 마시지 않음", sometimes: "가끔", daily: "매일" },
+  alcohol: { none: "마시지 않음", monthly: "월 1회 이하", weekly: "주 1회 이상", frequent: "자주" },
+  meal: { early: "이른 편", mixed: "보통", late: "늦은 편" },
+  exercise: { rare: "거의 하지 않음", weekly: "주 1회 이상", frequent: "자주" },
+} as const;
+
 export const AccountScreen = ({ viewModel }: Readonly<{ viewModel: AccountViewModel }>) => {
   const visibleConnections = viewModel.connections.filter((connection) => connection.type === "wearable" || connection.type === "phone");
 
@@ -54,6 +61,20 @@ export const AccountScreen = ({ viewModel }: Readonly<{ viewModel: AccountViewMo
           <ConnectionList connections={viewModel.connections} />
         </section>
       </div>
+      {viewModel.habits ? (
+        <section className={styles.habitSummary} aria-labelledby="account-habits-title">
+          <div>
+            <h2 id="account-habits-title">생활 습관</h2>
+            <p>온보딩에서 저장한 기본 습관이에요. 실제 기록은 기록 화면에서 계속 보완할 수 있어요.</p>
+          </div>
+          <dl>
+            <div><dt>카페인</dt><dd>{habitLabels.caffeine[viewModel.habits.caffeine]}</dd></div>
+            <div><dt>음주</dt><dd>{viewModel.habits.alcohol ? habitLabels.alcohol[viewModel.habits.alcohol] : "입력하지 않음"}</dd></div>
+            <div><dt>식사</dt><dd>{habitLabels.meal[viewModel.habits.meal]}</dd></div>
+            <div><dt>운동</dt><dd>{habitLabels.exercise[viewModel.habits.exercise]}</dd></div>
+          </dl>
+        </section>
+      ) : null}
       <ManualInputRules idPrefix="desktop-manual-rules" categories={viewModel.manualInputCategories} />
       <aside className={styles.dataSummary} id="data"><strong>데이터 관리</strong><p>기록은 개인화 분석을 위한 구조화된 데이터로 관리하며, 필요하면 내보내기·수정·삭제 범위를 선택할 수 있습니다.</p></aside>
       <div className={styles.mobileDetails}>
@@ -61,7 +82,7 @@ export const AccountScreen = ({ viewModel }: Readonly<{ viewModel: AccountViewMo
           <Image alt="" height={64} src="/assets/lunar-rabbit/rabbit-face.png" width={64} />
           <div className={styles.mobileProfileCopy}>
             <h2>{viewModel.profile.nickname} · 기본 프로필</h2>
-            <p>타임존 {viewModel.profile.timezone}</p>
+            <p>타임존 {viewModel.profile.timezone}{viewModel.profile.heightCm ? ` · ${viewModel.profile.heightCm}cm` : ""}{viewModel.profile.weightKg ? ` · ${viewModel.profile.weightKg}kg` : ""}</p>
           </div>
           <BottomSheet triggerLabel="개인 정보 수정" triggerVisualLabel="수정"><ProfileForm idPrefix="mobile-profile" identity={viewModel.identity} profile={viewModel.profile} /></BottomSheet>
         </section>

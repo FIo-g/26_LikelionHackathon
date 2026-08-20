@@ -331,6 +331,20 @@
   box-shadow: 0 4px 14px rgba(38, 18, 56, .05);
 }
 
+.toolUnavailableCard {
+  justify-content: space-between;
+}
+
+.toolAvailability {
+  align-self: flex-start;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #5f346f;
+  background: #f0e9f5;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .toolCardHeader {
   display: flex;
   align-items: flex-start;
@@ -544,6 +558,57 @@
   background: #fff0dd;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.signalDataCard {
+  display: grid;
+  gap: 7px;
+  padding: 18px 19px;
+  border: 1px solid #e2d6e9;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 5px 15px rgba(38, 18, 56, .05);
+}
+
+.signalDataCard h3,
+.signalDataCard p {
+  margin: 0;
+}
+
+.signalDataEyebrow {
+  color: #5f346f;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.signalDataCard h3 {
+  color: #21152e;
+  font-size: 14px;
+  letter-spacing: -0.035em;
+  line-height: 1.45;
+}
+
+.signalDataCard > p:not(.signalDataEyebrow) {
+  color: #73647b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.signalDataLink {
+  justify-self: start;
+  margin-top: 3px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  color: #ffffff;
+  background: #5f346f;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.signalDataLink:hover,
+.signalDataLink:focus-visible {
+  background: #3d224b;
 }
 
 @media (max-width: 1180px) and (min-width: 768px) {

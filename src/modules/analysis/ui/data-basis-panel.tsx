@@ -1,11 +1,21 @@
 import type { DataBasis } from "../domain/types";
 import styles from "./analyze.module.css";
 
-export const DataBasisPanel = ({ dataBasis }: { dataBasis: DataBasis }) => (
-  <section aria-labelledby="data-basis-title" className={styles.dataBasisSection}>
+type DataBasisPanelProps = Readonly<{
+  dataBasis: DataBasis;
+  id?: string;
+}>;
+
+export const DataBasisPanel = ({ dataBasis, id = "analysis-data-basis" }: DataBasisPanelProps) => (
+  <section
+    aria-labelledby={`${id}-title`}
+    className={styles.dataBasisSection}
+    id={id}
+    tabIndex={-1}
+  >
     <div className={styles.sectionHeading}>
       <p className={styles.eyebrow}>계산 로직</p>
-      <h2 id="data-basis-title">분석에 반영된 데이터</h2>
+      <h2 id={`${id}-title`}>분석에 반영된 데이터</h2>
     </div>
     <dl className={styles.dataBasisList}>
       <div><dt>기간</dt><dd>{dataBasis.periodStart && dataBasis.periodEnd ? `${dataBasis.periodStart}–${dataBasis.periodEnd}` : "기록을 기다리고 있어요"}</dd></div>

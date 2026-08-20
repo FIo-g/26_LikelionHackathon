@@ -8,5 +8,5 @@ const firstParam = (value: string | string[] | undefined): string | undefined =>
 export default async function SleepPhonePage({ searchParams }: SleepPhonePageProps) {
   const { timezone } = await requireUserScope();
   const query = await searchParams;
-  return <SleepPhoneFlow timezone={timezone} step={firstParam(query.step)} />;
+  return <SleepPhoneFlow focus={firstParam(query.focus)} timezone={timezone} step={firstParam(query.step)} />;
 }

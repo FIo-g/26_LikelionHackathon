@@ -4,9 +4,27 @@ import { getPrismaClient } from "@/shared/db/prisma";
 import type { TransactionClient } from "@/shared/db/transaction";
 import type { UserScope } from "@/shared/domain/contracts";
 import { wakeLocalDate } from "@/shared/time/local-date";
+import { habitsSchema, profileSchema } from "@/modules/onboarding/domain/schemas";
 import type { AccountConnection, AccountRepository, ManualInputCategory } from "../application/ports";
 
 type StoredConnection = Readonly<{ selected: string; state: string }>;
+
+type StoredProfile = Readonly<{
+  nickname: string | null;
+  timezone: string | null;
+  age: number | null;
+  gender: string | null;
+  heightCm: number | null;
+  weightKg: number | null;
+}>;
+
+type StoredHabit = Readonly<{
+  caffeine: string;
+  exercise: string;
+  meal: string;
+  alcohol: string | null;
+  phoneUsage: string;
+}>;
 
 const manualInputCategories: readonly ManualInputCategory[] = [
   { key: "sleep", label: "수면" }, { key: "phone", label: "휴대폰" }, { key: "caffeine", label: "카페인" },
@@ -41,17 +59,21 @@ export const createPrismaAccountRepository = (
   const now = options.now ?? (() => new Date());
   return {
     getViewModelData: async (scope) => {
-      const [profile, sleepGoal, _habits, connection] = await Promise.all([
-        client.userProfile.findUnique({ where: { userId: scope.userId }, select: { nickname: true, timezone: true } }),
+      const [profile, sleepGoal, habits, connection] = await Promise.all([
+        client.userProfile.findUnique({ where: { userId: scope.userId }, select: { nickname: true, timezone: true, age: true, gender: true, heightCm: true, weightKg: true } }) as Promise<StoredProfile | null>,
         client.sleepGoal.findUnique({ where: { userId: scope.userId }, select: { targetBedTime: true, targetWakeTime: true, targetDurationMinutes: true } }),
-        client.userHabit.findUnique({ where: { userId: scope.userId } }),
+        client.userHabit.findUnique({ where: { userId: scope.userId }, select: { caffeine: true, exercise: true, meal: true, alcohol: true, phoneUsage: true } }) as Promise<StoredHabit | null>,
         client.connection.findUnique({ where: { userId: scope.userId }, select: { selected: true, state: true } }),
       ]);
-      void _habits;
       if (!profile?.nickname || !profile.timezone || !sleepGoal) throw new Error("ACCOUNT_SETTINGS_UNAVAILABLE");
+      const normalizedProfile = profileSchema.safeParse(profile);
+      if (!normalizedProfile.success) throw new Error("ACCOUNT_SETTINGS_UNAVAILABLE");
+      const normalizedHabits = habits ? habitsSchema.safeParse(habits) : null;
+      if (normalizedHabits && !normalizedHabits.success) throw new Error("ACCOUNT_SETTINGS_UNAVAILABLE");
       return {
         identity: { email: null },
-        profile: { nickname: profile.nickname, timezone: profile.timezone },
+        profile: normalizedProfile.data,
+        habits: normalizedHabits?.success ? normalizedHabits.data : null,
         sleepGoal,
         connections: plannedConnections(connection?.selected === "manual" ? connection : null),
         manualInputCategories,
@@ -61,7 +83,17 @@ export const createPrismaAccountRepository = (
       await client.$transaction(async (transaction) => {
         const profile = await transaction.userProfile.findUnique({ where: { userId: scope.userId }, select: { timezone: true } });
         if (!profile) throw new Error("ACCOUNT_PROFILE_NOT_FOUND");
-        await transaction.userProfile.updateMany({ where: { userId: scope.userId }, data: input });
+        await transaction.userProfile.updateMany({
+          where: { userId: scope.userId },
+          data: {
+            nickname: input.nickname,
+            timezone: input.timezone,
+            ...(input.age === undefined ? {} : { age: input.age }),
+            ...(input.gender === undefined ? {} : { gender: input.gender }),
+            ...(input.heightCm === undefined ? {} : { heightCm: input.heightCm }),
+            ...(input.weightKg === undefined ? {} : { weightKg: input.weightKg }),
+          },
+        });
         if (profile.timezone === input.timezone) return;
         const at = now();
         await supersedeAccountDerivedState(transaction, scope, at);

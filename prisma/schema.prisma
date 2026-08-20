@@ -102,6 +102,10 @@ model UserProfile {
   userId                String    @unique
   nickname              String?
   timezone              String?
+  age                   Int?
+  gender                String?
+  heightCm              Int?
+  weightKg              Float?
   onboardingCompletedAt DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
@@ -125,6 +129,7 @@ model UserHabit {
   caffeine   String
   exercise   String
   meal       String
+  alcohol    String?
   phoneUsage String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

@@ -11,6 +11,21 @@ const futureLocalTime = (daysFromNow: number): string => {
   return `${startsAt.getFullYear()}-${String(startsAt.getMonth() + 1).padStart(2, "0")}-${String(startsAt.getDate()).padStart(2, "0")}T09:00`;
 };
 
+test("keeps a saved major-event title visible after a full Plan reload", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
+
+  await page.goto("/plan");
+  const form = majorEventForm(page);
+  await visibleByLabel(form, "일정 이름").fill("졸업 발표 리허설");
+  await visibleByLabel(form, "일정 유형").fill("발표");
+  await visibleByLabel(form, "시작 시간").fill(futureLocalTime(7));
+  await form.getByRole("button", { name: "주요 일정 추가" }).click();
+
+  await expect(visibleText(page, "졸업 발표 리허설")).toBeVisible();
+  await page.reload();
+  await expect(visibleText(page, "졸업 발표 리허설")).toBeVisible();
+});
+
 test("accepts generated advice and separately dismisses a later generated proposal", async ({ page }, testInfo) => {
   await setupE2eUser(page.request, testInfo);
 

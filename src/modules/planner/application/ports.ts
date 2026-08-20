@@ -8,6 +8,7 @@ import type {
   ScheduleAdviceEntity,
   SleepPlanEntity,
   SpecialEventInput,
+  SpecialEventSummary,
 } from "../domain/types";
 
 export type {
@@ -19,6 +20,7 @@ export type {
   ScheduleAdviceEntity,
   SleepPlanEntity,
   SpecialEventInput,
+  SpecialEventSummary,
 } from "../domain/types";
 
 export interface PlannerRepository {
@@ -31,7 +33,7 @@ export interface PlannerRepository {
   findCurrentBaseline(): Promise<PlannerBaselineSnapshot | null>;
   findActivePlan(): Promise<SleepPlanEntity | null>;
   listActiveDays(planId: string): Promise<readonly PlanDayEntity[]>;
-  listEvents(): Promise<readonly { id: string; type: string; startsAt: string }[]>;
+  listEvents(): Promise<readonly SpecialEventSummary[]>;
   findLatestGeneratedAdvice(): Promise<ScheduleAdviceEntity | null>;
   findLatestDismissedAdvice(): Promise<ScheduleAdviceEntity | null>;
   findPlanForEvent(eventId: string): Promise<SleepPlanEntity | null>;
