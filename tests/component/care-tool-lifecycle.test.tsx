@@ -38,7 +38,9 @@ describe("Care tool lifecycle", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "시작" }));
     await waitFor(() => expect(actions.start).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByRole("button", { name: "일시정지" })).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "멈추기" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "시작" })).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "시작" }));
     await waitFor(() => expect(actions.start).toHaveBeenCalledTimes(2));
     expect(actions.complete).not.toHaveBeenCalled();

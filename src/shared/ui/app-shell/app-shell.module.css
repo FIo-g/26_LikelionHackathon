@@ -23,6 +23,8 @@
 .navigationList a:hover, .navigationList a:focus-visible { background: #edf6f1; }
 .mobileLabel { display: none; }
 
+.careSidebarArtwork { display: none; }
+
 .content {
   min-width: 0;
   width: min(var(--content-max), 100%);
@@ -30,6 +32,94 @@
 }
 
 .mobileNavigation { display: none; }
+
+@media (min-width: 768px) {
+  .page:has([data-lunar-screen="care"]) {
+    grid-template-columns: 216px minmax(0, 1fr);
+  }
+
+  .page:has([data-lunar-screen="care"]) .desktopNavigation {
+    gap: 32px;
+    padding: 28px 20px;
+    border-right: 0;
+    background: #28163b;
+    color: #d7c8e2;
+  }
+
+  .page:has([data-lunar-screen="care"]) .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen="care"]) .brand::before {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 50%;
+    color: #5f346f;
+    background: #fff0d7;
+    content: "토";
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+
+  .page:has([data-lunar-screen="care"]) .content {
+    width: min(1136px, 100%);
+  }
+
+  .page:has([data-lunar-screen="care"]) .desktopNavigation .navigationList a {
+    min-height: 40px;
+    box-sizing: border-box;
+    color: #d7c8e2;
+  }
+
+  .page:has([data-lunar-screen="care"]) .desktopNavigation .navigationList a:hover,
+  .page:has([data-lunar-screen="care"]) .desktopNavigation .navigationList a:focus-visible {
+    background: rgba(95, 52, 111, .65);
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen="care"]) .desktopNavigation .desktopLabel {
+    display: none;
+  }
+
+  .page:has([data-lunar-screen="care"]) .desktopNavigation .mobileLabel {
+    display: inline;
+  }
+
+  .page:has([data-lunar-screen="care"]) .desktopNavigation a[href="/care"] {
+    background: #5f346f;
+    color: #fff;
+  }
+
+  .page:has([data-lunar-screen="care"]) .careSidebarArtwork {
+    position: relative;
+    display: block;
+    width: 176px;
+    height: 160px;
+    margin-top: auto;
+  }
+
+  .page:has([data-lunar-screen="care"]) .careSidebarScene {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 169px;
+    height: 133px;
+  }
+
+  .page:has([data-lunar-screen="care"]) .careSidebarRabbit {
+    position: absolute;
+    right: 8px;
+    bottom: -10px;
+    width: 142px;
+    height: 142px;
+    object-fit: contain;
+  }
+}
 
 @media (max-width: 767px) {
   .page { display: block; }
@@ -77,10 +167,12 @@
   .page:has([data-lunar-screen="today"]) .mobileNavigation a[href="/today"],
   .page:has([data-lunar-screen="plan"]) .mobileNavigation a[href="/plan"],
   .page:has([data-lunar-screen="analyze"]) .mobileNavigation a[href="/analyze"],
+  .page:has([data-lunar-screen="care"]) .mobileNavigation a[href="/care"],
   .page:has([data-lunar-screen="account"]) .mobileNavigation a[href="/account"] { color: #5f346f; font-weight: 800; }
   .page:has([data-lunar-screen="today"]) .mobileNavigation a[href="/today"]::before,
   .page:has([data-lunar-screen="plan"]) .mobileNavigation a[href="/plan"]::before,
   .page:has([data-lunar-screen="analyze"]) .mobileNavigation a[href="/analyze"]::before,
+  .page:has([data-lunar-screen="care"]) .mobileNavigation a[href="/care"]::before,
   .page:has([data-lunar-screen="account"]) .mobileNavigation a[href="/account"]::before {
     position: absolute;
     top: 10px;

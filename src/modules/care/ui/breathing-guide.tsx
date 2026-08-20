@@ -95,5 +95,39 @@ export const BreathingGuide = ({ localDate }: { localDate: string }) => {
     completedSegmentsMs.current = 0; activeStartedAtMs.current = null;
   };
 
-  return <article className={styles.toolCard} aria-busy={starting}><h3>호흡 가이드</h3><div aria-label="호흡 가이드 진행" aria-live="polite" aria-valuemax={DURATION_SECONDS} aria-valuemin={0} aria-valuenow={elapsed} role="progressbar">{phase.label} · {elapsed}/{DURATION_SECONDS}초</div><div><button disabled={starting} onClick={() => { if (running) pause(); else if (hasSession) resume(); else void start(); }} type="button">{starting ? "시작 중" : running ? "일시정지" : hasSession ? "이어하기" : "시작"}</button><button disabled={starting} onClick={stop} type="button">멈추기</button></div>{message ? <p role="alert">{message}</p> : null}</article>;
+  return (
+    <article className={styles.toolCard} aria-busy={starting}>
+      <div className={styles.toolCardHeader}>
+        <span className={styles.toolIcon} aria-hidden="true">↗</span>
+        <div className={styles.toolCopy}>
+          <h3>호흡 가이드</h3>
+          <p>4-2-6 리듬 · 3분</p>
+        </div>
+      </div>
+      <div
+        className={styles.toolProgress}
+        aria-label="호흡 가이드 진행"
+        aria-live="polite"
+        aria-valuemax={DURATION_SECONDS}
+        aria-valuemin={0}
+        aria-valuenow={elapsed}
+        role="progressbar"
+      >
+        <div className={styles.toolProgressHeader}>
+          <span className={styles.toolProgressLabel}>{phase.label}</span>
+          <span className={styles.toolProgressValue}>{elapsed}초 / 3분</span>
+        </div>
+        <span className={styles.toolProgressTrack} aria-hidden="true">
+          <span className={styles.toolProgressFill} style={{ width: `${(elapsed / DURATION_SECONDS) * 100}%` }} />
+        </span>
+      </div>
+      <div className={styles.toolControls}>
+        <button className={styles.toolPrimaryAction} disabled={starting} onClick={() => { if (running) pause(); else if (hasSession) resume(); else void start(); }} type="button">
+          {starting ? "시작 중" : running ? "일시정지" : hasSession ? "이어하기" : "시작"}
+        </button>
+        <button className={styles.toolSecondaryAction} disabled={starting} onClick={stop} type="button">멈추기</button>
+      </div>
+      {message ? <p className={styles.toolAlert} role="alert">{message}</p> : null}
+    </article>
+  );
 };

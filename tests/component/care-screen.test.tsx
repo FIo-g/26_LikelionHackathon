@@ -9,7 +9,7 @@ describe("CareScreen", () => {
       routineSteps: [{ key: "target-bed", label: "잠자리", scheduledAt: new Date("2026-08-19T14:00:00.000Z"), status: "current" }],
     }} />);
 
-    expect(screen.getByRole("heading", { name: "Care" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "오늘 밤 케어" })).toBeInTheDocument();
     expect(screen.getByText("직접 입력 사용 중")).toBeInTheDocument();
     expect(screen.getByText("호흡 가이드")).toBeInTheDocument();
     expect(screen.getByText("백색소음")).toBeInTheDocument();

@@ -72,5 +72,39 @@ export const SleepGuide = ({ localDate }: { localDate: string }) => {
     completedSegmentsMs.current = 0; activeStartedAtMs.current = null;
   };
 
-  return <article className={styles.toolCard} aria-busy={starting}><h3>ASMR·수면 가이드</h3><p aria-live="polite">{step.label}</p><div aria-label="수면 가이드 진행" aria-valuemax={DURATION_SECONDS} aria-valuemin={0} aria-valuenow={elapsed} role="progressbar">{elapsed}/{DURATION_SECONDS}초</div><div><button disabled={starting} onClick={() => { if (running) pause(); else if (hasSession) { activeStartedAtMs.current = performance.now(); setRunning(true); } else void start(); }} type="button">{starting ? "시작 중" : running ? "일시정지" : hasSession ? "이어하기" : "시작"}</button><button disabled={starting} onClick={stop} type="button">멈추기</button></div>{message ? <p role="alert">{message}</p> : null}</article>;
+  return (
+    <article className={styles.toolCard} aria-busy={starting}>
+      <div className={styles.toolCardHeader}>
+        <span className={styles.toolIcon} aria-hidden="true">~</span>
+        <div className={styles.toolCopy}>
+          <h3>ASMR·수면 가이드</h3>
+          <p>5분 이완 가이드</p>
+        </div>
+      </div>
+      <div
+        className={styles.toolProgress}
+        aria-label="수면 가이드 진행"
+        aria-valuemax={DURATION_SECONDS}
+        aria-valuemin={0}
+        aria-valuenow={elapsed}
+        role="progressbar"
+      >
+        <p className={styles.toolGuidance} aria-live="polite">{step.label}</p>
+        <div className={styles.toolProgressHeader}>
+          <span className={styles.toolProgressLabel}>{running ? "진행 중" : hasSession ? "일시정지" : "준비됨"}</span>
+          <span className={styles.toolProgressValue}>{elapsed}초 / 5분</span>
+        </div>
+        <span className={styles.toolProgressTrack} aria-hidden="true">
+          <span className={styles.toolProgressFill} style={{ width: `${(elapsed / DURATION_SECONDS) * 100}%` }} />
+        </span>
+      </div>
+      <div className={styles.toolControls}>
+        <button className={styles.toolPrimaryAction} disabled={starting} onClick={() => { if (running) pause(); else if (hasSession) { activeStartedAtMs.current = performance.now(); setRunning(true); } else void start(); }} type="button">
+          {starting ? "시작 중" : running ? "일시정지" : hasSession ? "이어하기" : "시작"}
+        </button>
+        <button className={styles.toolSecondaryAction} disabled={starting} onClick={stop} type="button">멈추기</button>
+      </div>
+      {message ? <p className={styles.toolAlert} role="alert">{message}</p> : null}
+    </article>
+  );
 };
