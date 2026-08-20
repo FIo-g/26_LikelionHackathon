@@ -241,9 +241,15 @@ export const RecordFormShell = ({
       ) : null}
       <div aria-live="polite" role="status">
         {state?.status === "success" ? <p>저장되었습니다.</p> : null}
-        {renderFieldErrors ? <ul>{Object.entries(renderFieldErrors).flatMap(([name, messages]) => messages.map((message, index) => (
-          <li id={name === "_form" ? undefined : `${instanceId}-${name}-error`} key={`${name}-${index}-${message}`}>{message}</li>
-        )))}</ul> : null}
+        {renderFieldErrors ? <ul>{Object.entries(renderFieldErrors).map(([name, messages]) => (
+          name === "_form"
+            ? messages.map((message, index) => <li key={`${name}-${index}-${message}`}>{message}</li>)
+            : (
+                <li id={`${instanceId}-${name}-error`} key={name}>
+                  <ul>{messages.map((message, index) => <li key={`${index}-${message}`}>{message}</li>)}</ul>
+                </li>
+              )
+        ))}</ul> : null}
       </div>
     </form>
   );

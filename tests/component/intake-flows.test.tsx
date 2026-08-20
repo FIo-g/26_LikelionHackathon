@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const router = vi.hoisted(() => ({
   push: vi.fn(),
@@ -15,6 +15,7 @@ import { CaffeineFlow } from "@/modules/records/ui/caffeine-flow";
 import { AlcoholFlow } from "@/modules/records/ui/alcohol-flow";
 import { MealHealthFlow } from "@/modules/records/ui/meal-health-form";
 import { SleepPhoneFlow } from "@/modules/records/ui/sleep-phone-form";
+import { RecordFormShell } from "@/modules/records/ui/record-form-shell";
 import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 
 describe("intake flows", () => {
@@ -26,6 +27,32 @@ describe("intake flows", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("associates every validation message for one field through one unique error container", async () => {
+    const view = render(
+      <RecordFormShell
+        pathname="/record/batch"
+        action={async () => ({
+          status: "error",
+          values: {},
+          fieldErrors: { items: ["한 개 이상 선택해 주세요.", "삭제할 수 없는 기록이 포함되어 있습니다."] },
+        })}
+      >
+        {() => <input name="items" defaultValue="[]" />}
+      </RecordFormShell>,
+    );
+
+    fireEvent.submit(view.container.querySelector("form")!);
+
+    await waitFor(() => expect(screen.getByText("한 개 이상 선택해 주세요.")).toBeVisible());
+    const field = view.container.querySelector<HTMLInputElement>('input[name="items"]')!;
+    const errorId = field.getAttribute("aria-describedby")!;
+    const linkedErrors = view.container.querySelectorAll(`[id="${errorId}"]`);
+
+    expect(linkedErrors).toHaveLength(1);
+    expect(linkedErrors[0]).toHaveTextContent("한 개 이상 선택해 주세요.");
+    expect(linkedErrors[0]).toHaveTextContent("삭제할 수 없는 기록이 포함되어 있습니다.");
   });
 
   it("uses the stored non-UTC timezone for datetime and local-date defaults near midnight", () => {
