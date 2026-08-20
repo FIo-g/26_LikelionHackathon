@@ -50,3 +50,13 @@ export const getAuth = () => {
   authInstance ??= createAuth(process.env, getPrismaClient());
   return authInstance;
 };
+
+export const auth = new Proxy({} as ReturnType<typeof createAuth>, {
+  get: (_target, property) => Reflect.get(getAuth(), property, getAuth()),
+  has: (_target, property) => property in getAuth(),
+  ownKeys: () => Reflect.ownKeys(getAuth()),
+  getOwnPropertyDescriptor: (_target, property) => {
+    const descriptor = Reflect.getOwnPropertyDescriptor(getAuth(), property);
+    return descriptor ? { ...descriptor, configurable: true } : undefined;
+  },
+});

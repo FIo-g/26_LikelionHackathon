@@ -24,6 +24,10 @@ const isUniqueViolation = (error: unknown): boolean => (
   typeof error === "object" && error !== null && "code" in error && error.code === "P2002"
 );
 
+const isForeignKeyViolation = (error: unknown): boolean => (
+  typeof error === "object" && error !== null && "code" in error && error.code === "P2003"
+);
+
 const clean = async (userId: string): Promise<void> => {
   await prisma.rateLimit.deleteMany({ where: { key: `${userId}:rate-limit` } });
   await prisma.narration.deleteMany({ where: { userId } });
@@ -97,6 +101,28 @@ export const runDatabaseContract = async () => {
   await prisma.routineCompletion.create({ data: { userId: alice, localDate: secondLog.localDate, planDayId: day.id, routineRevisionKey: plan.id, stepKey: "wind-down", completedAt: now } });
   await prisma.careToolSession.create({ data: { userId: alice, localDate: secondLog.localDate, toolKey: "breathing", startedAt: now, plannedDurationSeconds: 180 } });
 
+  const routineOwnership = await prisma.routineCompletion.create({
+    data: {
+      userId: bob,
+      localDate: secondLog.localDate,
+      planDayId: day.id,
+      routineRevisionKey: "foreign-plan-day",
+      stepKey: "wind-down",
+      completedAt: now,
+    },
+  }).then(() => false).catch(isForeignKeyViolation);
+  const narrationOwnership = await prisma.narration.create({
+    data: {
+      userId: bob,
+      scheduleAdviceId: advice.id,
+      provider: "template",
+      inputHash: "foreign-advice",
+      facts: { schemaVersion: 1 },
+      output: { schemaVersion: 1 },
+      status: "template-fallback",
+    },
+  }).then(() => false).catch(isForeignKeyViolation);
+
   const dailyLogCompositeUnique = await prisma.dailyLog.create({ data: { userId: alice, localDate: secondLog.localDate, timezone } }).then(() => false).catch(isUniqueViolation);
   const activeKeyInvariant = await prisma.sleepPlan.create({ data: { userId: alice, timezone, status: "active", activeKey: plan.activeKey } }).then(() => false).catch(isUniqueViolation);
   const currentKeyInvariant = await prisma.analysisSnapshot.create({ data: { userId: alice, localDate: "2026-08-20", timezone, status: "current", result: { schemaVersion: 1 }, currentKey: snapshot.currentKey } }).then(() => false).catch(isUniqueViolation);
@@ -109,6 +135,12 @@ export const runDatabaseContract = async () => {
   await prisma.caffeineEntry.create({ data: { userId: cascadeUser, dailyLogId: cascadeLog.id, brand: "test", product: "coffee", caffeineMg: 100, consumedAt: now, timezone } });
   await prisma.user.delete({ where: { id: cascadeUser } });
   const userCascade = (await prisma.dailyLog.count({ where: { userId: cascadeUser } })) === 0 && (await prisma.caffeineEntry.count({ where: { userId: cascadeUser } })) === 0;
+  const onboardingCascade = await Promise.all([
+    prisma.userProfile.count({ where: { userId: cascadeUser } }),
+    prisma.sleepGoal.count({ where: { userId: cascadeUser } }),
+    prisma.userHabit.count({ where: { userId: cascadeUser } }),
+    prisma.connection.count({ where: { userId: cascadeUser } }),
+  ]).then((counts) => counts.every((count) => count === 0));
 
   const transactionRolledBack = await prisma.$transaction(async (transaction) => {
     await transaction.user.create({ data: { id: "contract-rollback", email: "contract-rollback@example.invalid" } });
@@ -122,6 +154,9 @@ export const runDatabaseContract = async () => {
     activeKeyInvariant,
     currentKeyInvariant,
     userCascade,
+    onboardingCascade,
+    routineOwnership,
+    narrationOwnership,
     transactionRolledBack,
     orderedLocalDates,
   };
@@ -145,6 +180,9 @@ describeContract("database contract", () => {
       activeKeyInvariant: true,
       currentKeyInvariant: true,
       userCascade: true,
+      onboardingCascade: true,
+      routineOwnership: true,
+      narrationOwnership: true,
       transactionRolledBack: true,
       orderedLocalDates: ["2026-08-18", "2026-08-19"],
     });

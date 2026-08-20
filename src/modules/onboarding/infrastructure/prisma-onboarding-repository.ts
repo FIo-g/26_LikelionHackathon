@@ -2,7 +2,7 @@ import { getPrismaClient } from "@/shared/db/prisma";
 import type { OnboardingProgressData, SleepGoalInput, HabitValues, ProfileInput, ConnectInput } from "../domain/types";
 import type { OnboardingRepository } from "../application/ports";
 
-type PrismaClientForOnboarding = ReturnType<typeof getPrismaClient> & {
+type OnboardingStore = {
   connection: {
     upsert: (args: unknown) => Promise<unknown>;
     findUnique: (args: unknown) => Promise<unknown>;
@@ -19,7 +19,10 @@ type PrismaClientForOnboarding = ReturnType<typeof getPrismaClient> & {
     upsert: (args: unknown) => Promise<unknown>;
     findUnique: (args: unknown) => Promise<unknown>;
   };
-  $transaction: <T>(callback: (tx: PrismaClientForOnboarding) => Promise<T>) => Promise<T>;
+};
+
+type PrismaClientForOnboarding = OnboardingStore & {
+  $transaction: <T>(callback: (tx: OnboardingStore) => Promise<T>) => Promise<T>;
 };
 
 type StoredConnection = {
@@ -54,7 +57,7 @@ type StoredProfile = {
 };
 
 const toProgress = async (
-  client: PrismaClientForOnboarding,
+  client: OnboardingStore,
   userId: string,
 ): Promise<OnboardingProgressData> => {
   const [connection, sleepGoal, habits, profile] = await Promise.all([
@@ -116,8 +119,11 @@ const toProgress = async (
   };
 };
 
-export const createOnboardingRepository = (userId: string): OnboardingRepository => {
-  const prisma = getPrismaClient() as PrismaClientForOnboarding;
+export const createOnboardingRepository = (
+  userId: string,
+  client: PrismaClientForOnboarding = getPrismaClient() as PrismaClientForOnboarding,
+): OnboardingRepository => {
+  const prisma = client;
 
   const verifyComplete = (progress: OnboardingProgressData): void => {
     if (!progress.connect || !progress.sleepGoal || !progress.habits) {

@@ -233,6 +233,7 @@ export type AnalysisSnapshotOrderByWithRelationInput = {
 export type AnalysisSnapshotWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   currentKey?: string
+  id_userId?: Prisma.AnalysisSnapshotIdUserIdCompoundUniqueInput
   AND?: Prisma.AnalysisSnapshotWhereInput | Prisma.AnalysisSnapshotWhereInput[]
   OR?: Prisma.AnalysisSnapshotWhereInput[]
   NOT?: Prisma.AnalysisSnapshotWhereInput | Prisma.AnalysisSnapshotWhereInput[]
@@ -246,7 +247,7 @@ export type AnalysisSnapshotWhereUniqueInput = Prisma.AtLeast<{
   factors?: Prisma.ImpactFactorListRelationFilter
   narrations?: Prisma.NarrationListRelationFilter
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "currentKey">
+}, "id" | "currentKey" | "id_userId">
 
 export type AnalysisSnapshotOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -377,6 +378,11 @@ export type AnalysisSnapshotListRelationFilter = {
 
 export type AnalysisSnapshotOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AnalysisSnapshotIdUserIdCompoundUniqueInput = {
+  id: string
+  userId: string
 }
 
 export type AnalysisSnapshotCountOrderByAggregateInput = {

@@ -232,6 +232,7 @@ export type SleepGoalWhereInput = {
   targetDurationMinutes?: Prisma.IntFilter<"SleepGoal"> | number
   createdAt?: Prisma.DateTimeFilter<"SleepGoal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SleepGoal"> | Date | string
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type SleepGoalOrderByWithRelationInput = {
@@ -242,6 +243,7 @@ export type SleepGoalOrderByWithRelationInput = {
   targetDurationMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type SleepGoalWhereUniqueInput = Prisma.AtLeast<{
@@ -255,6 +257,7 @@ export type SleepGoalWhereUniqueInput = Prisma.AtLeast<{
   targetDurationMinutes?: Prisma.IntFilter<"SleepGoal"> | number
   createdAt?: Prisma.DateTimeFilter<"SleepGoal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SleepGoal"> | Date | string
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId">
 
 export type SleepGoalOrderByWithAggregationInput = {
@@ -287,12 +290,12 @@ export type SleepGoalScalarWhereWithAggregatesInput = {
 
 export type SleepGoalCreateInput = {
   id?: string
-  userId: string
   targetBedTime: string
   targetWakeTime: string
   targetDurationMinutes: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSleepGoalInput
 }
 
 export type SleepGoalUncheckedCreateInput = {
@@ -307,12 +310,12 @@ export type SleepGoalUncheckedCreateInput = {
 
 export type SleepGoalUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   targetBedTime?: Prisma.StringFieldUpdateOperationsInput | string
   targetWakeTime?: Prisma.StringFieldUpdateOperationsInput | string
   targetDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSleepGoalNestedInput
 }
 
 export type SleepGoalUncheckedUpdateInput = {
@@ -337,7 +340,6 @@ export type SleepGoalCreateManyInput = {
 
 export type SleepGoalUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   targetBedTime?: Prisma.StringFieldUpdateOperationsInput | string
   targetWakeTime?: Prisma.StringFieldUpdateOperationsInput | string
   targetDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -353,6 +355,11 @@ export type SleepGoalUncheckedUpdateManyInput = {
   targetDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SleepGoalNullableScalarRelationFilter = {
+  is?: Prisma.SleepGoalWhereInput | null
+  isNot?: Prisma.SleepGoalWhereInput | null
 }
 
 export type SleepGoalCountOrderByAggregateInput = {
@@ -393,12 +400,88 @@ export type SleepGoalSumOrderByAggregateInput = {
   targetDurationMinutes?: Prisma.SortOrder
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type SleepGoalCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.SleepGoalCreateWithoutUserInput, Prisma.SleepGoalUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.SleepGoalCreateOrConnectWithoutUserInput
+  connect?: Prisma.SleepGoalWhereUniqueInput
+}
+
+export type SleepGoalUncheckedCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.SleepGoalCreateWithoutUserInput, Prisma.SleepGoalUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.SleepGoalCreateOrConnectWithoutUserInput
+  connect?: Prisma.SleepGoalWhereUniqueInput
+}
+
+export type SleepGoalUpdateOneWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.SleepGoalCreateWithoutUserInput, Prisma.SleepGoalUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.SleepGoalCreateOrConnectWithoutUserInput
+  upsert?: Prisma.SleepGoalUpsertWithoutUserInput
+  disconnect?: Prisma.SleepGoalWhereInput | boolean
+  delete?: Prisma.SleepGoalWhereInput | boolean
+  connect?: Prisma.SleepGoalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SleepGoalUpdateToOneWithWhereWithoutUserInput, Prisma.SleepGoalUpdateWithoutUserInput>, Prisma.SleepGoalUncheckedUpdateWithoutUserInput>
+}
+
+export type SleepGoalUncheckedUpdateOneWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.SleepGoalCreateWithoutUserInput, Prisma.SleepGoalUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.SleepGoalCreateOrConnectWithoutUserInput
+  upsert?: Prisma.SleepGoalUpsertWithoutUserInput
+  disconnect?: Prisma.SleepGoalWhereInput | boolean
+  delete?: Prisma.SleepGoalWhereInput | boolean
+  connect?: Prisma.SleepGoalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SleepGoalUpdateToOneWithWhereWithoutUserInput, Prisma.SleepGoalUpdateWithoutUserInput>, Prisma.SleepGoalUncheckedUpdateWithoutUserInput>
+}
+
+export type SleepGoalCreateWithoutUserInput = {
+  id?: string
+  targetBedTime: string
+  targetWakeTime: string
+  targetDurationMinutes: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SleepGoalUncheckedCreateWithoutUserInput = {
+  id?: string
+  targetBedTime: string
+  targetWakeTime: string
+  targetDurationMinutes: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SleepGoalCreateOrConnectWithoutUserInput = {
+  where: Prisma.SleepGoalWhereUniqueInput
+  create: Prisma.XOR<Prisma.SleepGoalCreateWithoutUserInput, Prisma.SleepGoalUncheckedCreateWithoutUserInput>
+}
+
+export type SleepGoalUpsertWithoutUserInput = {
+  update: Prisma.XOR<Prisma.SleepGoalUpdateWithoutUserInput, Prisma.SleepGoalUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.SleepGoalCreateWithoutUserInput, Prisma.SleepGoalUncheckedCreateWithoutUserInput>
+  where?: Prisma.SleepGoalWhereInput
+}
+
+export type SleepGoalUpdateToOneWithWhereWithoutUserInput = {
+  where?: Prisma.SleepGoalWhereInput
+  data: Prisma.XOR<Prisma.SleepGoalUpdateWithoutUserInput, Prisma.SleepGoalUncheckedUpdateWithoutUserInput>
+}
+
+export type SleepGoalUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  targetBedTime?: Prisma.StringFieldUpdateOperationsInput | string
+  targetWakeTime?: Prisma.StringFieldUpdateOperationsInput | string
+  targetDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SleepGoalUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  targetBedTime?: Prisma.StringFieldUpdateOperationsInput | string
+  targetWakeTime?: Prisma.StringFieldUpdateOperationsInput | string
+  targetDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -411,6 +494,7 @@ export type SleepGoalSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   targetDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sleepGoal"]>
 
 export type SleepGoalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -421,6 +505,7 @@ export type SleepGoalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   targetDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sleepGoal"]>
 
 export type SleepGoalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -431,6 +516,7 @@ export type SleepGoalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   targetDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sleepGoal"]>
 
 export type SleepGoalSelectScalar = {
@@ -444,10 +530,21 @@ export type SleepGoalSelectScalar = {
 }
 
 export type SleepGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "targetBedTime" | "targetWakeTime" | "targetDurationMinutes" | "createdAt" | "updatedAt", ExtArgs["result"]["sleepGoal"]>
+export type SleepGoalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type SleepGoalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type SleepGoalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
 
 export type $SleepGoalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SleepGoal"
-  objects: {}
+  objects: {
+    user: Prisma.$UserPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
@@ -850,6 +947,7 @@ readonly fields: SleepGoalFieldRefs;
  */
 export interface Prisma__SleepGoalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -903,6 +1001,10 @@ export type SleepGoalFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
+  /**
    * Filter, which SleepGoal to fetch.
    */
   where: Prisma.SleepGoalWhereUniqueInput
@@ -921,6 +1023,10 @@ export type SleepGoalFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
+  /**
    * Filter, which SleepGoal to fetch.
    */
   where: Prisma.SleepGoalWhereUniqueInput
@@ -938,6 +1044,10 @@ export type SleepGoalFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the SleepGoal
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
   /**
    * Filter, which SleepGoal to fetch.
    */
@@ -987,6 +1097,10 @@ export type SleepGoalFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
+  /**
    * Filter, which SleepGoal to fetch.
    */
   where?: Prisma.SleepGoalWhereInput
@@ -1034,6 +1148,10 @@ export type SleepGoalFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SleepGoal
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
   /**
    * Filter, which SleepGoals to fetch.
    */
@@ -1083,6 +1201,10 @@ export type SleepGoalCreateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
+  /**
    * The data needed to create a SleepGoal.
    */
   data: Prisma.XOR<Prisma.SleepGoalCreateInput, Prisma.SleepGoalUncheckedCreateInput>
@@ -1114,6 +1236,10 @@ export type SleepGoalCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many SleepGoals.
    */
   data: Prisma.SleepGoalCreateManyInput | Prisma.SleepGoalCreateManyInput[]
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1128,6 +1254,10 @@ export type SleepGoalUpdateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the SleepGoal
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
   /**
    * The data needed to update a SleepGoal.
    */
@@ -1180,6 +1310,10 @@ export type SleepGoalUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * Limit how many SleepGoals to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1194,6 +1328,10 @@ export type SleepGoalUpsertArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the SleepGoal
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
   /**
    * The filter to search for the SleepGoal to update in case it exists.
    */
@@ -1220,6 +1358,10 @@ export type SleepGoalDeleteArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the SleepGoal
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
   /**
    * Filter which SleepGoal to delete.
    */
@@ -1252,4 +1394,8 @@ export type SleepGoalDefaultArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the SleepGoal
    */
   omit?: Prisma.SleepGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SleepGoalInclude<ExtArgs> | null
 }

@@ -1,15 +1,11 @@
 "use server";
 
 import { connectSchema } from "@/modules/onboarding/domain/schemas";
-import { actionError } from "@/modules/onboarding/application/ports";
 import { requireSessionUserId } from "@/shared/auth/require-session-user";
 import { saveConnectStep } from "@/modules/onboarding/application/save-connect-step";
 import { redirect } from "next/navigation";
 
-export async function submitConnectAction(
-  previousState: ReturnType<typeof actionError>,
-  formData: FormData,
-) {
+export async function submitConnectAction(formData: FormData): Promise<void> {
   const userId = await requireSessionUserId();
 
   const values = Object.fromEntries(Array.from(formData.entries()).map(([key, value]) => [
@@ -19,7 +15,7 @@ export async function submitConnectAction(
   const parsed = connectSchema.safeParse(values);
 
   if (!parsed.success) {
-    return actionError(previousState, formData, parsed.error.flatten().fieldErrors);
+    return;
   }
 
   await saveConnectStep(userId, parsed.data);

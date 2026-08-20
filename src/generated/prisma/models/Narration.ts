@@ -772,7 +772,6 @@ export type NarrationCreateWithoutAnalysisSnapshotInput = {
 
 export type NarrationUncheckedCreateWithoutAnalysisSnapshotInput = {
   id?: string
-  userId: string
   scheduleAdviceId?: string | null
   provider: string
   model?: string | null
@@ -829,7 +828,6 @@ export type NarrationCreateWithoutScheduleAdviceInput = {
 
 export type NarrationUncheckedCreateWithoutScheduleAdviceInput = {
   id?: string
-  userId: string
   analysisSnapshotId?: string | null
   provider: string
   model?: string | null
@@ -934,7 +932,6 @@ export type NarrationUncheckedUpdateManyWithoutUserInput = {
 
 export type NarrationCreateManyAnalysisSnapshotInput = {
   id?: string
-  userId: string
   scheduleAdviceId?: string | null
   provider: string
   model?: string | null
@@ -966,7 +963,6 @@ export type NarrationUpdateWithoutAnalysisSnapshotInput = {
 
 export type NarrationUncheckedUpdateWithoutAnalysisSnapshotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scheduleAdviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -982,7 +978,6 @@ export type NarrationUncheckedUpdateWithoutAnalysisSnapshotInput = {
 
 export type NarrationUncheckedUpdateManyWithoutAnalysisSnapshotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   scheduleAdviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -998,7 +993,6 @@ export type NarrationUncheckedUpdateManyWithoutAnalysisSnapshotInput = {
 
 export type NarrationCreateManyScheduleAdviceInput = {
   id?: string
-  userId: string
   analysisSnapshotId?: string | null
   provider: string
   model?: string | null
@@ -1030,7 +1024,6 @@ export type NarrationUpdateWithoutScheduleAdviceInput = {
 
 export type NarrationUncheckedUpdateWithoutScheduleAdviceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   analysisSnapshotId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1046,7 +1039,6 @@ export type NarrationUncheckedUpdateWithoutScheduleAdviceInput = {
 
 export type NarrationUncheckedUpdateManyWithoutScheduleAdviceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
   analysisSnapshotId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
