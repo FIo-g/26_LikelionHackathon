@@ -16,6 +16,7 @@ import { PlanMobileContent, PlanScreen } from "@/modules/planner/ui/plan-screen"
 import type { PlanViewModel } from "@/modules/planner/application/get-plan-view-model";
 
 const viewModel: PlanViewModel = {
+  timezone: "America/New_York",
   calendarConnection: { availability: "coming-soon" },
   planStatus: "none",
   dismissedAdvice: false,
@@ -81,7 +82,14 @@ describe("Plan screen", () => {
     expect(screen.getByRole("button", { name: "주요 일정 추가" })).toBeVisible();
     expect(screen.getByRole("button", { name: "계획에 반영" })).toBeVisible();
     expect(screen.getByRole("button", { name: "제안 닫기" })).toBeVisible();
-    expect(screen.getByRole("region", { name: "가까운 수면 일정" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "앞으로 2주" })).toBeVisible();
+  });
+
+  it("formats plan instants in the ViewModel timezone", () => {
+    render(<PlanScreen viewModel={viewModel} />);
+
+    expect(screen.getByText("취침 10:00")).toBeVisible();
+    expect(screen.getByText("기상 18:00")).toBeVisible();
   });
 
   it("uses nearby advice instead of desktop calendar and strip in the mobile presentation", () => {

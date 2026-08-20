@@ -66,4 +66,57 @@ describe("generateRerouteProposal", () => {
 
     expect(result).toBeNull();
   });
+
+  it("does not derive a conflict from a plan day whose target bedtime is before the trigger instant", () => {
+    const result = generateRerouteProposal({
+      timezone: "Asia/Seoul",
+      goal: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
+      baseline: null,
+      trigger: {
+        recordId: "caffeine-1",
+        input: {
+          type: "caffeine",
+          brand: "테스트",
+          product: "커피",
+          caffeineMg: 120,
+          consumedAt: new Date("2026-08-22T14:30:00.000Z"),
+          timezone: "Asia/Seoul",
+        },
+      },
+      activeDays: [
+        target("2026-08-22", "2026-08-22T14:15:00.000Z"),
+        target("2026-08-23", "2026-08-23T15:00:00.000Z"),
+      ],
+      now: new Date("2026-08-22T14:00:00.000Z"),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("does not derive a conflict from completed or superseded plan days", () => {
+    const result = generateRerouteProposal({
+      timezone: "Asia/Seoul",
+      goal: { targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 },
+      baseline: null,
+      trigger: {
+        recordId: "caffeine-1",
+        input: {
+          type: "caffeine",
+          brand: "테스트",
+          product: "커피",
+          caffeineMg: 120,
+          consumedAt: new Date("2026-08-22T12:30:00.000Z"),
+          timezone: "Asia/Seoul",
+        },
+      },
+      activeDays: [
+        { ...target("2026-08-22", "2026-08-22T15:00:00.000Z"), status: "completed" },
+        { ...target("2026-08-23", "2026-08-23T15:00:00.000Z"), status: "superseded" },
+        target("2026-08-24", "2026-08-24T15:00:00.000Z"),
+      ],
+      now: new Date("2026-08-22T10:00:00.000Z"),
+    });
+
+    expect(result).toBeNull();
+  });
 });

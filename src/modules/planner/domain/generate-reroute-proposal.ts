@@ -69,10 +69,30 @@ const hasProvisionalConflict = (trigger: RerouteTrigger, activeDays: readonly Pl
   return wakeDrift > WAKE_DRIFT_MINUTES || plannedDuration - actualDuration > DURATION_SHORTFALL_MINUTES;
 };
 
-export const generateRerouteProposal = (input: RerouteProposalInput): ScheduleProposal | null => {
-  if (!hasProvisionalConflict(input.trigger, input.activeDays)) return null;
+export const rerouteTriggerInstant = (trigger: RerouteTrigger): Date => {
+  const { input } = trigger;
+  if (input.type === "sleep" || input.type === "exercise") return input.endedAt;
+  if (input.type === "caffeine" || input.type === "alcohol") return input.consumedAt;
+  if (input.type === "meal") return input.eatenAt;
+  if (input.type === "phone-usage") return input.lastUseAt;
+  return new Date(`${input.localDate}T00:00:00.000Z`);
+};
 
-  const futureDays = input.activeDays.filter((day) => new Date(day.targetBedAt).getTime() > input.now.getTime());
+export const selectReroutePlanDays = (
+  activeDays: readonly PlanDayEntity[],
+  trigger: RerouteTrigger,
+  now: Date,
+): readonly PlanDayEntity[] => {
+  const threshold = Math.max(now.getTime(), rerouteTriggerInstant(trigger).getTime());
+  return activeDays
+    .filter((day) => day.status === "active" && new Date(day.targetBedAt).getTime() > threshold)
+    .slice()
+    .sort((left, right) => left.localDate.localeCompare(right.localDate) || left.id.localeCompare(right.id));
+};
+
+export const generateRerouteProposal = (input: RerouteProposalInput): ScheduleProposal | null => {
+  const futureDays = selectReroutePlanDays(input.activeDays, input.trigger, input.now);
+  if (!hasProvisionalConflict(input.trigger, futureDays)) return null;
   const firstFutureDay = futureDays[0];
   if (!firstFutureDay) return null;
 

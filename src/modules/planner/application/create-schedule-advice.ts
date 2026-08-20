@@ -174,10 +174,11 @@ export const createScheduleAdviceService = (
           : [];
         return { result, pendingNarration };
       });
-      const narrationDependencies = dependencies.narrationDependencies
-        ?? (hasNarrationModel(getPrisma() as TransactionClient)
+      const narrationDependencies = dependencies.narrationDependencies === undefined
+        ? (hasNarrationModel(getPrisma() as TransactionClient)
           ? { provider: createOpenAiNarrationProvider(), repository: narrationRepositoryFactory(getPrisma() as TransactionClient, scope) }
-          : null);
+          : null)
+        : dependencies.narrationDependencies;
       if (narrationDependencies) {
         await Promise.allSettled(committed.pendingNarration.map((request) => generateNarration(request, narrationDependencies)));
       }

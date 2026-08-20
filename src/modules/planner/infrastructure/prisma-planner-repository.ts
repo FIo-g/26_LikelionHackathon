@@ -192,8 +192,20 @@ export const createPrismaPlannerRepository = (
     findActivePlan: async () => {
       const plan = await client.sleepPlan.findFirst({
         where: { userId: scope.userId, status: "active" },
+        select: {
+          id: true,
+          status: true,
+          activeKey: true,
+          revisions: { orderBy: { createdAt: "desc" }, take: 1, select: { id: true } },
+        },
       });
-      return plan ? { id: toStringValue(plan.id), status: "active" } satisfies SleepPlanEntity : null;
+      const revision = Array.isArray(plan?.revisions) ? plan.revisions[0] as DbPayload | undefined : undefined;
+      return plan ? {
+        id: toStringValue(plan.id),
+        status: "active",
+        activeKey: plan.activeKey === null || plan.activeKey === undefined ? null : toStringValue(plan.activeKey),
+        revisionId: revision ? toStringValue(revision.id) : null,
+      } satisfies SleepPlanEntity : null;
     },
     listActiveDays: async (planId) => {
       const rows = await client.planDay.findMany({
@@ -232,7 +244,7 @@ export const createPrismaPlannerRepository = (
       const revision = await client.planRevision.findFirst({
         where: { userId: scope.userId, triggerEntityType: "special-event", triggerEntityId: eventId },
         orderBy: { createdAt: "desc" },
-        select: { planId: true },
+        select: { id: true, planId: true },
       });
       if (!revision) {
         return null;
@@ -243,6 +255,8 @@ export const createPrismaPlannerRepository = (
       return plan ? {
         id: toStringValue(plan.id),
         status: toStringValue(plan.status) as SleepPlanEntity["status"],
+        activeKey: plan.activeKey === null || plan.activeKey === undefined ? null : toStringValue(plan.activeKey),
+        revisionId: toStringValue(revision.id),
       } : null;
     },
     acceptAdvice: async (input) => {

@@ -75,6 +75,10 @@ const inputSnapshotSchema = versionedPayloadSchema({
   }).strict().nullable(),
   planId: z.string().min(1).nullable(),
   triggerRecordId: z.string().min(1).nullable(),
+  planActiveKey: z.string().min(1).nullable().optional(),
+  planRevisionId: z.string().min(1).nullable().optional(),
+  triggerInstant: instantSchema.optional(),
+  activeDays: z.array(planDayTargetSchema).optional(),
   rerouteRecords: z.array(z.object({
     id: z.string().min(1),
     type: z.string().min(1),
@@ -85,6 +89,12 @@ const inputSnapshotSchema = versionedPayloadSchema({
   const hasPlan = value.planId !== null;
   if (hasEvent === hasPlan) {
     context.addIssue({ code: z.ZodIssueCode.custom, message: "Snapshot must target exactly one event or plan" });
+  }
+  const rerouteIdentityParts = [value.planActiveKey, value.planRevisionId, value.triggerInstant, value.activeDays];
+  const hasAnyRerouteIdentity = rerouteIdentityParts.some((part) => part !== undefined);
+  const hasCompleteRerouteIdentity = rerouteIdentityParts.every((part) => part !== undefined);
+  if ((hasPlan && !hasCompleteRerouteIdentity) || (hasEvent && hasAnyRerouteIdentity)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "Reroute snapshot must include active plan identity and days" });
   }
 }) as z.ZodType<PlannerInputSnapshot>;
 

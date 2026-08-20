@@ -5,6 +5,7 @@ import type { PlannerRepository } from "./ports";
 
 export type ScheduleAdviceViewModel = Readonly<{
   id: string;
+  timezone?: string;
   triggerType: "event" | "reroute";
   status: "generated" | "accepted" | "dismissed" | "superseded" | "failed";
   headline: string;
@@ -13,6 +14,7 @@ export type ScheduleAdviceViewModel = Readonly<{
 }>;
 
 export type PlanViewModel = Readonly<{
+  timezone: string;
   calendarConnection: { availability: "coming-soon" };
   planStatus: "active" | "none";
   dismissedAdvice: boolean;
@@ -48,12 +50,14 @@ export const getPlanViewModel = async (
   const eventType = generatedAdvice?.inputSnapshot.event?.type;
 
   return {
+    timezone,
     calendarConnection: { availability: "coming-soon" },
     planStatus: activePlan ? "active" : "none",
     dismissedAdvice: generatedAdvice === null && dismissedAdvice !== null,
     events,
     advice: generatedAdvice ? {
       id: generatedAdvice.id,
+      timezone,
       triggerType: generatedAdvice.triggerType,
       status: generatedAdvice.status,
       headline: adviceHeadline(eventType),

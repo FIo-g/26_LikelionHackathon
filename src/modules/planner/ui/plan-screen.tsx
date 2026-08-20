@@ -11,18 +11,18 @@ import styles from "./plan.module.css";
 export const PlanDesktopContent = ({ viewModel }: { viewModel: PlanViewModel }) => (
   <>
     <CalendarConnectionCard availability={viewModel.calendarConnection.availability} />
-    <div className={styles.desktopGrid}><PlanCalendar events={viewModel.events} /><MajorEventForm /></div>
-    {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} /> : null}
+    <div className={styles.desktopGrid}><PlanCalendar events={viewModel.events} timezone={viewModel.timezone} /><MajorEventForm /></div>
+    {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} timezone={viewModel.timezone} /> : null}
     {!viewModel.advice && viewModel.dismissedAdvice ? <p className={styles.dismissedNotice} role="status">제안을 닫았습니다.</p> : null}
-    <TwoWeekPlanStrip days={viewModel.days} planStatus={viewModel.planStatus} />
+    <TwoWeekPlanStrip days={viewModel.days} planStatus={viewModel.planStatus} timezone={viewModel.timezone} />
   </>
 );
 
 export const PlanMobileContent = ({ viewModel }: { viewModel: PlanViewModel }) => (
   <>
     <MajorEventForm />
-    <NearbyDayAdvice days={viewModel.days} />
-    {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} /> : null}
+    <NearbyDayAdvice days={viewModel.days} timezone={viewModel.timezone} />
+    {viewModel.advice ? <ScheduleAdviceCard advice={viewModel.advice} timezone={viewModel.timezone} /> : null}
     {!viewModel.advice && viewModel.dismissedAdvice ? <p className={styles.dismissedNotice} role="status">제안을 닫았습니다.</p> : null}
   </>
 );

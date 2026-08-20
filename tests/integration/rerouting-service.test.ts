@@ -40,11 +40,9 @@ describe("evaluateRerouting", () => {
     };
 
     const record = {
-      id: "caffeine-1",
-      userId: scope.userId,
-      localDate: "2026-08-22",
+      recordId: "caffeine-1",
       input: {
-        type: "caffeine",
+        type: "caffeine" as const,
         brand: "테스트",
         product: "커피",
         caffeineMg: 120,
@@ -72,7 +70,7 @@ describe("evaluateRerouting", () => {
       findLatestDismissedAdvice: async () => null, findPlanForEvent: async () => null, acceptAdvice: async () => ({ planId: "plan-1", revisionId: "revision-1", changedDates: [] }),
       dismissAdvice: async () => undefined, supersedeGeneratedAdvice: async () => undefined,
     } satisfies PlannerRepository;
-    const makeRecord = (caffeineMg: number) => ({ id: "caffeine-1", userId: scope.userId, localDate: "2026-08-22", input: { type: "caffeine" as const, brand: "테스트", product: "커피", caffeineMg, consumedAt: new Date("2026-08-22T12:30:00.000Z"), timezone: "Asia/Seoul" } });
+    const makeRecord = (caffeineMg: number) => ({ recordId: "caffeine-1", input: { type: "caffeine" as const, brand: "테스트", product: "커피", caffeineMg, consumedAt: new Date("2026-08-22T12:30:00.000Z"), timezone: "Asia/Seoul" } });
 
     await evaluateRerouting(scope, repository, [makeRecord(120)], { clock: { now: () => new Date("2026-08-22T10:00:00.000Z") } });
     await evaluateRerouting(scope, repository, [makeRecord(200)], { clock: { now: () => new Date("2026-08-22T10:00:00.000Z") } });
@@ -96,15 +94,15 @@ describe("evaluateRerouting", () => {
 
     const result = await evaluateRerouting(scope, repository, records, { clock: { now: () => new Date("2026-08-22T10:00:00.000Z") } });
 
-    expect(result).toEqual({ adviceId: "reroute-existing" });
+    expect(result).toEqual({ adviceId: "reroute-existing", pendingNarration: null });
     expect(supersedeGeneratedAdvice).not.toHaveBeenCalled();
     expect(saveGeneratedAdvice).not.toHaveBeenCalled();
   });
 
   it("selects a remaining cutoff violation from the final record set after a delete", async () => {
-    const saved: Array<{ inputSnapshot: { triggerRecordId: string } }> = [];
+    const saved: Array<{ inputSnapshot: { triggerRecordId: string | null } }> = [];
     const repository = {
-      createEvent: async () => ({ eventId: "event-1" }), saveGeneratedAdvice: async (input: { inputSnapshot: { triggerRecordId: string } }) => { saved.push(input); return { adviceId: "reroute-2" }; }, findAdvice: async () => null,
+      createEvent: async () => ({ eventId: "event-1" }), saveGeneratedAdvice: async (input: Parameters<PlannerRepository["saveGeneratedAdvice"]>[0]) => { saved.push(input); return { adviceId: "reroute-2" }; }, findAdvice: async () => null,
       findCurrentGoal: async () => ({ targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 }), findCurrentBaseline: async () => null,
       findActivePlan: async () => ({ id: "plan-1", status: "active" as const }), listActiveDays: async () => [activeDay], listEvents: async () => [],
       findLatestGeneratedAdvice: async () => null, findLatestDismissedAdvice: async () => null, findPlanForEvent: async () => null,
@@ -146,5 +144,69 @@ describe("evaluateRerouting", () => {
 
     expect(restored).toEqual(first);
     expect([...adviceByHash.values()].filter((advice) => advice.status === "generated")).toEqual([{ id: first?.adviceId, status: "generated" }]);
+  });
+
+  it("changes the advice hash when the active plan revision changes", async () => {
+    const savedHashes: string[] = [];
+    let revisionId = "revision-1";
+    const repository = {
+      createEvent: async () => ({ eventId: "event-1" }),
+      saveGeneratedAdvice: async (input: { inputHash: string }) => {
+        savedHashes.push(input.inputHash);
+        return { adviceId: `reroute-${savedHashes.length}` };
+      },
+      findAdvice: async () => null,
+      findCurrentGoal: async () => ({ targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 }),
+      findCurrentBaseline: async () => null,
+      findActivePlan: async () => ({ id: "plan-1", status: "active" as const, activeKey: scope.userId, revisionId }),
+      listActiveDays: async () => [activeDay],
+      listEvents: async () => [],
+      findLatestGeneratedAdvice: async () => null,
+      findLatestDismissedAdvice: async () => null,
+      findPlanForEvent: async () => null,
+      acceptAdvice: async () => ({ planId: "plan-1", revisionId: "revision-1", changedDates: [] }),
+      dismissAdvice: async () => undefined,
+      supersedeGeneratedAdvice: async () => undefined,
+    } satisfies PlannerRepository;
+    const records = [{ recordId: "caffeine-1", input: { type: "caffeine" as const, brand: "테스트", product: "커피", caffeineMg: 120, consumedAt: new Date("2026-08-22T12:30:00.000Z"), timezone: "Asia/Seoul" } }];
+    const dependencies = { clock: { now: () => new Date("2026-08-22T10:00:00.000Z") } };
+
+    await evaluateRerouting(scope, repository, records, dependencies);
+    revisionId = "revision-2";
+    await evaluateRerouting(scope, repository, records, dependencies);
+
+    expect(savedHashes[1]).not.toBe(savedHashes[0]);
+  });
+
+  it("changes the advice hash when future active plan-day content changes", async () => {
+    const savedHashes: string[] = [];
+    let day = activeDay;
+    const repository = {
+      createEvent: async () => ({ eventId: "event-1" }),
+      saveGeneratedAdvice: async (input: { inputHash: string }) => {
+        savedHashes.push(input.inputHash);
+        return { adviceId: `reroute-${savedHashes.length}` };
+      },
+      findAdvice: async () => null,
+      findCurrentGoal: async () => ({ targetBedTime: "23:00", targetWakeTime: "07:00", targetDurationMinutes: 480 }),
+      findCurrentBaseline: async () => null,
+      findActivePlan: async () => ({ id: "plan-1", status: "active" as const, activeKey: scope.userId, revisionId: "revision-1" }),
+      listActiveDays: async () => [day],
+      listEvents: async () => [],
+      findLatestGeneratedAdvice: async () => null,
+      findLatestDismissedAdvice: async () => null,
+      findPlanForEvent: async () => null,
+      acceptAdvice: async () => ({ planId: "plan-1", revisionId: "revision-1", changedDates: [] }),
+      dismissAdvice: async () => undefined,
+      supersedeGeneratedAdvice: async () => undefined,
+    } satisfies PlannerRepository;
+    const records = [{ recordId: "caffeine-1", input: { type: "caffeine" as const, brand: "테스트", product: "커피", caffeineMg: 120, consumedAt: new Date("2026-08-22T12:30:00.000Z"), timezone: "Asia/Seoul" } }];
+    const dependencies = { clock: { now: () => new Date("2026-08-22T10:00:00.000Z") } };
+
+    await evaluateRerouting(scope, repository, records, dependencies);
+    day = { ...activeDay, targetWakeAt: "2026-08-22T23:05:00.000Z" };
+    await evaluateRerouting(scope, repository, records, dependencies);
+
+    expect(savedHashes[1]).not.toBe(savedHashes[0]);
   });
 });

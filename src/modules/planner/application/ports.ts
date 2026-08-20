@@ -3,7 +3,6 @@ import type { TransactionClient } from "@/shared/db/transaction";
 import type {
   GeneratedAdviceInput,
   PlanDayEntity,
-  PlanDayTarget,
   PlannerBaselineSnapshot,
   PlannerGoal,
   ScheduleAdviceEntity,

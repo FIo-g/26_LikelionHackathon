@@ -1,7 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AnalyzeScreen } from "@/modules/analysis/ui/analysis-report";
 import type { AnalyzeViewModel } from "@/modules/analysis/application/get-analyze-view-model";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
 
 const viewModel = {
   state: "ready",
@@ -24,10 +28,27 @@ const viewModel = {
   report: { status: "template-fallback", headline: "최근 수면 패턴", body: "본문", bullets: [] },
   scheduleAdvice: {
     id: "reroute-advice",
+    timezone: "Asia/Seoul",
     triggerType: "reroute",
     status: "generated",
     headline: "카페인 기록에 맞춰 수면 시간을 조정해요",
-    proposal: { days: [] },
+    proposal: {
+      adjustmentStartsOn: "2026-08-22",
+      eventWakeAt: "2026-08-22T23:15:00.000Z",
+      days: [{
+        localDate: "2026-08-22",
+        targetBedAt: "2026-08-22T15:15:00.000Z",
+        targetWakeAt: "2026-08-22T23:15:00.000Z",
+        caffeineCutoffAt: "2026-08-22T08:15:00.000Z",
+        exerciseCutoffAt: "2026-08-22T11:15:00.000Z",
+        mealCutoffAt: "2026-08-22T12:15:00.000Z",
+        windDownAt: "2026-08-22T14:15:00.000Z",
+      }],
+      conflicts: [],
+      confidence: "low",
+      evidence: [],
+      algorithmVersion: "provisional-v1",
+    },
     diff: [],
   },
 } as unknown as AnalyzeViewModel;
@@ -36,10 +57,10 @@ describe("AnalyzeScreen advice and mobile details", () => {
   it("renders reroute advice through the established confirmation dialog and retains the mobile disclosure", () => {
     render(<AnalyzeScreen viewModel={viewModel} />);
 
-    expect(screen.getByText("카페인 기록에 맞춰 수면 시간을 조정해요")).toBeInTheDocument();
+    expect(screen.getByText("기록된 활동에 맞춰 이후 계획을 조정해요")).toBeInTheDocument();
     expect(screen.getByText("전체 지표·근거 보기")).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button")[0]);
+    fireEvent.click(screen.getByRole("button", { name: "계획에 반영" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });

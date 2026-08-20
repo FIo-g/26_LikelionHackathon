@@ -23,4 +23,19 @@ describe("validateNarrationAgainstFacts", () => {
       facts,
     )).toEqual({ valid: true });
   });
+
+  it("rejects a metric label paired with another metric's value", () => {
+    const multipleMetrics: NarrationFacts = {
+      ...facts,
+      metrics: [
+        { id: "readiness", value: 72, band: "보통" },
+        { id: "caffeine-signal", value: 55, band: "보통" },
+      ],
+    };
+
+    expect(validateNarrationAgainstFacts(
+      { headline: "카페인 점수는 72점입니다.", body: "", bullets: [] },
+      multipleMetrics,
+    )).toEqual({ valid: false, code: "UNSUPPORTED_CLAIM" });
+  });
 });
