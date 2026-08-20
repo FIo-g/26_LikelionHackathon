@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Temporal } from "@js-temporal/polyfill";
 
 import type { Clock } from "@/shared/domain/contracts";
 import type { CreateRecordInput, RecordType, UpdateRecordInput } from "./types";
@@ -183,7 +184,13 @@ const phoneUsageSchema = (clock: Clock) => z.object({
   checkFutureDate(clock, value.lastUseAt, ["lastUseAt"], context);
 });
 
-const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
+  try {
+    return Temporal.PlainDate.from(value).toString() === value;
+  } catch {
+    return false;
+  }
+}, "INVALID_LOCAL_DATE");
 const wellnessSchema = () => z.object({
   type: z.literal("wellness"),
   localDate: localDateSchema,

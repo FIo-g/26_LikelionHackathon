@@ -160,6 +160,48 @@ describeSqlite("account export and atomic deletion", () => {
     await expect(createExportUserData(createPrismaAccountDataRepository(prisma), clock)(alice)).rejects.toBeInstanceOf(CorruptStoredPayloadError);
   });
 
+  it("rejects an oversized but otherwise valid analysis snapshot", async () => {
+    await prisma.analysisSnapshot.create({
+      data: {
+        userId: bob.userId,
+        localDate: "2026-08-20",
+        timezone: bob.timezone,
+        status: "current",
+        result: {
+          schemaVersion: 1,
+          baselineSnapshotId: "baseline-for-oversized-analysis-test",
+          analysisResult: {
+            readiness: null,
+            confidence: "insufficient",
+            metrics: {
+              sleepRhythmStability: null,
+              phoneWindDown: null,
+              caffeineSignal: null,
+              sleepGoalAttainment: null,
+            },
+            dataBasis: {
+              periodStart: "2026-08-20",
+              periodEnd: "2026-08-20",
+              sampleCount: 0,
+              excludedCount: 0,
+              missingFields: [],
+              completenessByCategory: { sleep: 0, phone: 0, meal: 0, exercise: 0, caffeine: 0, alcohol: 0, wellness: 0 },
+              sourceDistribution: { manual: 0 },
+              computedAt: now.toISOString(),
+              algorithmVersion: "provisional-v1",
+              confidence: "insufficient",
+            },
+            evidence: [{ code: "baseline-too-few-samples", label: "x".repeat(65 * 1024), direction: "neutral", value: null, count: null }],
+            missingFields: [],
+          },
+        },
+        currentKey: `${bob.userId}:oversized-export`,
+      },
+    });
+
+    await expect(createExportUserData(createPrismaAccountDataRepository(prisma), clock)(bob)).rejects.toBeInstanceOf(CorruptStoredPayloadError);
+  });
+
   it("requires a valid password verification after the five-minute freshness window", async () => {
     const stale = { userId: alice.userId, email: emailFor(alice.userId), createdAt: new Date(now.getTime() - 5 * 60_000 - 1) };
     await expect(requireRecentAuthentication(stale, null, new Headers(), clock, { api: { verifyPassword: async () => ({ status: true }) } })).rejects.toBeInstanceOf(ReauthenticationError);

@@ -6,7 +6,7 @@ import { narrationOutputSchema } from "@/modules/narration/domain/narration-sche
 import { profileSchema } from "@/modules/onboarding/domain/schemas";
 import { planDayTargetSchema, storedGeneratedAdviceInputSchema } from "@/modules/planner/domain/schemas";
 import type { ScheduleAdviceEntity, SleepPlanEntity } from "@/modules/planner/domain/types";
-import { versionedPayloadSchema } from "@/shared/validation/versioned-json";
+import { assertJsonSize, versionedPayloadSchema } from "@/shared/validation/versioned-json";
 import type { AccountDataExportRepository } from "../application/export-user-data";
 import {
   CorruptStoredPayloadError,
@@ -52,6 +52,12 @@ const localDate = (value: unknown): string => {
 };
 
 const parse = <T>(schema: z.ZodType<T>, value: unknown): T => {
+  try {
+    assertJsonSize(value);
+  } catch {
+    throw new CorruptStoredPayloadError();
+  }
+
   const result = schema.safeParse(value);
   if (!result.success) throw new CorruptStoredPayloadError();
   return result.data;

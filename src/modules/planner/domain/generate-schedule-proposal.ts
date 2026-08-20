@@ -1,5 +1,7 @@
 import { Temporal } from "@js-temporal/polyfill";
 
+import { baselineResultSchemaEnvelope } from "@/modules/analysis/domain/schemas";
+import type { BaselineResult } from "@/modules/analysis/domain/types";
 import { hashCanonicalJson } from "@/shared/validation/canonical-json";
 import type { Evidence } from "@/shared/domain/contracts";
 import { PROVISIONAL_PLANNER_RULES } from "./provisional-v1-config";
@@ -54,12 +56,21 @@ const resolveWallTime = (
 
 const toInstantString = (value: Temporal.ZonedDateTime): string => value.toInstant().toString();
 
-const baselineWakeMinute = (baseline: PlannerBaselineSnapshot | null): number | null => {
-  if (!baseline || baseline.status !== "current" || baseline.result === null || typeof baseline.result !== "object") {
+const unwrapBaselineResult = (baseline: PlannerBaselineSnapshot | null): BaselineResult | null => {
+  if (!baseline || baseline.status !== "current") {
     return null;
   }
 
-  const result = baseline.result as Record<string, unknown>;
+  const parsed = baselineResultSchemaEnvelope.safeParse(baseline.result);
+  return parsed.success ? parsed.data.baseline : null;
+};
+
+const baselineWakeMinute = (baseline: PlannerBaselineSnapshot | null): number | null => {
+  const result = unwrapBaselineResult(baseline);
+  if (!result) {
+    return null;
+  }
+
   const minute = result.baselineWakeMinuteOfDay;
   const samples = result.sampleCount;
   return typeof minute === "number" && Number.isInteger(minute) && minute >= 0 && minute < 1440
@@ -69,11 +80,12 @@ const baselineWakeMinute = (baseline: PlannerBaselineSnapshot | null): number | 
 };
 
 const baselineConfidence = (baseline: PlannerBaselineSnapshot | null): PlannerConfidence | null => {
-  if (!baseline || baseline.result === null || typeof baseline.result !== "object") {
+  const result = unwrapBaselineResult(baseline);
+  if (!result) {
     return null;
   }
 
-  const value = (baseline.result as Record<string, unknown>).confidence;
+  const value = result.confidence;
   return value === "medium" || value === "high" ? value : null;
 };
 

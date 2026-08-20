@@ -167,8 +167,12 @@ export const getAnalyzeViewModel = async (
   const narrationDb = getPrisma();
   if (snapshot.entity && hasNarrationModel(narrationDb)) {
     const narrationRepository = createNarration(narrationDb, scope);
-    await recoverStaleNarrations(clock.now(), narrationRepository);
-    narration = await narrationRepository.findForAnalysisSnapshot(snapshot.entity.id);
+    try {
+      await recoverStaleNarrations(clock.now(), narrationRepository);
+      narration = await narrationRepository.findForAnalysisSnapshot(snapshot.entity.id);
+    } catch {
+      narration = null;
+    }
   }
 
   let input: NormalizedAnalysisInput | null = null;

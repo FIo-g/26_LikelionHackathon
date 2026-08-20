@@ -113,7 +113,13 @@ describePreview("deployed preview smoke", () => {
       await expect(page).toHaveURL(/\/today$/);
       await expect(page.getByRole("heading", { name: /오늘 밤,\s*23:30에\s*편안히 잠들기 위한 준비/ })).toBeVisible();
 
-      await page.goto("/record/caffeine?step=confirm&brand=Smoke&product=Coffee&caffeineMg=80&consumedAt=2026-08-19T12%3A00");
+      await page.goto("/record/caffeine");
+      await page.getByLabel("브랜드", { exact: true }).fill("Smoke");
+      await page.getByRole("button", { name: "메뉴 선택하기" }).click();
+      await page.getByLabel("제품명", { exact: true }).fill("Coffee");
+      await page.getByLabel("카페인(mg)", { exact: true }).fill("80");
+      await page.getByLabel("마신 시각", { exact: true }).fill("2026-08-19T12:00");
+      await page.getByRole("button", { name: "수치 확인하기" }).click();
       await expect(page.getByRole("heading", { name: "카페인 기록을 확인해요" })).toBeVisible();
       await page.getByRole("button", { name: "카페인 저장" }).click();
       await expect(page).toHaveURL(/\/record$/);

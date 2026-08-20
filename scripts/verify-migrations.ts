@@ -244,7 +244,14 @@ const verifyPostgresqlHistory = async (rawUrl: string): Promise<void> => {
 await verifySqliteHistory();
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
-if (databaseUrl) {
+const isPostgresqlUrl = (value: string): boolean => {
+  try {
+    return new URL(value).protocol === "postgresql:";
+  } catch {
+    return false;
+  }
+};
+if (databaseUrl && isPostgresqlUrl(databaseUrl)) {
   await verifyPostgresqlHistory(databaseUrl);
 } else {
   console.log("PostgreSQL migration verification skipped: DATABASE_URL is not configured.");

@@ -9,7 +9,9 @@ describe("AppShell", () => {
 
     expect(screen.getAllByRole("link", { name: "Today" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Care" })).toHaveLength(2);
-    expect(screen.getByRole("link", { name: "프로필 및 수면 목표" })).toHaveAttribute("href", "/account");
+    const profileLinks = screen.getAllByRole("link", { name: "프로필 및 수면 목표" });
+    expect(profileLinks).toHaveLength(2);
+    expect(profileLinks.every((link) => link.getAttribute("href") === "/account")).toBe(true);
     expect(screen.getByText("써니")).toBeInTheDocument();
     expect(screen.getAllByText("protected content")).toHaveLength(1);
     expect(screen.getByRole("navigation", { name: "데스크톱 주요 메뉴" })).toBeInTheDocument();

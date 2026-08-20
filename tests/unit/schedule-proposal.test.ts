@@ -35,10 +35,15 @@ const scheduleContextFixture: ScheduleContext = {
     id: "baseline-1",
     status: "current",
     result: {
-      baselineBedMinuteOfDay: 1380,
-      baselineWakeMinuteOfDay: 420,
-      sampleCount: 7,
-      confidence: "high",
+      schemaVersion: 1,
+      baseline: {
+        baselineSleepMinutes: 480,
+        baselineBedMinuteOfDay: 1380,
+        baselineWakeMinuteOfDay: 420,
+        sampleCount: 7,
+        excludedCount: 0,
+        confidence: "high",
+      },
     },
   },
   event: {
@@ -84,10 +89,15 @@ describe("generateScheduleProposal", () => {
       baseline: {
         ...scheduleContextFixture.baseline!,
         result: {
-          baselineBedMinuteOfDay: 0,
-          baselineWakeMinuteOfDay: 480,
-          sampleCount: 7,
-          confidence: "high",
+          schemaVersion: 1,
+          baseline: {
+            baselineSleepMinutes: 480,
+            baselineBedMinuteOfDay: 0,
+            baselineWakeMinuteOfDay: 480,
+            sampleCount: 7,
+            excludedCount: 0,
+            confidence: "high",
+          },
         },
       },
     });
@@ -107,6 +117,26 @@ describe("generateScheduleProposal", () => {
     });
 
     expect(proposal.eventWakeAt).toBe("2026-09-11T22:00:00Z");
+  });
+
+  it("fails closed for a malformed stored baseline envelope", () => {
+    const result = generateScheduleProposal({
+      ...scheduleContextFixture,
+      baseline: {
+        ...scheduleContextFixture.baseline!,
+        result: {
+          schemaVersion: 2,
+          baseline: {
+            baselineWakeMinuteOfDay: 420,
+            sampleCount: 7,
+            confidence: "high",
+          },
+        },
+      },
+    });
+
+    expect(result.confidence).toBe("low");
+    expect(result.evidence.map((item) => item.code)).toContain("insufficient-history");
   });
 
   it("records a DST adjustment for generated recurring goal times", () => {

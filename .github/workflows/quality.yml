@@ -19,6 +19,13 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://planner:planner@127.0.0.1:5432/planner_test
+      BETTER_AUTH_SECRET: test-secret-that-is-at-least-32-characters
+      BETTER_AUTH_URL: http://127.0.0.1:3000
+      AUTH_RATE_LIMIT_ENABLED: "true"
+      OPENAI_API_KEY: test-key
+      OPENAI_MODEL: gpt-5.6-luna
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,9 +35,24 @@ jobs:
       - run: npm ci
       - run: npm exec -- auth generate --yes --config src/shared/auth/auth.ts --output prisma/schema.auth-check.prisma
       - run: npm run verify:auth-schema
+      - name: Generate the SQLite client used by isolated tests
+        run: |
+          npm run db:schema -- --provider sqlite --output prisma/schema.active.prisma
+          npm exec -- prisma generate --schema prisma/schema.active.prisma
+        env:
+          DATABASE_URL: file:./.tmp/quality-contract-e2e.sqlite
+      - name: Apply the SQLite migration history used by isolated tests
+        run: npm run db:migrate:sqlite
+        env:
+          DATABASE_URL: file:./.tmp/quality-contract-e2e.sqlite
       - run: npm run test:run
+        env:
+          DATABASE_URL: file:./.tmp/quality-contract-e2e.sqlite
+          ADAPTIVE_SLEEP_ACCOUNT_TEST_DATABASE_URL: file:./.tmp/quality-contract-e2e.sqlite
       - run: npm run lint
       - run: npm run typecheck
+      - name: Restore the PostgreSQL client before the production build
+        run: npm exec -- prisma generate --schema prisma/schema.prisma
       - run: npm run build
 
   visual-and-accessibility:
@@ -46,6 +68,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Generate the SQLite client used by browser tests
+        run: |
+          npm run db:schema -- --provider sqlite --output prisma/schema.active.prisma
+          npm exec -- prisma generate --schema prisma/schema.active.prisma
+        env:
+          DATABASE_URL: file:./.tmp/visual-e2e.sqlite
       - run: npm exec -- playwright install --with-deps chromium
       - name: Capture candidate baselines for review
         if: inputs.visual_mode == 'capture'

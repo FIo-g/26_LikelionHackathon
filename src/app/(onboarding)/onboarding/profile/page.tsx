@@ -5,7 +5,7 @@ import { requireSessionUserId } from "@/shared/auth/require-session-user";
 import styles from "@/modules/onboarding/ui/onboarding.module.css";
 import { submitProfileAction } from "./actions";
 
-export const onboardingTimezoneOptions = Intl.supportedValuesOf("timeZone");
+export const onboardingTimezoneOptions = Array.from(new Set(Intl.supportedValuesOf("timeZone")));
 
 export default async function ProfilePage() {
   const userId = await requireSessionUserId();

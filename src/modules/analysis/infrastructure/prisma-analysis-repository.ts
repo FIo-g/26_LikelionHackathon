@@ -306,11 +306,14 @@ const parseStoredBaselineEnvelope = (value: unknown, snapshotId: string): ParseR
 
 const normalizeSet = (rows: readonly string[]): string[] => [...new Set(rows)].sort();
 
+const MIN_VALID_SLEEP_MINUTES = 120;
+const MAX_VALID_SLEEP_MINUTES = 960;
+
 export const createAnalysisImpactRows = (input: NormalizedAnalysisInput): ReadonlyArray<ImpactFactorEntity> => {
   const targetBedMinuteOfDay = parseMinuteToNumber(input.goal.targetBedTime) ?? 1380;
   const cohort = (factor: SleepImpactResult["factor"], exposed: boolean): number[] => input.days
     .filter((row) => {
-      if (row.sleepMinutes === null) {
+      if (row.sleepMinutes === null || row.sleepMinutes < MIN_VALID_SLEEP_MINUTES || row.sleepMinutes > MAX_VALID_SLEEP_MINUTES) {
         return false;
       }
       return classifySleepImpactRow({
@@ -529,7 +532,19 @@ const loadWindowFromDb = async (
       })
       .sort((left, right) => left.startedAt.getTime() - right.startedAt.getTime())[0];
 
-    return followingSleep?.localDate ?? fallbackDate ?? null;
+    if (followingSleep) {
+      return followingSleep.localDate;
+    }
+
+    // No sleep session follows this observation yet (e.g. today, before tonight's
+    // sleep is logged). Only fall back to the record's own day if that day's sleep
+    // hasn't already happened -- otherwise this would misattribute e.g. an afternoon
+    // behavior to a morning sleep that already ended before the behavior occurred.
+    if (fallbackDate && daysByDate.get(fallbackDate)?.sleepMinutes === null) {
+      return fallbackDate;
+    }
+
+    return null;
   };
 
   for (const row of caffeineRows) {
