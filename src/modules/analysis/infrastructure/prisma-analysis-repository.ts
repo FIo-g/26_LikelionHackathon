@@ -520,7 +520,7 @@ const loadWindowFromDb = async (
     }
   }
 
-  const sleepDateForObservation = (observedAt: Date): string | null => {
+  const sleepDateForObservation = (observedAt: Date, fallbackDate: string | null | undefined): string | null => {
     const followingSleep = sleepSessions
       .map((session) => ({
         localDate: assertString(session.sleepDate),
@@ -532,12 +532,24 @@ const loadWindowFromDb = async (
       })
       .sort((left, right) => left.startedAt.getTime() - right.startedAt.getTime())[0];
 
-    return followingSleep?.localDate ?? null;
+    if (followingSleep) {
+      return followingSleep.localDate;
+    }
+
+    // No sleep session follows this observation yet (e.g. today, before tonight's
+    // sleep is logged). Only fall back to the record's own day if that day's sleep
+    // hasn't already happened -- otherwise this would misattribute e.g. an afternoon
+    // behavior to a morning sleep that already ended before the behavior occurred.
+    if (fallbackDate && daysByDate.get(fallbackDate)?.sleepMinutes === null) {
+      return fallbackDate;
+    }
+
+    return null;
   };
 
   for (const row of caffeineRows) {
     const consumedAt = toDate(row.consumedAt);
-    const rowDate = sleepDateForObservation(consumedAt);
+    const rowDate = sleepDateForObservation(consumedAt, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
@@ -551,7 +563,7 @@ const loadWindowFromDb = async (
 
   for (const row of alcoholRows) {
     const consumedAt = toDate(row.consumedAt);
-    const rowDate = sleepDateForObservation(consumedAt);
+    const rowDate = sleepDateForObservation(consumedAt, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
@@ -565,7 +577,7 @@ const loadWindowFromDb = async (
 
   for (const row of mealRows) {
     const mealTime = toDate(row.eatenAt);
-    const rowDate = sleepDateForObservation(mealTime);
+    const rowDate = sleepDateForObservation(mealTime, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
@@ -578,7 +590,7 @@ const loadWindowFromDb = async (
 
   for (const row of exerciseRows) {
     const endedAt = toDate(row.endedAt);
-    const rowDate = sleepDateForObservation(endedAt);
+    const rowDate = sleepDateForObservation(endedAt, row.dailyLog?.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;
@@ -596,7 +608,7 @@ const loadWindowFromDb = async (
 
   for (const row of phoneRows) {
     const lastUseAt = toDate(row.lastUseAt);
-    const rowDate = sleepDateForObservation(lastUseAt);
+    const rowDate = sleepDateForObservation(lastUseAt, row.localDate);
     const day = rowDate ? daysByDate.get(assertString(rowDate)) : null;
     if (!day) {
       continue;

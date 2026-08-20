@@ -46,7 +46,13 @@ test("creates reroute advice only after saving a cutoff-crossing caffeine record
 
   await page.goto("/plan");
   await expect(page.getByText("계획 조정 제안")).not.toBeVisible();
-  await page.goto(`/record/caffeine?step=confirm&brand=%ED%85%8C%EC%8A%A4%ED%8A%B8&product=%EC%BB%A4%ED%94%BC&caffeineMg=120&consumedAt=${encodeURIComponent(caffeineAt)}`);
+  await page.goto("/record/caffeine");
+  await page.getByLabel("브랜드").fill("테스트");
+  await page.getByRole("button", { name: "다음" }).click();
+  await page.getByLabel("제품명").fill("커피");
+  await page.getByLabel("카페인(mg)").fill("120");
+  await page.getByLabel("마신 시각").fill(caffeineAt);
+  await page.getByRole("button", { name: "다음" }).click();
   await page.getByRole("button", { name: "카페인 저장" }).click();
   await expect(page).toHaveURL(/\/record$/);
   await page.goto("/plan");

@@ -166,6 +166,9 @@ const parseConfidenceLabel = (confidence: ConfidenceLevel): string => {
   if (confidence === "low") {
     return "낮음";
   }
+  if (confidence === "insufficient") {
+    return "부족";
+  }
   return "낮음";
 };
 
@@ -253,6 +256,15 @@ const buildReadinessViewModel = (snapshot: SnapshotState): TodayViewModel["readi
   }
 
   if (snapshot.result.readiness === null) {
+    if (snapshot.status === "stale") {
+      return {
+        state: "stale",
+        data: null,
+        message: readinessMessageFromSnapshot(snapshot),
+        action: null,
+      };
+    }
+
     return {
       state: "insufficient",
       data: null,
