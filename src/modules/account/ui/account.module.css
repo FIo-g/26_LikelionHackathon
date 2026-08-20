@@ -7,5 +7,95 @@
 .liveRegion { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .dataActions { display: grid; max-width: 440px; gap: 9px; margin-top: 16px; }.dataActions label { display: grid; gap: 5px; color: #27525b; font-size: .9rem; font-weight: 700; }.dataActions input { box-sizing: border-box; width: 100%; border: 1px solid #b9d4c7; border-radius: 9px; padding: 9px; color: #16303a; background: #fbfefb; font: inherit; }.dataActions button, .dangerButton { width: fit-content; border: 0; border-radius: 9px; padding: 9px 12px; color: #fff; background: #23714f; font: inherit; font-weight: 700; cursor: pointer; }.dataActions button:disabled, .dangerButton:disabled { cursor: not-allowed; opacity: .58; }.deleteNotice { display: grid; gap: 6px; margin-top: 18px; padding: 14px; border: 1px solid #efcec7; border-radius: 12px; background: #fff8f6; }.deleteNotice p { margin: 0; color: #73564e; font-size: .9rem; }.dangerButton { background: #a4342a; }.dataDialogBackdrop { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(13, 48, 37, .48); }.dataDialog { box-sizing: border-box; width: min(520px, 100%); max-height: calc(100vh - 32px); overflow: auto; border-radius: 16px; padding: 20px; color: #16303a; background: #fff; box-shadow: 0 22px 70px rgba(11, 49, 37, .28); }.dataDialog h2 { margin: 0 0 8px; }.dataDialog > p:not(.eyebrow) { margin: 0 0 16px; color: #557078; }.dialogActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }.dialogActions button { border: 0; border-radius: 9px; padding: 9px 12px; color: #196347; background: #e5f3ea; font: inherit; font-weight: 700; cursor: pointer; }.dialogActions .dangerButton { color: #fff; background: #a4342a; }
 :global(.bottomSheet) { width: min(620px, calc(100% - 28px)); max-height: min(720px, calc(100vh - 28px)); padding: 0; border: 0; border-radius: 18px; box-shadow: 0 22px 70px rgba(11, 49, 37, .28); }:global(.bottomSheet::backdrop) { background: rgba(13, 48, 37, .42); }:global(.bottomSheet > div) { padding: 18px; background: #fff; }:global(.bottomSheet > div > div:first-child) { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }:global(.bottomSheet h2) { margin: 0; }:global(.bottomSheet button) { border: 0; border-radius: 8px; padding: 8px 10px; background: #e5f3ea; color: #1e6448; font: inherit; font-weight: 700; cursor: pointer; }
-@media (max-width: 767px) { .accountLayout { padding: var(--space-2); padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }.desktopTabs, .desktopDetails { display: none; }.mobileDetails { display: grid; gap: 10px; }.summaryCard { padding: 15px; }.summaryCard p { margin: 0 0 12px; color: #557078; }.dataEntry { margin-top: 12px; } }
+.mobileProfileCard,
+.mobileGoalCard,
+.mobileConnectionCard,
+.mobileProfileCopy,
+.mobileConnectionList,
+.mobileInputPill,
+.mobileManualNote { display: none; }
+
+@media (max-width: 767px) {
+  .accountLayout {
+    min-height: 100%;
+    padding: 0 0 calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+    color: #21152e;
+    background: #f4eef8;
+  }
+  .header {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .desktopTabs, .desktopDetails { display: none; }
+  .mobileDetails { display: grid; gap: 16px; padding: 24px 24px 0; }
+  .summaryCard { border: 1px solid #e2d6e9; border-radius: 21px; background: #ffffff; box-shadow: 0 3px 10px rgba(38, 18, 56, .04); }
+  .mobileProfileCard {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    min-height: 132px;
+    box-sizing: border-box;
+    padding: 20px 22px;
+  }
+  .mobileProfileCard > img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+  }
+  .mobileProfileCopy { display: block; min-width: 0; }
+  .mobileProfileCopy h2,
+  .mobileProfileCopy p { margin: 0; }
+  .mobileProfileCopy h2 { font-size: 16px; letter-spacing: -0.05em; }
+  .mobileProfileCopy p { margin-top: 10px; color: #766982; font-size: 13px; }
+  .mobileProfileCard > button,
+  .mobileGoalCard > button,
+  .mobileConnectionCard > button {
+    border: 0;
+    padding: 6px 0;
+    color: #5f346f;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .mobileGoalCard {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    min-height: 170px;
+    box-sizing: border-box;
+    padding: 26px 24px;
+    border-color: #6c417d;
+    background: #5f346f;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(38, 18, 56, .12);
+  }
+  .mobileGoalCard h2,
+  .mobileGoalCard p { margin: 0; }
+  .mobileGoalCard h2 { grid-column: 1 / -1; align-self: start; font-size: 16px; }
+  .mobileGoalCard p { font-size: 30px; font-weight: 800; letter-spacing: -0.065em; }
+  .mobileGoalCard > button { color: #ffffff; }
+  .mobileConnectionCard { display: block; padding: 24px; }
+  .mobileConnectionCard h2 { margin: 0 0 20px; font-size: 18px; letter-spacing: -0.05em; }
+  .mobileConnectionList { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+  .mobileConnectionList li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+  .mobileConnectionList li > span { width: 10px; height: 10px; border-radius: 50%; background: #5f346f; }
+  .mobileConnectionList strong { font-size: 14px; letter-spacing: -0.04em; }
+  .mobileConnectionList em { color: #8a7d94; font-size: 13px; font-style: normal; }
+  .mobileInputPill { display: inline-block; margin: 24px 0 0; padding: 8px 17px; border-radius: 999px; background: #e5f0fa; color: #5a7cb4; font-size: 13px; font-weight: 700; }
+  .mobileConnectionCard > button { float: right; margin-top: 23px; }
+  .mobileManualNote { display: block; padding: 20px; border: 1px solid #eddca7; border-radius: 18px; background: #fff4d9; }
+  .mobileManualNote strong { display: block; font-size: 14px; }
+  .mobileManualNote p { margin: 8px 0 0; color: #766982; font-size: 13px; }
+  .dataEntry { margin: 16px 24px 0; border-color: #e2d6e9; box-shadow: 0 3px 10px rgba(38, 18, 56, .04); }
+}
 @media (prefers-reduced-motion: reduce) { .dataDialogBackdrop, .dataDialog { scroll-behavior: auto; } }

@@ -10,10 +10,12 @@
 .metricCard, .priorityDetail { min-height: 120px; padding: 16px; border-radius: 14px; background: #f4f6ff; }
 .metricCard p, .priorityDetail p { margin: 0; color: #65708d; font-size: 14px; }
 .metricCard strong, .priorityDetail strong { display: block; margin: 15px 0 8px; font-size: 24px; }
+.metricMobileLabel { display: none; }
 .status_ready { color: #207657; font-size: 13px; font-weight: 700; }
 .status_stale { color: #8b6615; font-size: 13px; font-weight: 700; }
 .status_insufficient, .status_error { color: #687189; font-size: 13px; font-weight: 700; }
 .reportSection p { color: #59627e; line-height: 1.6; }
+.mobileReportEyebrow, .reportBasis { display: none; }
 .reportSection li { margin: 8px 0; }
 .disclaimer { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e4e8f5; font-size: 13px; }
 .desktopDetails { max-width: 1080px; margin: 18px auto 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
@@ -44,17 +46,96 @@
 .dataBasisList dt { color: #65708d; font-size: 13px; }
 .dataBasisList dd { margin: 4px 0 0; font-weight: 700; }
 .emptyState { color: #66718e; }
-.mobileDetails { display: none; }
+.mobileDetails, .mobileExplainabilityVisual { display: none; }
 @media (max-width: 767px) {
-  .page { padding: var(--space-2); padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }
-  .hero { padding: 22px; }
-  .primaryLayout { display: block; }
-  .primaryLayout > * { margin-bottom: 14px; }
-  .metricGrid { grid-template-columns: repeat(2, 1fr); }
-  .priorityDetail { display: none; }
+  .page {
+    min-height: 100%;
+    padding: 0 0 calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+    background: #f4eef8;
+    color: #21152e;
+  }
+  .hero {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .primaryLayout { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 20px 24px 0; }
+  .metricSection {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .metricSection .sectionHeading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+  .metricCard {
+    min-height: 128px;
+    box-sizing: border-box;
+    padding: 21px 22px;
+    border: 1px solid #e2d6e9;
+    border-radius: 21px;
+    background: #ffffff;
+    box-shadow: 0 3px 10px rgba(38, 18, 56, .04);
+  }
+  .metricCard p { color: #766982; font-size: 14px; }
+  .metricCard strong { margin: 19px 0 0; color: #21152e; font-size: 25px; letter-spacing: -0.06em; }
+  .metricCard .status_ready,
+  .metricCard .status_stale,
+  .metricCard .status_insufficient,
+  .metricCard .status_error { display: none; }
+  .metricGrid > [data-metric-key="sleep-rhythm"], .metricGrid > [data-metric-key="phone-wind-down"] { display: none; }
+  .metricGrid > [data-metric-key="caffeine-signal"] { display: block; order: 2; }
+  .metricGrid > [data-metric-key="sleep-goal"] { display: block; order: 1; }
+  .metricDesktopLabel { display: none; }
+  .metricMobileLabel { display: inline; }
+  .desktopReportEyebrow { display: none; }
+  .mobileReportEyebrow { display: block; }
+  .reportSection {
+    margin: 0;
+    padding: 26px 24px;
+    border: 1px solid #6c417d;
+    border-radius: 23px;
+    background: #5f346f;
+    box-shadow: 0 8px 20px rgba(38, 18, 56, .12);
+    color: #ffffff;
+  }
+  .reportSection .eyebrow { margin-bottom: 17px; color: #ffffff; font-size: 13px; letter-spacing: -0.02em; }
+  .reportSection h2 { color: #ffffff; font-size: 23px; line-height: 1.38; letter-spacing: -0.065em; }
+  .reportSection p { color: #eee3f3; font-size: 13px; line-height: 1.6; }
+  .reportSection .reportBasis { display: inline-block; margin-top: 16px; padding: 6px 12px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 12px; font-weight: 800; }
+  .reportSection ul { margin: 16px 0 0; padding-left: 18px; color: #eee3f3; font-size: 13px; line-height: 1.5; }
+  .reportSection .disclaimer { color: #e8ddea; border-color: rgba(255, 255, 255, .18); }
+  .mobileExplainabilityVisual {
+    position: relative;
+    display: block;
+    min-height: 160px;
+    box-sizing: border-box;
+    margin: 16px 24px 0;
+    padding: 24px 120px 22px 24px;
+    border-radius: 22px;
+    background: #e5f0fa;
+    color: #21152e;
+  }
+  .mobileExplainabilityVisual img {
+    position: absolute;
+    right: 12px;
+    bottom: 13px;
+    width: 92px;
+    height: 92px;
+    object-fit: contain;
+  }
+  .mobileExplainabilityVisual strong { display: block; font-size: 16px; letter-spacing: -0.05em; }
+  .mobileExplainabilityVisual p { margin: 25px 0 0; color: #766982; font-size: 13px; line-height: 1.55; }
   .desktopDetails { display: none; }
-  .mobileDetails { display: block; max-width: 1080px; margin: 14px auto 0; border: 1px solid #d7dcf3; border-radius: 16px; background: white; }
-  .mobileDetails summary { padding: 18px; cursor: pointer; color: #34317e; font-weight: 800; }
+  .mobileDetails { display: block; max-width: none; margin: 16px 24px 0; border: 1px solid #e2d6e9; border-radius: 18px; background: white; }
+  .mobileDetails summary { padding: 18px; cursor: pointer; color: #5f346f; font-weight: 800; }
   .mobileDetails > * { margin: 0 14px 14px; }
   .mobileDetails .priorityDetail { display: block; }
   .whatIfForm { grid-template-columns: 1fr; }

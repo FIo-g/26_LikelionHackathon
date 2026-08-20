@@ -3,17 +3,24 @@ import type { ReactNode } from "react";
 import styles from "./app-shell.module.css";
 
 const navigation = [
-  { href: "/today", label: "Today" },
-  { href: "/record", label: "Record" },
-  { href: "/plan", label: "Plan" },
-  { href: "/analyze", label: "Analyze" },
-  { href: "/care", label: "Care" },
-  { href: "/account", label: "Account" },
+  { href: "/today", label: "Today", mobileLabel: "오늘" },
+  { href: "/record", label: "Record", mobileLabel: "기록" },
+  { href: "/plan", label: "Plan", mobileLabel: "계획" },
+  { href: "/analyze", label: "Analyze", mobileLabel: "분석" },
+  { href: "/care", label: "Care", mobileLabel: "케어" },
+  { href: "/account", label: "Account", mobileLabel: "프로필" },
 ] as const;
 
 const NavigationLinks = () => (
   <ul className={styles.navigationList}>
-    {navigation.map((item) => <li key={item.href}><Link href={item.href}>{item.label}</Link></li>)}
+    {navigation.map((item) => (
+      <li key={item.href}>
+        <Link aria-label={item.label} href={item.href}>
+          <span className={styles.desktopLabel}>{item.label}</span>
+          <span aria-hidden="true" className={styles.mobileLabel}>{item.mobileLabel}</span>
+        </Link>
+      </li>
+    ))}
   </ul>
 );
 

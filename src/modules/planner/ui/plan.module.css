@@ -8,4 +8,155 @@
 .dismissedNotice { margin: 0 0 14px; padding: 12px 14px; border-radius: 10px; background: #eef2ff; color: #3b4bbf; }
 .dialogBackdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(19, 29, 68, 0.46); }.confirmationDialog { width: min(620px, 100%); max-height: min(720px, calc(100vh - 40px)); overflow: auto; padding: 22px; border: 1px solid #d7dcf3; border-radius: 16px; background: #ffffff; box-shadow: 0 20px 60px rgba(17, 25, 60, 0.28); }.dialogHeading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }.dialogHeading h2 { margin: 0; font-size: 1.25rem; }.dialogClose { border: 0; background: transparent; color: #4a5477; font: inherit; cursor: pointer; }.changeList { display: grid; gap: 10px; margin: 18px 0; padding: 0; list-style: none; }.changeList li { padding: 12px; border: 1px solid #e4e8f6; border-radius: 10px; background: #f9fbff; }.changeList strong { color: #2f3b6e; }.changeList p { display: grid; grid-template-columns: 42px 1fr; gap: 8px; margin: 8px 0 0; color: #4a5477; font-size: 0.9rem; }.changeList p span { color: #66708f; }.changeList details { margin-top: 10px; color: #3b4bbf; font-size: 0.9rem; }.changeList dl { display: grid; gap: 5px; margin: 10px 0 0; color: #4a5477; }.changeList dl div { display: flex; justify-content: space-between; gap: 10px; }.changeList dt, .changeList dd { margin: 0; }.dialogActions { display: flex; justify-content: end; gap: 8px; }.dialogActions button { border: 0; border-radius: 8px; padding: 9px 12px; background: #6d67df; color: #ffffff; font: inherit; cursor: pointer; }.dialogActions button:disabled, .dialogClose:disabled { cursor: not-allowed; opacity: 0.65; }.dialogActions .secondaryButton { background: #eef2ff; color: #3b4bbf; }.dialogError { margin: 0 0 12px; color: #b42318; }
 .mobilePlanContent { display: none; }.nearbyAgenda { margin: 0 0 14px; padding: 18px; border: 1px solid #d7dcf3; border-radius: 14px; background: #ffffff; box-shadow: 0 10px 24px rgba(17, 25, 60, 0.08); }.nearbyAgenda h2 { margin: 0 0 10px; font-size: 1.1rem; }.nearbyAgenda ol { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }.nearbyAgenda li { display: grid; gap: 3px; padding: 10px; border-radius: 10px; background: #f9fbff; border: 1px solid #e4e8f6; }.nearbyAgenda time { color: #3b4bbf; font-size: 0.86rem; }.nearbyAgenda span { color: #4e5a82; font-size: 0.9rem; }
-@media (max-width: 767px) { .planPage { padding: var(--space-2); padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); }.desktopPlanContent { display: none; }.mobilePlanContent { display: block; }.formFields { grid-template-columns: 1fr; }.fullWidth { grid-column: auto; }.adviceActions { display: grid; grid-template-columns: 1fr; }.adviceActions button { width: 100%; } }
+.mobileConnection,
+.mobileAgenda,
+.mobileAiCard,
+.mobileAddButton,
+.mobileEmptyAgenda,
+.mobileCalendarMark,
+.mobileConnectionStatus,
+.mobileEventDot { display: none; }
+
+@media (max-width: 767px) {
+  .planPage {
+    min-height: 100%;
+    padding: 0 0 calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+    color: #21152e;
+    background: #f4eef8;
+  }
+  .planHeader {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .desktopPlanContent { display: none; }
+  .mobilePlanContent {
+    display: grid;
+    gap: 16px;
+    padding: 20px 24px 0;
+  }
+  .mobileConnection {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 84px;
+    box-sizing: border-box;
+    padding: 15px 18px;
+    border-radius: 18px;
+    background: #e5f0fa;
+  }
+  .mobileCalendarMark {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff4d9;
+    color: #5f346f;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .mobileConnection h2,
+  .mobileConnection p { margin: 0; }
+  .mobileConnection h2 { font-size: 14px; letter-spacing: -0.045em; }
+  .mobileConnection p { margin-top: 4px; color: #766982; font-size: 12px; }
+  .mobileConnectionStatus {
+    display: inline;
+    color: #766982;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .mobileAgenda { display: block; }
+  .mobileAgenda h2 { margin: 18px 0 14px; font-size: 27px; letter-spacing: -0.065em; }
+  .mobileAgenda ol { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .mobileAgenda li {
+    display: grid;
+    grid-template-columns: 12px 81px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    min-height: 74px;
+    box-sizing: border-box;
+    padding: 17px 18px;
+    border: 1px solid #e2d6e9;
+    border-radius: 19px;
+    background: #ffffff;
+    box-shadow: 0 3px 10px rgba(38, 18, 56, .04);
+  }
+  .mobileEventDot {
+    display: block;
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: #603b74;
+  }
+  .mobileAgenda time { color: #5f346f; font-size: 13px; font-weight: 800; }
+  .mobileAgenda strong,
+  .mobileAgenda span { display: block; }
+  .mobileAgenda strong { font-size: 14px; letter-spacing: -0.04em; }
+  .mobileAgenda div span { margin-top: 8px; color: #8a7d94; font-size: 13px; }
+  .mobileEmptyAgenda {
+    display: block;
+    margin: 0;
+    padding: 19px;
+    border: 1px dashed #d8c7e1;
+    border-radius: 18px;
+    color: #766982;
+    background: #ffffff;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .mobileAiCard {
+    position: relative;
+    display: block;
+    min-height: 155px;
+    box-sizing: border-box;
+    padding: 26px 122px 24px 24px;
+    border: 1px solid #ded0e7;
+    border-radius: 22px;
+    background: #f0e9f5;
+  }
+  .mobileAiCard img {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    width: 94px;
+    height: 94px;
+    object-fit: contain;
+  }
+  .mobileAiCard h2,
+  .mobileAiCard p { margin: 0; }
+  .mobileAiCard h2 { font-size: 16px; line-height: 1.4; letter-spacing: -0.045em; }
+  .mobileAiCard p { margin-top: 22px; color: #766982; font-size: 13px; line-height: 1.55; }
+  .mobileAddButton {
+    display: grid;
+    min-height: 62px;
+    place-items: center;
+    border-radius: 17px;
+    background: #5f346f;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+  }
+  .mobileAddButton:hover,
+  .mobileAddButton:focus-visible { background: #482758; }
+  .mobilePlanContent .eventFormCard,
+  .mobilePlanContent .nearbyAgenda,
+  .mobilePlanContent .adviceCard { margin: 0; border-color: #e2d6e9; border-radius: 20px; box-shadow: 0 3px 10px rgba(38, 18, 56, .04); }
+  .mobilePlanContent .eventFormCard { scroll-margin-top: 20px; }
+  .mobilePlanContent .nearbyAgenda { background: #ffffff; }
+  .formFields { grid-template-columns: 1fr; }
+  .fullWidth { grid-column: auto; }
+  .adviceActions { display: grid; grid-template-columns: 1fr; }
+  .adviceActions button { width: 100%; }
+}
