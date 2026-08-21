@@ -1,5 +1,6 @@
 import { withTimeout } from "@/shared/time/with-timeout";
-import { logNarrationOutcome } from "@/shared/observability/operational-log";
+import { ZodError } from "zod";
+import { logNarrationOutcome, type NarrationFallbackReason } from "@/shared/observability/operational-log";
 import { buildTemplateNarration } from "../domain/build-template-narration";
 import { narrationOutputSchema } from "../domain/narration-schema";
 import { NarrationProviderError, type NarrationFacts } from "../domain/types";
@@ -13,7 +14,34 @@ export type NarrationDependencies = Readonly<{
   repository: NarrationRepository;
 }>;
 
-export async function generateNarration(request: NarrationRequest, deps: NarrationDependencies): Promise<void> {
+export type NarrationGenerationOutcome = "ready" | "template-fallback";
+
+export type NarrationRetryOutcome = NarrationGenerationOutcome | "unavailable" | "not-retryable";
+
+const fallbackReasonFor = (
+  error: unknown,
+  provider: NarrationProvider | null,
+): NarrationFallbackReason => {
+  if (!provider) return "provider-unavailable";
+  if (error instanceof ZodError) return "invalid-output";
+  if (!(error instanceof NarrationProviderError)) return "provider-error";
+
+  switch (error.code) {
+    case "TIMEOUT":
+      return "timeout";
+    case "UNPARSED_RESPONSE":
+      return "invalid-output";
+    case "UNSUPPORTED_CLAIM":
+      return "unsupported-claim";
+    case "REFUSAL":
+      return "provider-refusal";
+  }
+};
+
+export async function generateNarration(
+  request: NarrationRequest,
+  deps: NarrationDependencies,
+): Promise<NarrationGenerationOutcome> {
   const startedAt = Date.now();
   try {
     if (!deps.provider) throw new NarrationProviderError("UNPARSED_RESPONSE");
@@ -24,10 +52,12 @@ export async function generateNarration(request: NarrationRequest, deps: Narrati
     if (!validation.valid) throw new NarrationProviderError("UNSUPPORTED_CLAIM");
     await deps.repository.markReady(request.narrationId, { schemaVersion: 1, ...output });
     logNarrationOutcome("ready", Date.now() - startedAt);
-  } catch {
+    return "ready";
+  } catch (error) {
     const output = buildTemplateNarration(request.facts);
     await deps.repository.markFallback(request.narrationId, { schemaVersion: 1, ...output });
-    logNarrationOutcome("template-fallback", Date.now() - startedAt);
+    logNarrationOutcome("template-fallback", Date.now() - startedAt, fallbackReasonFor(error, deps.provider));
+    return "template-fallback";
   }
 }
 
@@ -46,9 +76,11 @@ export const recoverStaleNarrations = async (now: Date, repository: NarrationRep
 export const retryNarration = async (
   narrationId: string,
   dependencies: NarrationDependencies,
-): Promise<boolean> => {
+): Promise<NarrationRetryOutcome> => {
+  // Do not consume a user's finite retry count when the server cannot call a provider at all.
+  if (!dependencies.provider) return "unavailable";
+
   const request = await dependencies.repository.retry(narrationId);
-  if (!request) return false;
-  await generateNarration(request, dependencies);
-  return true;
+  if (!request) return "not-retryable";
+  return generateNarration(request, dependencies);
 };

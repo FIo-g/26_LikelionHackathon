@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { generateNarration } from "@/modules/narration/application/generate-narration";
+import { generateNarration, retryNarration } from "@/modules/narration/application/generate-narration";
 import type { NarrationFacts } from "@/modules/narration/domain/types";
 
 const facts: NarrationFacts = {
@@ -41,5 +41,15 @@ describe("generateNarration", () => {
 
     expect(repository.markFallback).toHaveBeenCalledOnce();
     expect(repository.markReady).not.toHaveBeenCalled();
+  });
+
+  it("does not consume a retry when no model provider is configured", async () => {
+    const repository = { createPending: vi.fn(), markReady: vi.fn(), markFallback: vi.fn(), recoverStalePending: vi.fn(), retry: vi.fn(), findForAnalysisSnapshot: vi.fn() };
+
+    await expect(retryNarration("narration-1", { provider: null, repository })).resolves.toBe("unavailable");
+
+    expect(repository.retry).not.toHaveBeenCalled();
+    expect(repository.markReady).not.toHaveBeenCalled();
+    expect(repository.markFallback).not.toHaveBeenCalled();
   });
 });

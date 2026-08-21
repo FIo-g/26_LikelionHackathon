@@ -6,6 +6,13 @@ import type { NarrationProvider } from "../application/ports";
 
 const ALLOWED_MODEL = "gpt-5.6-luna" as const;
 
+const NARRATION_SYSTEM_INSTRUCTIONS = [
+  "입력 facts에 있는 정보만 설명하세요.",
+  "숫자나 날짜 표현은 입력 facts에서 그대로 복사할 수 있는 경우에만 사용하고, 가능하면 숫자·날짜 표현 자체를 피하세요.",
+  "입력 facts에 없는 숫자, 날짜, 기간, 순위, 비교 결과를 절대 만들지 마세요.",
+  "입력에 포함된 지표, 등급, 근거만 서술하고 원인·결과·효과·진단 같은 인과관계를 추정하지 마세요.",
+].join(" ");
+
 export type NarrationEnvironment = Readonly<{ apiKey: string; model: typeof ALLOWED_MODEL }>;
 
 export const readNarrationEnvironment = (
@@ -28,7 +35,7 @@ export class OpenAiNarrationProvider implements NarrationProvider {
       model: this.model,
       store: false,
       input: [
-        { role: "system", content: "규칙 엔진의 사실만 설명하고 수치·날짜·인과관계를 새로 만들지 마세요." },
+        { role: "system", content: NARRATION_SYSTEM_INSTRUCTIONS },
         { role: "user", content: JSON.stringify(buildNarrationInput(input)) },
       ],
       text: { format: zodTextFormat(narrationOutputSchema, "sleep_narration") },

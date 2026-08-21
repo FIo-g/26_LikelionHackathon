@@ -99,11 +99,11 @@
     display: inline;
   }
 
-  .page:has([data-lunar-screen="today"]) .desktopNavigation a[href="/today"],
-  .page:has([data-lunar-screen="record"]) .desktopNavigation a[href="/record"],
-  .page:has([data-lunar-screen="plan"]) .desktopNavigation a[href="/plan"],
-  .page:has([data-lunar-screen="analyze"]) .desktopNavigation a[href="/analyze"],
-  .page:has([data-lunar-screen="care"]) .desktopNavigation a[href="/care"] {
+  .page:has([data-lunar-screen="today"]) .desktopNavigation .navigationList a[href="/today"],
+  .page:has([data-lunar-screen="record"]) .desktopNavigation .navigationList a[href="/record"],
+  .page:has([data-lunar-screen="plan"]) .desktopNavigation .navigationList a[href="/plan"],
+  .page:has([data-lunar-screen="analyze"]) .desktopNavigation .navigationList a[href="/analyze"],
+  .page:has([data-lunar-screen="care"]) .desktopNavigation .navigationList a[href="/care"] {
     background: #5f346f;
     color: #fff;
   }
