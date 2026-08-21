@@ -52,23 +52,7 @@
   }
 
   .page:has([data-lunar-screen]) .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     color: #fff;
-  }
-
-  .page:has([data-lunar-screen]) .brand::before {
-    display: grid;
-    width: 48px;
-    height: 48px;
-    place-items: center;
-    border-radius: 50%;
-    color: #5f346f;
-    background: #fff0d7;
-    content: "토";
-    font-size: 15px;
-    letter-spacing: 0;
   }
 
   .page:has([data-lunar-screen]) .content {

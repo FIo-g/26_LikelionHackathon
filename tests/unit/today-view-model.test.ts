@@ -183,6 +183,58 @@ describe("getTodayViewModel", () => {
     });
   });
 
+  it("uses today's saved records for the Today data-status count instead of rolling analysis coverage", async () => {
+    createAnalysisRepositoryMock.mockReturnValue({
+      findCurrent: async () => ({
+        ok: true,
+        value: {
+          ...fallbackSnapshot,
+          result: {
+            ...sleepFoundation,
+            dataBasis: {
+              ...sleepFoundation.dataBasis,
+              missingFields: ["caffeine"],
+              completenessByCategory: {
+                ...sleepFoundation.dataBasis.completenessByCategory,
+                caffeine: 0,
+              },
+            },
+          },
+        },
+      }),
+      findLastSuccessful: async () => null,
+      loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
+      supersedeCurrent: async () => {},
+      saveCurrent: async () => ({ snapshotId: "noop" }),
+    });
+
+    const model = await getTodayViewModel(scope, {
+      clock,
+      getPrisma: () => createPrisma({
+        caffeine: true,
+        alcohol: true,
+        meal: true,
+        exercise: true,
+        sleep: true,
+        phone: true,
+        wellness: true,
+      }),
+    });
+
+    expect(model.recordSummary.message).toBe("오늘 기록 7개 완료");
+    expect(model.dataStatus).toMatchObject({
+      state: "ready",
+      data: {
+        completedCategories: 7,
+        totalCategories: 7,
+        missingLabels: [],
+      },
+    });
+  });
+
   it("uses error for a corrupt current snapshot without a valid fallback", async () => {
     createAnalysisRepositoryMock.mockReturnValue({
       findCurrent: async () => ({

@@ -1,5 +1,7 @@
 import { getPrismaClient } from "@/shared/db/prisma";
-import type { UserScope } from "@/shared/domain/contracts";
+import type { Clock, UserScope } from "@/shared/domain/contracts";
+import { wakeLocalDate } from "@/shared/time/local-date";
+import { systemClock } from "@/shared/time/system-clock";
 import { formatRecordWallTimeInput } from "@/shared/time/zoned-date-time";
 import type { RecordType } from "../domain/types";
 
@@ -33,12 +35,11 @@ type CategoryRecordRow = {
 };
 
 type CategoryRecordQuery = {
-  findFirst: (args: {
-    where: { userId: string };
+  findMany: (args: {
+    where: Record<string, unknown>;
     orderBy: { updatedAt: "desc" };
     select: Record<string, unknown>;
-  }) => Promise<CategoryRecordRow | null>;
-  count: (args: { where: { userId: string } }) => Promise<number>;
+  }) => Promise<CategoryRecordRow[]>;
 };
 
 type PrismaRecordHubClient = {
@@ -53,6 +54,7 @@ type PrismaRecordHubClient = {
 
 export type GetRecordHubDependencies = Readonly<{
   getPrisma?: () => PrismaRecordHubClient;
+  clock?: Clock;
 }>;
 
 type LoadedRecord = Readonly<{ type: RecordType; row: CategoryRecordRow }>;
@@ -68,39 +70,51 @@ type LoadedCategory = Readonly<{
   relatedRecordCount?: number;
 }>;
 
-const selectLatest = async (
+const selectCurrentRecords = async (
   query: CategoryRecordQuery,
-  userId: string,
+  where: Record<string, unknown>,
   select: Record<string, unknown>,
-): Promise<CategoryRecordRow | null> => query.findFirst({
-  where: { userId },
-  orderBy: { updatedAt: "desc" },
-  select: { id: true, updatedAt: true, ...select },
-});
+): Promise<CategoryRecordRow[]> =>
+  query.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, updatedAt: true, ...select },
+  });
 
-const countRecords = async (query: CategoryRecordQuery, userId: string): Promise<number> => (
-  query.count({ where: { userId } })
-);
+const present = (
+  type: RecordType,
+  rows: readonly CategoryRecordRow[],
+): LoadedRecord[] => rows.map((row) => ({ type, row }));
 
-const present = (type: RecordType, row: CategoryRecordRow | null): LoadedRecord[] => (
-  row ? [{ type, row }] : []
-);
-
-const latestRow = (records: readonly LoadedRecord[]): CategoryRecordRow | null => (
+const latestRow = (
+  records: readonly LoadedRecord[],
+): CategoryRecordRow | null =>
   records.length === 0
     ? null
-    : [...records].sort((left, right) => right.row.updatedAt.getTime() - left.row.updatedAt.getTime())[0].row
-);
+    : [...records].sort(
+        (left, right) =>
+          right.row.updatedAt.getTime() - left.row.updatedAt.getTime(),
+      )[0].row;
+
+const latestRecord = (
+  type: RecordType,
+  records: readonly LoadedRecord[],
+): LoadedRecord[] => {
+  const row = latestRow(records);
+  return row ? [{ type, row }] : [];
+};
 
 const summaryFromRow = (row: CategoryRecordRow | null): string | null => {
   if (!row) return null;
   if (typeof row.sleepDate === "string") return `마지막: ${row.sleepDate}`;
   if (typeof row.localDate === "string") return `마지막: ${row.localDate}`;
   const dailyLog = row.dailyLog as { localDate?: unknown } | null | undefined;
-  return typeof dailyLog?.localDate === "string" ? `마지막: ${dailyLog.localDate}` : null;
+  return typeof dailyLog?.localDate === "string"
+    ? `마지막: ${dailyLog.localDate}`
+    : null;
 };
 
-const summaryWithHistory = (
+const summaryWithCount = (
   row: CategoryRecordRow | null,
   recordCount: number,
   relatedRecordCount?: number,
@@ -115,12 +129,16 @@ const summaryWithHistory = (
   return values.join(" · ");
 };
 
-const derivePresence = (count: number, requiredCount: number): EntryPresence => {
+const derivePresence = (
+  count: number,
+  requiredCount: number,
+): EntryPresence => {
   if (count === 0) return "empty";
   return count >= requiredCount ? "completed" : "draft";
 };
 
-const text = (value: unknown): string => value === null || value === undefined ? "" : String(value);
+const text = (value: unknown): string =>
+  value === null || value === undefined ? "" : String(value);
 const editableWallTime = (
   field: string,
   value: unknown,
@@ -136,7 +154,10 @@ const editableWallTime = (
   };
 };
 
-const draftValues = (records: readonly LoadedRecord[], timezone: string): Record<string, string> => {
+const draftValues = (
+  records: readonly LoadedRecord[],
+  timezone: string,
+): Record<string, string> => {
   const values: Record<string, string> = {};
 
   for (const { type, row } of records) {
@@ -206,47 +227,87 @@ const draftValues = (records: readonly LoadedRecord[], timezone: string): Record
   return values;
 };
 
-const loadCategories = async (client: PrismaRecordHubClient, userId: string): Promise<LoadedCategory[]> => {
-  const [caffeine, caffeineCount, alcohol, alcoholCount, meal, mealCount, exercise, exerciseCount, wellness, wellnessCount, sleep, sleepCount, phone, phoneCount] = await Promise.all([
-    selectLatest(client.caffeineEntry, userId, {
-      brand: true, product: true, caffeineMg: true, consumedAt: true,
-      dailyLog: { select: { localDate: true } },
-    }),
-    countRecords(client.caffeineEntry, userId),
-    selectLatest(client.alcoholEntry, userId, {
-      alcoholType: true, servings: true, measurementUnit: true, consumedAt: true,
-      dailyLog: { select: { localDate: true } },
-    }),
-    countRecords(client.alcoholEntry, userId),
-    selectLatest(client.mealEntry, userId, {
-      size: true, eatenAt: true, notes: true,
-      dailyLog: { select: { localDate: true } },
-    }),
-    countRecords(client.mealEntry, userId),
-    selectLatest(client.exerciseEntry, userId, {
-      exerciseType: true, intensity: true, startedAt: true, endedAt: true, averageHeartRate: true,
-      dailyLog: { select: { localDate: true } },
-    }),
-    countRecords(client.exerciseEntry, userId),
-    selectLatest(client.wellnessEntry, userId, {
-      localDate: true, fatigueLevel: true, stressLevel: true,
-    }),
-    countRecords(client.wellnessEntry, userId),
-    selectLatest(client.sleepSession, userId, {
-      sleepDate: true, startedAt: true, endedAt: true, morningFatigue: true,
-    }),
-    countRecords(client.sleepSession, userId),
-    selectLatest(client.phoneUsageEntry, userId, {
-      localDate: true, lastUseAt: true, durationMinutes: true,
-    }),
-    countRecords(client.phoneUsageEntry, userId),
-  ]);
+const loadCategories = async (
+  client: PrismaRecordHubClient,
+  scope: UserScope,
+  localDate: string,
+): Promise<LoadedCategory[]> => {
+  const dailyLogWhere = {
+    userId: scope.userId,
+    timezone: scope.timezone,
+    dailyLog: {
+      is: {
+        userId: scope.userId,
+        timezone: scope.timezone,
+        localDate,
+      },
+    },
+  };
+  const directDailyWhere = {
+    userId: scope.userId,
+    timezone: scope.timezone,
+    localDate,
+  };
+  const sleepWhere = {
+    userId: scope.userId,
+    timezone: scope.timezone,
+    sleepDate: localDate,
+  };
+  const [caffeine, alcohol, meal, exercise, wellness, sleep, phone] =
+    await Promise.all([
+      selectCurrentRecords(client.caffeineEntry, dailyLogWhere, {
+        brand: true,
+        product: true,
+        caffeineMg: true,
+        consumedAt: true,
+        dailyLog: { select: { localDate: true } },
+      }),
+      selectCurrentRecords(client.alcoholEntry, dailyLogWhere, {
+        alcoholType: true,
+        servings: true,
+        measurementUnit: true,
+        consumedAt: true,
+        dailyLog: { select: { localDate: true } },
+      }),
+      selectCurrentRecords(client.mealEntry, dailyLogWhere, {
+        size: true,
+        eatenAt: true,
+        notes: true,
+        dailyLog: { select: { localDate: true } },
+      }),
+      selectCurrentRecords(client.exerciseEntry, dailyLogWhere, {
+        exerciseType: true,
+        intensity: true,
+        startedAt: true,
+        endedAt: true,
+        averageHeartRate: true,
+        dailyLog: { select: { localDate: true } },
+      }),
+      selectCurrentRecords(client.wellnessEntry, directDailyWhere, {
+        localDate: true,
+        fatigueLevel: true,
+        stressLevel: true,
+      }),
+      selectCurrentRecords(client.sleepSession, sleepWhere, {
+        sleepDate: true,
+        startedAt: true,
+        endedAt: true,
+        morningFatigue: true,
+      }),
+      selectCurrentRecords(client.phoneUsageEntry, directDailyWhere, {
+        localDate: true,
+        lastUseAt: true,
+        durationMinutes: true,
+      }),
+    ]);
 
   const mealRecords = present("meal", meal);
   const exerciseRecords = present("exercise", exercise);
   const wellnessRecords = present("wellness", wellness);
   const sleepRecords = present("sleep", sleep);
   const phoneRecords = present("phone-usage", phone);
+  const caffeineRecords = present("caffeine", caffeine);
+  const alcoholRecords = present("alcohol", alcohol);
 
   return [
     {
@@ -255,8 +316,9 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       requiredCount: 1,
       href: "/record/caffeine?step=brand",
       step: "brand",
-      records: present("caffeine", caffeine),
-      recordCount: caffeineCount,
+      records: caffeineRecords,
+      editRecords: latestRecord("caffeine", caffeineRecords),
+      recordCount: caffeineRecords.length,
     },
     {
       type: "alcohol",
@@ -264,8 +326,9 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       requiredCount: 1,
       href: "/record/alcohol?step=type",
       step: "type",
-      records: present("alcohol", alcohol),
-      recordCount: alcoholCount,
+      records: alcoholRecords,
+      editRecords: latestRecord("alcohol", alcoholRecords),
+      recordCount: alcoholRecords.length,
     },
     {
       type: "meal",
@@ -274,7 +337,8 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/meal-health?step=meal&focus=meal",
       step: "meal",
       records: mealRecords,
-      recordCount: mealCount,
+      editRecords: latestRecord("meal", mealRecords),
+      recordCount: mealRecords.length,
     },
     {
       type: "exercise",
@@ -283,9 +347,12 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/meal-health?step=exercise-and-wellness&focus=exercise",
       step: "exercise-and-wellness",
       records: exerciseRecords,
-      editRecords: [...exerciseRecords, ...wellnessRecords],
-      recordCount: exerciseCount,
-      relatedRecordCount: wellnessCount,
+      editRecords: [
+        ...latestRecord("exercise", exerciseRecords),
+        ...latestRecord("wellness", wellnessRecords),
+      ],
+      recordCount: exerciseRecords.length,
+      relatedRecordCount: wellnessRecords.length,
     },
     {
       type: "phone-usage",
@@ -294,7 +361,8 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/sleep-phone?step=phone&focus=phone",
       step: "phone",
       records: phoneRecords,
-      recordCount: phoneCount,
+      editRecords: latestRecord("phone-usage", phoneRecords),
+      recordCount: phoneRecords.length,
     },
     {
       type: "sleep",
@@ -303,7 +371,8 @@ const loadCategories = async (client: PrismaRecordHubClient, userId: string): Pr
       href: "/record/sleep-phone?step=sleep&focus=sleep",
       step: "sleep",
       records: sleepRecords,
-      recordCount: sleepCount,
+      editRecords: latestRecord("sleep", sleepRecords),
+      recordCount: sleepRecords.length,
     },
   ];
 };
@@ -314,20 +383,38 @@ export const getRecordHub = async (
 ): Promise<RecordHubViewModel> => {
   const prisma = dependencies.getPrisma
     ? dependencies.getPrisma()
-    : getPrismaClient() as unknown as PrismaRecordHubClient;
-  const loaded = await loadCategories(prisma, scope.userId);
+    : (getPrismaClient() as unknown as PrismaRecordHubClient);
+  const localDate = wakeLocalDate(
+    (dependencies.clock ?? systemClock).now(),
+    scope.timezone,
+  );
+  const loaded = await loadCategories(prisma, scope, localDate);
   return {
     categories: loaded.map((category) => ({
       type: category.type,
       label: category.label,
       presence: derivePresence(category.records.length, category.requiredCount),
       inputMode: "manual",
-      summary: summaryWithHistory(latestRow(category.records), category.recordCount, category.relatedRecordCount),
+      summary: summaryWithCount(
+        latestRow(category.records),
+        category.recordCount,
+        category.relatedRecordCount,
+      ),
       href: category.href,
-      records: category.records.map(({ type, row }) => ({ recordId: row.id, recordType: type })),
-      editDraft: category.records.length === 0
-        ? null
-        : { step: category.step, values: draftValues(category.editRecords ?? category.records, scope.timezone) },
+      records: category.records.map(({ type, row }) => ({
+        recordId: row.id,
+        recordType: type,
+      })),
+      editDraft:
+        category.records.length === 0
+          ? null
+          : {
+              step: category.step,
+              values: draftValues(
+                category.editRecords ?? category.records,
+                scope.timezone,
+              ),
+            },
     })),
   };
 };

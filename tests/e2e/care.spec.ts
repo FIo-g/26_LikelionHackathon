@@ -38,6 +38,14 @@ test("renders the manual Care routine and bounded tools", async ({ page }, testI
   await expect(breathingCard).toBeVisible();
   await expect(whiteNoiseCard).toBeVisible();
 
+  const [sidebarBox, headerBox] = await Promise.all([
+    page.locator("aside").first().boundingBox(),
+    careScreen.locator("header").boundingBox(),
+  ]);
+  expect(sidebarBox).not.toBeNull();
+  expect(headerBox).not.toBeNull();
+  expect(headerBox!.x).toBeGreaterThanOrEqual(sidebarBox!.x + sidebarBox!.width + 64);
+
   await page.getByRole("button", { name: "완료" }).first().click();
   await expect(page.getByRole("button", { name: "되돌리기" }).first()).toBeVisible();
 

@@ -1,6 +1,12 @@
 .page {
   min-height: 100vh;
-  padding: 42px 0 56px;
+  /*
+   * The desktop shell owns the sidebar, so a Care page with no local gutter
+   * reads as if its content is attached to that navigation at intermediate
+   * viewport widths. Keep this gutter in the page module: the mobile layout
+   * replaces it with its own 16px content inset below.
+   */
+  padding: 42px clamp(24px, 3vw, 48px) 56px;
   color: #21152e;
   background: #f4eef8;
 }
