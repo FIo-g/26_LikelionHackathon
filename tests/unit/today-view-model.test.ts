@@ -141,6 +141,15 @@ describe("getTodayViewModel", () => {
     expect(model.readiness.message).toBe("마지막 정상 분석을 표시합니다");
     expect(model.recordSummary.state).toBe("ready");
     expect(model.recordSummary.message).toBe("오늘 기록 4개 완료");
+    expect(model.recordSummary.data?.map(({ type, href }) => ({ type, href }))).toEqual([
+      { type: "caffeine", href: "/record/caffeine?step=brand&mode=create" },
+      { type: "alcohol", href: "/record/alcohol?step=type&mode=create" },
+      { type: "meal", href: "/record/meal-health?step=meal&focus=meal&mode=create" },
+      { type: "exercise", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+      { type: "sleep", href: "/record/sleep-phone?step=sleep&focus=sleep&mode=create" },
+      { type: "phone-usage", href: "/record/sleep-phone?step=phone&focus=phone&mode=create" },
+      { type: "wellness", href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+    ]);
   });
 
   it("reads a parsed result from a ready snapshot entity", async () => {
@@ -171,6 +180,58 @@ describe("getTodayViewModel", () => {
     expect(model.readiness).toMatchObject({
       state: "ready",
       data: { score: 76, confidence: "high" },
+    });
+  });
+
+  it("uses today's saved records for the Today data-status count instead of rolling analysis coverage", async () => {
+    createAnalysisRepositoryMock.mockReturnValue({
+      findCurrent: async () => ({
+        ok: true,
+        value: {
+          ...fallbackSnapshot,
+          result: {
+            ...sleepFoundation,
+            dataBasis: {
+              ...sleepFoundation.dataBasis,
+              missingFields: ["caffeine"],
+              completenessByCategory: {
+                ...sleepFoundation.dataBasis.completenessByCategory,
+                caffeine: 0,
+              },
+            },
+          },
+        },
+      }),
+      findLastSuccessful: async () => null,
+      loadWindow: async () => { throw new Error("not expected"); },
+      supersedeCurrentBaseline: async () => {},
+      saveCurrentBaseline: async () => { throw new Error("not expected"); },
+      findCurrentBaseline: async () => null,
+      supersedeCurrent: async () => {},
+      saveCurrent: async () => ({ snapshotId: "noop" }),
+    });
+
+    const model = await getTodayViewModel(scope, {
+      clock,
+      getPrisma: () => createPrisma({
+        caffeine: true,
+        alcohol: true,
+        meal: true,
+        exercise: true,
+        sleep: true,
+        phone: true,
+        wellness: true,
+      }),
+    });
+
+    expect(model.recordSummary.message).toBe("오늘 기록 7개 완료");
+    expect(model.dataStatus).toMatchObject({
+      state: "ready",
+      data: {
+        completedCategories: 7,
+        totalCategories: 7,
+        missingLabels: [],
+      },
     });
   });
 

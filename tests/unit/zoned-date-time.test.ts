@@ -6,6 +6,8 @@ import {
   parseRecordWallTime,
   parseZonedDateTime,
   possibleOffsetsForWallTime,
+  requiresRecordWallTimeDisambiguation,
+  resolveRecordWallTimeDisambiguation,
 } from "@/shared/time/zoned-date-time";
 import { wakeLocalDate } from "@/shared/time/local-date";
 
@@ -49,6 +51,24 @@ describe("zoned-date-time", () => {
   it("requires explicit disambiguation for a repeated wall time", () => {
     expect(() => parseRecordWallTime("2026-11-01T01:30", "America/New_York"))
       .toThrow("AMBIGUOUS_LOCAL_TIME");
+  });
+
+  it("only marks repeated DST wall times as needing a choice", () => {
+    expect(requiresRecordWallTimeDisambiguation("2026-11-01T01:30", "America/New_York"))
+      .toBe(true);
+    expect(requiresRecordWallTimeDisambiguation("2026-11-01T01:30", "Asia/Seoul"))
+      .toBe(false);
+  });
+
+  it("uses an explicit safe occurrence only for a repeated wall time", () => {
+    expect(resolveRecordWallTimeDisambiguation("2026-11-01T01:30", "", "America/New_York"))
+      .toBe("earlier");
+    expect(resolveRecordWallTimeDisambiguation("2026-11-01T01:30", "later", "America/New_York"))
+      .toBe("later");
+    expect(resolveRecordWallTimeDisambiguation("2026-11-01T01:30", "", "Asia/Seoul"))
+      .toBe("");
+    expect(resolveRecordWallTimeDisambiguation("2026-11-01T01:30", "later", "Asia/Seoul"))
+      .toBe("");
   });
 
   it("round-trips a chosen repeated wall time through the stored timezone", () => {

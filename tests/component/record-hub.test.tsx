@@ -52,7 +52,7 @@ describe("record category card", () => {
       />,
     );
 
-    expect(screen.getByRole("link", { name: "추가" })).toHaveAttribute("href", "/record/caffeine");
+    expect(screen.getByRole("link", { name: "추가" })).toHaveAttribute("href", "/record/caffeine?mode=create");
     expect(screen.getByRole("link", { name: "수정" })).toHaveAttribute("href", "/record/caffeine");
     expect(screen.getByRole("button", { name: "삭제" })).toBeVisible();
   });
@@ -98,7 +98,7 @@ describe("record category card", () => {
       });
   });
 
-  it("keeps the draft pathname-scoped when a focused card uses safe query parameters", () => {
+  it("keeps the draft focus-scoped when a focused card uses safe query parameters", () => {
     render(
       <RecordCategoryCard
         category="식사"
@@ -118,7 +118,8 @@ describe("record category card", () => {
     editLink.addEventListener("click", (event) => event.preventDefault());
     fireEvent.click(editLink);
 
-    expect(window.sessionStorage.getItem("record-draft:/record/meal-health")).not.toBeNull();
+    expect(window.sessionStorage.getItem("record-draft:/record/meal-health:meal")).not.toBeNull();
+    expect(window.sessionStorage.getItem("record-draft:/record/meal-health")).toBeNull();
     expect(window.sessionStorage.getItem("record-draft:/record/meal-health?step=meal&focus=meal")).toBeNull();
     expect(window.location.href).not.toContain("meal-secret");
     expect(window.location.href).not.toContain(encodeURIComponent("개인 메모"));

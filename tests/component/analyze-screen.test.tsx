@@ -63,6 +63,12 @@ describe("Analyze screen components", () => {
     expect(screen.getByText("AI 서술")).toBeVisible();
   });
 
+  it("offers an initial AI report attempt for a ready snapshot without narration", () => {
+    render(<AnalyzeScreen viewModel={screenViewModel} />);
+
+    expect(screen.getByRole("button", { name: "AI 리포트 시도" })).toBeVisible();
+  });
+
   it("adds a non-causal status tag and note to metrics", () => {
     render(<MetricGrid metrics={[{ key: "sleep-goal", label: "수면 목표", value: 72, state: "ready" }]} />);
 

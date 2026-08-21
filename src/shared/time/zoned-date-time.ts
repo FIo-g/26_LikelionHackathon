@@ -178,6 +178,35 @@ const splitRecordWallTime = (value: string): { localDate: string; localTime: str
   return { localDate: match[1], localTime: match[2] };
 };
 
+/** Returns whether this local date-time occurs more than once in its timezone. */
+export const requiresRecordWallTimeDisambiguation = (
+  value: string,
+  timezone: string,
+): boolean => {
+  try {
+    const { localDate, localTime } = splitRecordWallTime(value);
+    return possibleOffsetsForWallTime({ localDate, localTime, timezone }).length > 1;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Supplies an explicit occurrence only for a repeated local time. Existing
+ * later-occurrence edits stay later; irrelevant stale values are not submitted.
+ */
+export const resolveRecordWallTimeDisambiguation = (
+  value: string,
+  disambiguation: string | undefined,
+  timezone: string,
+): WallTimeDisambiguation | "" => {
+  if (!requiresRecordWallTimeDisambiguation(value, timezone)) {
+    return "";
+  }
+
+  return disambiguation === "later" ? "later" : "earlier";
+};
+
 export const parseRecordWallTime = (
   input: string | LocalRecordTime,
   timezone: string,

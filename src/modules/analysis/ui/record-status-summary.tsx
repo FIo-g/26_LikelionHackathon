@@ -20,7 +20,7 @@ const stateClassName: Record<DisplayState, string> = {
 };
 
 const toActionLabel = (presence: EntryPresence): string => (
-  presence === "completed" ? "수정하기" : presence === "draft" ? "마저 입력" : "기록하기"
+  presence === "completed" ? "추가 기록" : presence === "draft" ? "마저 입력" : "기록하기"
 );
 
 const toStatusLabel = (presence: EntryPresence): string => (

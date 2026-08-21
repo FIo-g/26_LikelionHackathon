@@ -17,6 +17,7 @@ export default async function CaffeinePage({ searchParams }: CaffeinePageProps) 
 
   return (
     <CaffeineFlow
+      freshCreate={firstParam(query.mode) === "create"}
       timezone={timezone}
       step={firstParam(query.step)}
     />

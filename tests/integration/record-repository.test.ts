@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { parseCreateRecordInput } from "@/modules/records/domain/schemas";
 import type { CreateRecordInput, RecordEntity } from "@/modules/records/domain/types";
-import { createRecordRepository } from "@/modules/records/infrastructure/prisma-record-repository";
+import { createRecordRepository, serializeRecordPayload } from "@/modules/records/infrastructure/prisma-record-repository";
 
 type DailyLogRow = {
   id: string;
@@ -22,9 +22,21 @@ type CaffeineRow = {
   dailyLogId: string;
 };
 
+type AlcoholRow = {
+  id: string;
+  userId: string;
+  alcoholType: string;
+  servings: number;
+  measurementUnit: string | null;
+  consumedAt: Date;
+  timezone: string;
+  dailyLogId: string;
+};
+
 type MockDbState = {
   dailyLogs: DailyLogRow[];
   caffeineEntries: CaffeineRow[];
+  alcoholEntries: AlcoholRow[];
   recordRevisions: {
     input: unknown;
   }[];
@@ -39,6 +51,7 @@ const createMockDb = () => {
   const state: MockDbState = {
     dailyLogs: [],
     caffeineEntries: [],
+    alcoholEntries: [],
     recordRevisions: [],
   };
 
@@ -160,26 +173,62 @@ const createMockDb = () => {
         delete: async () => undefined,
       },
       alcoholEntry: {
-        findFirst: async () => null,
-        create: async () => ({
-          id: "",
-          userId: "",
-          alcoholType: "",
-          servings: 0,
-          consumedAt: new Date(),
-          timezone: "",
-          dailyLog: null,
-        }),
-        update: async () => ({
-          id: "",
-          userId: "",
-          alcoholType: "",
-          servings: 0,
-          consumedAt: new Date(),
-          timezone: "",
-          dailyLog: null,
-        }),
-        delete: async () => undefined,
+        findFirst: async ({
+          where,
+          include,
+        }: { where: { id: string; userId: string }; include?: { dailyLog?: { select: { localDate: true } } } }) => {
+          const row = state.alcoholEntries.find((item) => (
+            item.id === where.id && item.userId === where.userId
+          ));
+          if (!row) {
+            return null;
+          }
+
+          const dailyLog = state.dailyLogs.find((item) => item.id === row.dailyLogId);
+          return {
+            ...row,
+            dailyLog: include?.dailyLog && dailyLog ? { localDate: dailyLog.localDate } : undefined,
+          };
+        },
+        create: async ({
+          data,
+          include,
+        }: { data: Omit<AlcoholRow, "id">; include?: { dailyLog?: { select: { localDate: true } } } }) => {
+          const row = { ...data, id: createId() };
+          state.alcoholEntries.push(row);
+          const dailyLog = state.dailyLogs.find((item) => item.id === row.dailyLogId);
+          return {
+            ...row,
+            dailyLog: include?.dailyLog && dailyLog ? { localDate: dailyLog.localDate } : undefined,
+          };
+        },
+        update: async ({
+          where,
+          data,
+          include,
+        }: { where: { id: string }; data: Partial<AlcoholRow>; include?: { dailyLog?: { select: { localDate: true } } } }) => {
+          const index = state.alcoholEntries.findIndex((item) => item.id === where.id);
+          if (index < 0) {
+            throw new Error("Not found");
+          }
+
+          state.alcoholEntries[index] = {
+            ...state.alcoholEntries[index],
+            ...data,
+          };
+          const row = state.alcoholEntries[index];
+          const dailyLog = state.dailyLogs.find((item) => item.id === row.dailyLogId);
+          return {
+            ...row,
+            dailyLog: include?.dailyLog && dailyLog ? { localDate: dailyLog.localDate } : undefined,
+          };
+        },
+        delete: async ({ where }: { where: { id: string } }) => {
+          const index = state.alcoholEntries.findIndex((item) => item.id === where.id);
+          if (index >= 0) {
+            state.alcoholEntries.splice(index, 1);
+          }
+        },
       },
       mealEntry: {
         findFirst: async () => null,
@@ -305,11 +354,40 @@ const createCaffeineFixture = (): Extract<CreateRecordInput, { type: "caffeine" 
 
 const caffeineFixture = createCaffeineFixture();
 
+const createAlcoholFixture = (): Extract<CreateRecordInput, { type: "alcohol" }> => {
+  const input = parseCreateRecordInput(clock, {
+    type: "alcohol",
+    alcoholType: "맥주",
+    servings: 1,
+    measurementUnit: "can",
+    consumedAt: new Date("2026-08-19T07:00:00.000Z"),
+    timezone: "Asia/Seoul",
+  });
+
+  if (input.type !== "alcohol") {
+    throw new Error("Expected alcohol fixture");
+  }
+
+  return input;
+};
+
+const alcoholFixture = createAlcoholFixture();
+
 const requireCaffeineRecord = (
   record: RecordEntity | null,
 ): Extract<RecordEntity, { type: "caffeine" }> => {
   if (record?.type !== "caffeine") {
     throw new Error("Expected caffeine record");
+  }
+
+  return record;
+};
+
+const requireAlcoholRecord = (
+  record: RecordEntity | null,
+): Extract<RecordEntity, { type: "alcohol" }> => {
+  if (record?.type !== "alcohol") {
+    throw new Error("Expected alcohol record");
   }
 
   return record;
@@ -376,6 +454,35 @@ describe("record repository", () => {
 
     await alice.delete("caffeine", created.id);
     await expect(alice.findById("caffeine", created.id)).resolves.toBeNull();
+  });
+
+  it("persists selected alcohol units, serializes revisions, and keeps legacy units null", async () => {
+    const alice = createRecordRepository(fixture.db as never, createScope("alice"));
+
+    const created = requireAlcoholRecord(await alice.create("alcohol", alcoholFixture));
+    expect(created.measurementUnit).toBe("can");
+    expect(fixture.state.alcoholEntries[0]).toMatchObject({ measurementUnit: "can" });
+
+    const updated = requireAlcoholRecord(await alice.update("alcohol", created.id, {
+      ...alcoholFixture,
+      measurementUnit: "bottle",
+    }));
+    expect(updated.measurementUnit).toBe("bottle");
+    expect(serializeRecordPayload(updated).record.fields).toMatchObject({ measurementUnit: "bottle" });
+
+    fixture.state.alcoholEntries.push({
+      id: "legacy-alcohol",
+      userId: "alice",
+      dailyLogId: fixture.state.dailyLogs[0]?.id ?? "missing-log",
+      alcoholType: "맥주",
+      servings: 1,
+      measurementUnit: null,
+      consumedAt: alcoholFixture.consumedAt,
+      timezone: "Asia/Seoul",
+    });
+    const legacy = requireAlcoholRecord(await alice.findById("alcohol", "legacy-alcohol"));
+    expect(legacy.measurementUnit).toBeNull();
+    expect(serializeRecordPayload(legacy).record.fields).toMatchObject({ measurementUnit: null });
   });
 
   it("rejects an update input whose discriminator does not match the requested record type", async () => {

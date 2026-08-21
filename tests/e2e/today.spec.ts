@@ -10,6 +10,18 @@ test("protects today route without session", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "반가워요" })).toBeVisible();
 });
 
+test("keeps the brand separate from the active Today navigation item", async ({ page }, testInfo) => {
+  await setupE2eUser(page.request, testInfo);
+  await page.goto("/today");
+
+  const brand = page.getByRole("link", { name: "SLEEP LOOP" });
+  const desktopNavigation = page.getByRole("navigation", { name: "데스크톱 주요 메뉴" });
+  const todayNavigationItem = desktopNavigation.getByRole("link", { name: "Today" });
+
+  await expect(brand).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(todayNavigationItem).toHaveCSS("background-color", "rgb(95, 52, 111)");
+});
+
 test("shows accepted plan-day cutoffs instead of the goal fallback", async ({ page }, testInfo) => {
   await setupE2eUser(page.request, testInfo);
   await page.goto("/plan");

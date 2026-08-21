@@ -2,7 +2,15 @@ import type { VersionedPayload, UserScope } from "@/shared/domain/contracts";
 import type { TransactionClient } from "@/shared/db/transaction";
 import { wakeLocalDate } from "@/shared/time/local-date";
 import type { RecordRepository } from "@/modules/records/application/ports";
-import type { CreateRecordInput, RecordType, SerializedRecord, UpdateRecordInput, RecordEntity } from "@/modules/records/domain/types";
+import {
+  alcoholMeasurementUnits,
+  type AlcoholMeasurementUnit,
+  type CreateRecordInput,
+  type RecordEntity,
+  type RecordType,
+  type SerializedRecord,
+  type UpdateRecordInput,
+} from "@/modules/records/domain/types";
 
 type DbRecordPayload = Record<string, unknown>;
 type TxDb = TransactionClient & {
@@ -58,6 +66,17 @@ type TxDb = TransactionClient & {
 
 const toStringValue = (value: unknown): string => String(value);
 const toDateValue = (value: unknown): Date => value instanceof Date ? value : new Date(String(value));
+const toAlcoholMeasurementUnit = (value: unknown): AlcoholMeasurementUnit | null => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "string" || !(alcoholMeasurementUnits as readonly string[]).includes(value)) {
+    throw new Error("INVALID_ALCOHOL_MEASUREMENT_UNIT");
+  }
+
+  return value as AlcoholMeasurementUnit;
+};
 const asTx = (db: TransactionClient): TxDb => db as TxDb;
 const dailyLogLocalDateInclude = { dailyLog: { select: { localDate: true } } };
 
@@ -159,6 +178,7 @@ const mapToRecordEntity = (type: RecordType, row: DbRecordPayload): RecordEntity
         type: "alcohol",
         alcoholType: toStringValue(row.alcoholType),
         servings: Number(row.servings),
+        measurementUnit: toAlcoholMeasurementUnit(row.measurementUnit),
         consumedAt: toDateValue(row.consumedAt),
         timezone: toStringValue(row.timezone),
       };
@@ -252,6 +272,7 @@ const serializeDateFields = (record: RecordEntity): SerializedRecord => {
           type: record.type,
           alcoholType: record.alcoholType,
           servings: record.servings,
+          measurementUnit: record.measurementUnit,
           consumedAt: record.consumedAt.toISOString(),
           timezone: record.timezone,
         },
@@ -493,6 +514,7 @@ const createByType = async (
           dailyLogId,
           alcoholType: input.alcoholType,
           servings: input.servings,
+          measurementUnit: input.measurementUnit,
           consumedAt: input.consumedAt,
           timezone: input.timezone,
         },
@@ -611,6 +633,7 @@ const updateByType = async (
           dailyLogId,
           alcoholType: input.alcoholType,
           servings: input.servings,
+          measurementUnit: input.measurementUnit,
           consumedAt: input.consumedAt,
           timezone: input.timezone,
         },

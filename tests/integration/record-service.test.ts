@@ -572,6 +572,55 @@ describe("record service", () => {
     expect(fixtures.state.mutationReceipts).toHaveLength(3);
   });
 
+  it("persists exercise and wellness as separate records and appends a later pair", async () => {
+    const fixtures = createMockPrisma();
+    const service = createRecordService(toScope("alice"), {
+      clock,
+      getPrisma: fixtures.getPrisma,
+    });
+
+    const first = await service.saveBatch({
+      idempotencyKey: "save-exercise-and-wellness-1",
+      items: [
+        { clientKey: "exercise", recordId: null, input: exerciseInput },
+        { clientKey: "wellness", recordId: null, input: wellnessInput },
+      ],
+    });
+    const second = await service.saveBatch({
+      idempotencyKey: "save-exercise-and-wellness-2",
+      items: [
+        {
+          clientKey: "exercise",
+          recordId: null,
+          input: parseCreateRecordInput(clock, {
+            ...exerciseInput,
+            exerciseType: "yoga",
+            startedAt: new Date("2026-08-19T11:00:00.000Z"),
+            endedAt: new Date("2026-08-19T11:30:00.000Z"),
+          }),
+        },
+        {
+          clientKey: "wellness",
+          recordId: null,
+          input: parseCreateRecordInput(clock, {
+            ...wellnessInput,
+            fatigueLevel: 4,
+            stressLevel: 1,
+          }),
+        },
+      ],
+    });
+
+    expect(first.records.map((record) => record.recordType)).toEqual(["exercise", "wellness"]);
+    expect(second.records.map((record) => record.recordType)).toEqual(["exercise", "wellness"]);
+    expect(second.records.map((record) => record.recordId)).not.toEqual(first.records.map((record) => record.recordId));
+    expect(fixtures.state.exerciseEntries).toHaveLength(2);
+    expect(fixtures.state.wellnessEntries).toHaveLength(2);
+    expect(fixtures.state.exerciseEntries.map((entry) => entry.exerciseType)).toEqual(["run", "yoga"]);
+    expect(fixtures.state.wellnessEntries.map((entry) => entry.fatigueLevel)).toEqual([2, 4]);
+    expect(fixtures.state.recordRevisions).toHaveLength(4);
+  });
+
   it("rolls back an entire save batch when one item fails", async () => {
     const fixtures = createMockPrisma({
       throwOnExerciseCreate: true,
@@ -710,8 +759,9 @@ describe("record service", () => {
       }],
       affectedLocalDates: ["2026-08-19"],
     };
-    const outerResolve = vi.fn(async (_command: MutationReceiptCommand) => {
+    const outerResolve = vi.fn(async (command: MutationReceiptCommand) => {
       expect(transactionSettled).toBe(true);
+      expect(command).toMatchObject({ operation: "record.create", idempotencyKey: "p2002-winner" });
       return winner;
     });
     const outerReceiptRepository: MutationReceiptRepository = {

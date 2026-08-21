@@ -40,6 +40,7 @@ export type AlcoholEntryMinAggregateOutputType = {
   dailyLogId: string | null
   alcoholType: string | null
   servings: number | null
+  measurementUnit: string | null
   consumedAt: Date | null
   timezone: string | null
   createdAt: Date | null
@@ -52,6 +53,7 @@ export type AlcoholEntryMaxAggregateOutputType = {
   dailyLogId: string | null
   alcoholType: string | null
   servings: number | null
+  measurementUnit: string | null
   consumedAt: Date | null
   timezone: string | null
   createdAt: Date | null
@@ -64,6 +66,7 @@ export type AlcoholEntryCountAggregateOutputType = {
   dailyLogId: number
   alcoholType: number
   servings: number
+  measurementUnit: number
   consumedAt: number
   timezone: number
   createdAt: number
@@ -86,6 +89,7 @@ export type AlcoholEntryMinAggregateInputType = {
   dailyLogId?: true
   alcoholType?: true
   servings?: true
+  measurementUnit?: true
   consumedAt?: true
   timezone?: true
   createdAt?: true
@@ -98,6 +102,7 @@ export type AlcoholEntryMaxAggregateInputType = {
   dailyLogId?: true
   alcoholType?: true
   servings?: true
+  measurementUnit?: true
   consumedAt?: true
   timezone?: true
   createdAt?: true
@@ -110,6 +115,7 @@ export type AlcoholEntryCountAggregateInputType = {
   dailyLogId?: true
   alcoholType?: true
   servings?: true
+  measurementUnit?: true
   consumedAt?: true
   timezone?: true
   createdAt?: true
@@ -209,6 +215,7 @@ export type AlcoholEntryGroupByOutputType = {
   dailyLogId: string
   alcoholType: string
   servings: number
+  measurementUnit: string | null
   consumedAt: Date
   timezone: string
   createdAt: Date
@@ -244,6 +251,7 @@ export type AlcoholEntryWhereInput = {
   dailyLogId?: Prisma.StringFilter<"AlcoholEntry"> | string
   alcoholType?: Prisma.StringFilter<"AlcoholEntry"> | string
   servings?: Prisma.FloatFilter<"AlcoholEntry"> | number
+  measurementUnit?: Prisma.StringNullableFilter<"AlcoholEntry"> | string | null
   consumedAt?: Prisma.DateTimeFilter<"AlcoholEntry"> | Date | string
   timezone?: Prisma.StringFilter<"AlcoholEntry"> | string
   createdAt?: Prisma.DateTimeFilter<"AlcoholEntry"> | Date | string
@@ -258,6 +266,7 @@ export type AlcoholEntryOrderByWithRelationInput = {
   dailyLogId?: Prisma.SortOrder
   alcoholType?: Prisma.SortOrder
   servings?: Prisma.SortOrder
+  measurementUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   consumedAt?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -275,6 +284,7 @@ export type AlcoholEntryWhereUniqueInput = Prisma.AtLeast<{
   dailyLogId?: Prisma.StringFilter<"AlcoholEntry"> | string
   alcoholType?: Prisma.StringFilter<"AlcoholEntry"> | string
   servings?: Prisma.FloatFilter<"AlcoholEntry"> | number
+  measurementUnit?: Prisma.StringNullableFilter<"AlcoholEntry"> | string | null
   consumedAt?: Prisma.DateTimeFilter<"AlcoholEntry"> | Date | string
   timezone?: Prisma.StringFilter<"AlcoholEntry"> | string
   createdAt?: Prisma.DateTimeFilter<"AlcoholEntry"> | Date | string
@@ -289,6 +299,7 @@ export type AlcoholEntryOrderByWithAggregationInput = {
   dailyLogId?: Prisma.SortOrder
   alcoholType?: Prisma.SortOrder
   servings?: Prisma.SortOrder
+  measurementUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   consumedAt?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -309,6 +320,7 @@ export type AlcoholEntryScalarWhereWithAggregatesInput = {
   dailyLogId?: Prisma.StringWithAggregatesFilter<"AlcoholEntry"> | string
   alcoholType?: Prisma.StringWithAggregatesFilter<"AlcoholEntry"> | string
   servings?: Prisma.FloatWithAggregatesFilter<"AlcoholEntry"> | number
+  measurementUnit?: Prisma.StringNullableWithAggregatesFilter<"AlcoholEntry"> | string | null
   consumedAt?: Prisma.DateTimeWithAggregatesFilter<"AlcoholEntry"> | Date | string
   timezone?: Prisma.StringWithAggregatesFilter<"AlcoholEntry"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AlcoholEntry"> | Date | string
@@ -319,6 +331,7 @@ export type AlcoholEntryCreateInput = {
   id?: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -333,6 +346,7 @@ export type AlcoholEntryUncheckedCreateInput = {
   dailyLogId: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -343,6 +357,7 @@ export type AlcoholEntryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -357,6 +372,7 @@ export type AlcoholEntryUncheckedUpdateInput = {
   dailyLogId?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -369,6 +385,7 @@ export type AlcoholEntryCreateManyInput = {
   dailyLogId: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -379,6 +396,7 @@ export type AlcoholEntryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -391,6 +409,7 @@ export type AlcoholEntryUncheckedUpdateManyInput = {
   dailyLogId?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -413,6 +432,7 @@ export type AlcoholEntryCountOrderByAggregateInput = {
   dailyLogId?: Prisma.SortOrder
   alcoholType?: Prisma.SortOrder
   servings?: Prisma.SortOrder
+  measurementUnit?: Prisma.SortOrder
   consumedAt?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -429,6 +449,7 @@ export type AlcoholEntryMaxOrderByAggregateInput = {
   dailyLogId?: Prisma.SortOrder
   alcoholType?: Prisma.SortOrder
   servings?: Prisma.SortOrder
+  measurementUnit?: Prisma.SortOrder
   consumedAt?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -441,6 +462,7 @@ export type AlcoholEntryMinOrderByAggregateInput = {
   dailyLogId?: Prisma.SortOrder
   alcoholType?: Prisma.SortOrder
   servings?: Prisma.SortOrder
+  measurementUnit?: Prisma.SortOrder
   consumedAt?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -547,6 +569,7 @@ export type AlcoholEntryCreateWithoutUserInput = {
   id?: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -559,6 +582,7 @@ export type AlcoholEntryUncheckedCreateWithoutUserInput = {
   dailyLogId: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -600,6 +624,7 @@ export type AlcoholEntryScalarWhereInput = {
   dailyLogId?: Prisma.StringFilter<"AlcoholEntry"> | string
   alcoholType?: Prisma.StringFilter<"AlcoholEntry"> | string
   servings?: Prisma.FloatFilter<"AlcoholEntry"> | number
+  measurementUnit?: Prisma.StringNullableFilter<"AlcoholEntry"> | string | null
   consumedAt?: Prisma.DateTimeFilter<"AlcoholEntry"> | Date | string
   timezone?: Prisma.StringFilter<"AlcoholEntry"> | string
   createdAt?: Prisma.DateTimeFilter<"AlcoholEntry"> | Date | string
@@ -610,6 +635,7 @@ export type AlcoholEntryCreateWithoutDailyLogInput = {
   id?: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -621,6 +647,7 @@ export type AlcoholEntryUncheckedCreateWithoutDailyLogInput = {
   id?: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -658,6 +685,7 @@ export type AlcoholEntryCreateManyUserInput = {
   dailyLogId: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -668,6 +696,7 @@ export type AlcoholEntryUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -680,6 +709,7 @@ export type AlcoholEntryUncheckedUpdateWithoutUserInput = {
   dailyLogId?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -691,6 +721,7 @@ export type AlcoholEntryUncheckedUpdateManyWithoutUserInput = {
   dailyLogId?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -701,6 +732,7 @@ export type AlcoholEntryCreateManyDailyLogInput = {
   id?: string
   alcoholType: string
   servings: number
+  measurementUnit?: string | null
   consumedAt: Date | string
   timezone: string
   createdAt?: Date | string
@@ -711,6 +743,7 @@ export type AlcoholEntryUpdateWithoutDailyLogInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -722,6 +755,7 @@ export type AlcoholEntryUncheckedUpdateWithoutDailyLogInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -732,6 +766,7 @@ export type AlcoholEntryUncheckedUpdateManyWithoutDailyLogInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   alcoholType?: Prisma.StringFieldUpdateOperationsInput | string
   servings?: Prisma.FloatFieldUpdateOperationsInput | number
+  measurementUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   consumedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -746,6 +781,7 @@ export type AlcoholEntrySelect<ExtArgs extends runtime.Types.Extensions.Internal
   dailyLogId?: boolean
   alcoholType?: boolean
   servings?: boolean
+  measurementUnit?: boolean
   consumedAt?: boolean
   timezone?: boolean
   createdAt?: boolean
@@ -760,6 +796,7 @@ export type AlcoholEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   dailyLogId?: boolean
   alcoholType?: boolean
   servings?: boolean
+  measurementUnit?: boolean
   consumedAt?: boolean
   timezone?: boolean
   createdAt?: boolean
@@ -774,6 +811,7 @@ export type AlcoholEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   dailyLogId?: boolean
   alcoholType?: boolean
   servings?: boolean
+  measurementUnit?: boolean
   consumedAt?: boolean
   timezone?: boolean
   createdAt?: boolean
@@ -788,13 +826,14 @@ export type AlcoholEntrySelectScalar = {
   dailyLogId?: boolean
   alcoholType?: boolean
   servings?: boolean
+  measurementUnit?: boolean
   consumedAt?: boolean
   timezone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AlcoholEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dailyLogId" | "alcoholType" | "servings" | "consumedAt" | "timezone" | "createdAt" | "updatedAt", ExtArgs["result"]["alcoholEntry"]>
+export type AlcoholEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dailyLogId" | "alcoholType" | "servings" | "measurementUnit" | "consumedAt" | "timezone" | "createdAt" | "updatedAt", ExtArgs["result"]["alcoholEntry"]>
 export type AlcoholEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dailyLog?: boolean | Prisma.DailyLogDefaultArgs<ExtArgs>
@@ -820,6 +859,7 @@ export type $AlcoholEntryPayload<ExtArgs extends runtime.Types.Extensions.Intern
     dailyLogId: string
     alcoholType: string
     servings: number
+    measurementUnit: string | null
     consumedAt: Date
     timezone: string
     createdAt: Date
@@ -1254,6 +1294,7 @@ export interface AlcoholEntryFieldRefs {
   readonly dailyLogId: Prisma.FieldRef<"AlcoholEntry", 'String'>
   readonly alcoholType: Prisma.FieldRef<"AlcoholEntry", 'String'>
   readonly servings: Prisma.FieldRef<"AlcoholEntry", 'Float'>
+  readonly measurementUnit: Prisma.FieldRef<"AlcoholEntry", 'String'>
   readonly consumedAt: Prisma.FieldRef<"AlcoholEntry", 'DateTime'>
   readonly timezone: Prisma.FieldRef<"AlcoholEntry", 'String'>
   readonly createdAt: Prisma.FieldRef<"AlcoholEntry", 'DateTime'>

@@ -82,7 +82,7 @@ export const runDatabaseContract = async () => {
   await prisma.dailyLog.create({ data: { userId: bob, localDate: "2026-08-19", timezone } });
   await prisma.sleepSession.create({ data: { userId: alice, dailyLogId: firstLog.id, sleepDate: firstLog.localDate, startedAt: now, endedAt: new Date(now.getTime() + 480 * 60_000), morningFatigue: 2, timezone } });
   await prisma.caffeineEntry.create({ data: { userId: alice, dailyLogId: secondLog.id, brand: "test", product: "coffee", caffeineMg: 100, consumedAt: now, timezone } });
-  await prisma.alcoholEntry.create({ data: { userId: alice, dailyLogId: secondLog.id, alcoholType: "none", servings: 0, consumedAt: now, timezone } });
+  await prisma.alcoholEntry.create({ data: { userId: alice, dailyLogId: secondLog.id, alcoholType: "맥주", servings: 1, measurementUnit: "can", consumedAt: now, timezone } });
   await prisma.mealEntry.create({ data: { userId: alice, dailyLogId: secondLog.id, size: "medium", eatenAt: now, timezone } });
   await prisma.exerciseEntry.create({ data: { userId: alice, dailyLogId: secondLog.id, exerciseType: "walk", intensity: "light", startedAt: now, endedAt: new Date(now.getTime() + 30 * 60_000), timezone } });
   await prisma.phoneUsageEntry.create({ data: { userId: alice, dailyLogId: secondLog.id, localDate: secondLog.localDate, lastUseAt: now, durationMinutes: 15, timezone } });
@@ -138,6 +138,10 @@ export const runDatabaseContract = async () => {
   const activeKeyInvariant = await prisma.sleepPlan.create({ data: { userId: alice, timezone, status: "active", activeKey: plan.activeKey } }).then(() => false).catch(isUniqueViolation);
   const currentKeyInvariant = await prisma.analysisSnapshot.create({ data: { userId: alice, localDate: "2026-08-20", timezone, status: "current", result: { schemaVersion: 1 }, currentKey: snapshot.currentKey } }).then(() => false).catch(isUniqueViolation);
   const versionedJsonRoundTrip = (await prisma.analysisSnapshot.findUniqueOrThrow({ where: { id: snapshot.id } })).result;
+  const alcoholMeasurementUnitRoundTrip = (await prisma.alcoholEntry.findFirstOrThrow({
+    where: { userId: alice, dailyLogId: secondLog.id },
+    select: { measurementUnit: true },
+  })).measurementUnit === "can";
   const orderedLocalDates = (await prisma.dailyLog.findMany({ where: { userId: alice }, orderBy: { localDate: "asc" }, select: { localDate: true } })).map(({ localDate }) => localDate);
   const isolatedUsers = (await prisma.dailyLog.count({ where: { userId: alice } })) === 2 && (await prisma.dailyLog.count({ where: { userId: bob } })) === 1;
 
@@ -164,6 +168,7 @@ export const runDatabaseContract = async () => {
 
   return {
     isolatedUsers,
+    alcoholMeasurementUnitRoundTrip,
     versionedJsonRoundTrip: JSON.stringify(versionedJsonRoundTrip) === JSON.stringify({ schemaVersion: 1, readiness: 80 }),
     dailyLogCompositeUnique,
     activeKeyInvariant,
@@ -191,6 +196,7 @@ describeContract("database contract", () => {
   it("preserves ownership, JSON, unique keys, cascade, ordering, and rollback", async () => {
     await expect(runDatabaseContract()).resolves.toEqual({
       isolatedUsers: true,
+      alcoholMeasurementUnitRoundTrip: true,
       versionedJsonRoundTrip: true,
       dailyLogCompositeUnique: true,
       activeKeyInvariant: true,

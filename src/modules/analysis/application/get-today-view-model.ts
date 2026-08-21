@@ -172,20 +172,6 @@ const parseConfidenceLabel = (confidence: ConfidenceLevel): string => {
   return "낮음";
 };
 
-const missingFieldLabel = (field: string): string => {
-  const map: Readonly<Record<string, string>> = {
-    sleep: "수면 기록",
-    phone: "휴대폰 기록",
-    meal: "식사",
-    exercise: "운동",
-    caffeine: "카페인",
-    alcohol: "음주",
-    wellness: "컨디션",
-  };
-
-  return map[field] ?? field;
-};
-
 const minutesNow = (clock: Clock, timezone: string): number | null => {
   try {
     const now = clock.now();
@@ -285,22 +271,23 @@ const buildReadinessViewModel = (snapshot: SnapshotState): TodayViewModel["readi
   };
 };
 
-const buildDataStatusViewModel = (snapshot: SnapshotState): TodayViewModel["dataStatus"] => {
-  if (snapshot.status === "insufficient" || snapshot.status === "error") {
+const buildDataStatusViewModel = (
+  recordSummary: TodayViewModel["recordSummary"],
+): TodayViewModel["dataStatus"] => {
+  if (!recordSummary.data) {
     return {
-      state: snapshot.status,
+      state: recordSummary.state,
       data: null,
-      message: readinessMessageFromSnapshot(snapshot),
-      action: snapshot.status === "error"
-        ? { label: "재계산", href: "/record" }
-        : { label: "기록 시작", href: "/record" },
+      message: recordSummary.message ?? "오늘 기록을 불러오지 못했어요",
+      action: recordSummary.action,
     };
   }
 
-  const basis = snapshot.result.dataBasis;
-  const missing = basis.missingFields.map((field) => missingFieldLabel(field));
+  const missing = recordSummary.data
+    .filter((item) => item.presence !== "completed")
+    .map((item) => item.label);
   const completedCategories = 7 - missing.length;
-  const state: DisplayState = missing.length > 0 ? "insufficient" : snapshot.status === "stale" ? "stale" : "ready";
+  const state: DisplayState = missing.length > 0 ? "insufficient" : "ready";
 
   return {
     state,
@@ -310,9 +297,9 @@ const buildDataStatusViewModel = (snapshot: SnapshotState): TodayViewModel["data
       missingLabels: missing,
     },
     message: missing.length === 0
-      ? `데이터 기준 7개 항목 중 ${completedCategories}개 충족`
-      : `${missing.length}개 항목을 더 채우면 분석 정확도가 올라가요`,
-    action: null,
+      ? "오늘 기록은 모두 저장됐어요. 분석 신뢰도는 최근 최대 14일의 누적 기록으로 조정돼요."
+      : `${missing.length}개 항목을 더 기록하면 오늘 기록 상태가 완성돼요`,
+    action: completedCategories === 0 ? recordSummary.action : null,
   };
 };
 
@@ -506,13 +493,13 @@ const buildRecordSummary = async (db: PrismaAnalysisClient, scope: UserScope, lo
   ]);
 
   const rows: ReadonlyArray<RecordSummaryItem> = [
-    { type: "caffeine", label: "카페인", presence: toEntryPresence(Boolean(caffeine)), href: "/record/caffeine?step=brand" },
-    { type: "alcohol", label: "음주", presence: toEntryPresence(Boolean(alcohol)), href: "/record/alcohol?step=type" },
-    { type: "meal", label: "식사", presence: toEntryPresence(Boolean(meal)), href: "/record/meal-health?step=meal" },
-    { type: "exercise", label: "운동", presence: toEntryPresence(Boolean(exercise)), href: "/record/meal-health?step=exercise-and-wellness" },
-    { type: "sleep", label: "수면", presence: toEntryPresence(Boolean(sleep)), href: "/record/sleep-phone?step=sleep" },
-    { type: "phone-usage", label: "휴대폰", presence: toEntryPresence(Boolean(phone)), href: "/record/sleep-phone?step=phone" },
-    { type: "wellness", label: "컨디션", presence: toEntryPresence(Boolean(wellness)), href: "/record/meal-health?step=exercise-and-wellness" },
+    { type: "caffeine", label: "카페인", presence: toEntryPresence(Boolean(caffeine)), href: "/record/caffeine?step=brand&mode=create" },
+    { type: "alcohol", label: "음주", presence: toEntryPresence(Boolean(alcohol)), href: "/record/alcohol?step=type&mode=create" },
+    { type: "meal", label: "식사", presence: toEntryPresence(Boolean(meal)), href: "/record/meal-health?step=meal&focus=meal&mode=create" },
+    { type: "exercise", label: "운동", presence: toEntryPresence(Boolean(exercise)), href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
+    { type: "sleep", label: "수면", presence: toEntryPresence(Boolean(sleep)), href: "/record/sleep-phone?step=sleep&focus=sleep&mode=create" },
+    { type: "phone-usage", label: "휴대폰", presence: toEntryPresence(Boolean(phone)), href: "/record/sleep-phone?step=phone&focus=phone&mode=create" },
+    { type: "wellness", label: "컨디션", presence: toEntryPresence(Boolean(wellness)), href: "/record/meal-health?step=exercise-and-wellness&focus=exercise&mode=create" },
   ];
 
   const completed = rows.filter((item) => item.presence === "completed").length;
@@ -644,7 +631,7 @@ export const getTodayViewModel = async (
   return {
     localDate,
     readiness: buildReadinessViewModel(analysisState),
-    dataStatus: buildDataStatusViewModel(analysisState),
+    dataStatus: buildDataStatusViewModel(recordSummary),
     preparationTimeline: buildPreparationTimeline(preparationSource, clock, scope.timezone),
     recordSummary,
     hasRerouteAdvice: rerouteAdvice !== null,

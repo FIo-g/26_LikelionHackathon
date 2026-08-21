@@ -8,9 +8,9 @@
 
 ## Runtime logging
 
-Operational logs may contain only fixed event names, outcome classes, and rounded durations. They must never include user IDs, email addresses, session IDs, database identifiers, prompts, model input/output bodies, API keys, tokens, narration IDs, analysis IDs, plan IDs, record content, or exported data. Error reporting integrations must use the same allowlist and disable request-body capture.
+Operational logs may contain only fixed event names, outcome classes, fixed failure-reason classes, and rounded durations. They must never include user IDs, email addresses, session IDs, database identifiers, prompts, model input/output bodies, API keys, tokens, narration IDs, analysis IDs, plan IDs, record content, or exported data. Error reporting integrations must use the same allowlist and disable request-body capture.
 
-The narration runtime emits the fixed `narration_generation` event with only `ready` or `template-fallback` and a duration. It intentionally omits all target and narration identifiers.
+The narration runtime emits the fixed `narration_generation` event with `ready` or `template-fallback` and a duration. A fallback can additionally include one of `provider-unavailable`, `timeout`, `invalid-output`, `unsupported-claim`, `provider-refusal`, or `provider-error`; it intentionally omits all target and narration identifiers.
 
 ## Release and migration boundaries
 

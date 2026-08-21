@@ -10,6 +10,9 @@ export type RecordType =
 type MealSize = "small" | "medium" | "large";
 type Intensity = "low" | "medium" | "high";
 
+export const alcoholMeasurementUnits = ["glass", "can", "bottle", "other"] as const;
+export type AlcoholMeasurementUnit = (typeof alcoholMeasurementUnits)[number];
+
 export type CreateRecordInput = (
   | {
     type: "sleep";
@@ -30,6 +33,7 @@ export type CreateRecordInput = (
     type: "alcohol";
     alcoholType: string;
     servings: number;
+    measurementUnit: AlcoholMeasurementUnit;
     consumedAt: Date;
     timezone: string;
   }
@@ -66,11 +70,25 @@ export type CreateRecordInput = (
 
 export type UpdateRecordInput = CreateRecordInput;
 
-export type RecordEntity = Readonly<CreateRecordInput & {
+type RecordEntityMetadata = {
   id: string;
   userId: string;
   localDate: string;
-}>;
+};
+
+/**
+ * `measurementUnit` was added after alcohol records already existed.  New
+ * mutations require a known unit, while persisted legacy records remain
+ * readable as `null` until the user explicitly updates them.
+ */
+type LegacyCompatibleAlcoholRecord = Omit<Extract<CreateRecordInput, { type: "alcohol" }>, "measurementUnit"> & {
+  measurementUnit: AlcoholMeasurementUnit | null;
+};
+
+export type RecordEntity = Readonly<
+  | (Exclude<CreateRecordInput, { type: "alcohol" }> & RecordEntityMetadata)
+  | (LegacyCompatibleAlcoholRecord & RecordEntityMetadata)
+>;
 
 export type SerializedRecord = Readonly<{
   id: string;

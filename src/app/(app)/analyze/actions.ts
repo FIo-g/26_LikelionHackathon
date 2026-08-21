@@ -8,9 +8,11 @@ import { getPrismaClient } from "@/shared/db/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { retryNarration } from "@/modules/narration/application/generate-narration";
+import { attemptCurrentAnalysisNarration } from "@/modules/narration/application/attempt-current-analysis-narration";
 import { createOpenAiNarrationProvider } from "@/modules/narration/infrastructure/openai-narration-provider";
 import { createPrismaNarrationRepository } from "@/modules/narration/infrastructure/prisma-narration-repository";
 import type { TransactionClient } from "@/shared/db/transaction";
+import { systemClock } from "@/shared/time/system-clock";
 
 export type CaffeineWhatIfActionState =
   | Readonly<{ status: "idle" }>
@@ -26,6 +28,7 @@ export type CaffeineWhatIfActionState =
 export type NarrationRetryActionState =
   | Readonly<{ status: "idle" }>
   | Readonly<{ status: "success"; message: string }>
+  | Readonly<{ status: "fallback"; message: string; narrationId?: string }>
   | Readonly<{ status: "error"; message: string }>;
 
 export const previewCaffeineWhatIfAction = async (
@@ -80,10 +83,61 @@ export const retryNarrationAction = async (
       provider: createOpenAiNarrationProvider(),
       repository,
     });
-    if (!retried) return { status: "error", message: "이 리포트는 더 이상 다시 시도할 수 없어요." };
+    if (retried === "unavailable") {
+      return { status: "fallback", message: "AI 리포트가 현재 연결되지 않아 기본 리포트를 유지하고 있어요." };
+    }
+    if (retried === "not-retryable") return { status: "error", message: "이 리포트는 더 이상 다시 시도할 수 없어요." };
+    if (retried === "template-fallback") {
+      return { status: "fallback", message: "AI 리포트를 다시 준비하지 못해 기본 리포트를 유지했어요. 잠시 후 다시 시도해 주세요." };
+    }
     revalidatePath("/analyze");
-    return { status: "success", message: "리포트를 다시 준비했어요." };
+    return { status: "success", message: "AI 리포트를 다시 작성했어요." };
   } catch {
     return { status: "error", message: "리포트를 다시 준비하지 못했어요. 잠시 후 다시 시도해 주세요." };
+  }
+};
+
+export const attemptNarrationAction = async (
+  _previousState: NarrationRetryActionState,
+  _formData: FormData,
+): Promise<NarrationRetryActionState> => {
+  void _previousState;
+  void _formData;
+  try {
+    const scope = await requireUserScope();
+    const db = getPrismaClient();
+    const outcome = await attemptCurrentAnalysisNarration(scope, {
+      clock: systemClock,
+      analysisRepository: createAnalysisRepository(db, scope),
+      narrationDependencies: {
+        provider: createOpenAiNarrationProvider(),
+        repository: createPrismaNarrationRepository(db as TransactionClient, scope),
+      },
+    });
+
+    if (outcome.status === "not-available") {
+      return { status: "error", message: "현재 분석 결과가 없어 AI 리포트를 준비할 수 없어요." };
+    }
+    if (outcome.status === "template-fallback") {
+      return {
+        status: "fallback",
+        message: "AI 리포트를 준비하지 못해 기본 리포트를 준비했어요. 잠시 후 다시 시도해 주세요.",
+        narrationId: outcome.narrationId,
+      };
+    }
+    if (outcome.status === "unavailable") {
+      return {
+        status: "fallback",
+        message: "AI 리포트가 현재 연결되지 않아 기본 리포트를 준비했어요.",
+        narrationId: outcome.narrationId,
+      };
+    }
+    revalidatePath("/analyze");
+    if (outcome.status === "ready") {
+      return { status: "success", message: "AI 리포트를 준비했어요." };
+    }
+    return { status: "success", message: "리포트 상태를 새로고침했어요." };
+  } catch {
+    return { status: "error", message: "리포트를 준비하지 못했어요. 잠시 후 다시 시도해 주세요." };
   }
 };

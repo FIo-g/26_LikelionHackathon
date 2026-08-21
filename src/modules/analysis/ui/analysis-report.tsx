@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useActionState } from "react";
 import { ScheduleAdviceCard } from "@/modules/planner/ui/schedule-advice-card";
-import { retryNarrationAction, type NarrationRetryActionState } from "@/app/(app)/analyze/actions";
+import { attemptNarrationAction, retryNarrationAction, type NarrationRetryActionState } from "@/app/(app)/analyze/actions";
 import type { AnalyzeViewModel, ReportViewModel } from "../application/get-analyze-view-model";
 import { CaffeineProfile } from "./caffeine-profile";
 import { DataBasisPanel } from "./data-basis-panel";
@@ -24,13 +24,22 @@ const hasAiNarration = (report: ReportViewModel) => report.status === "ready";
 export const AnalysisReport = ({
   report,
   narration,
+  attemptAvailable = false,
 }: {
   report: ReportViewModel;
   narration?: Readonly<{ id: string; retryAvailable: boolean }> | null;
+  attemptAvailable?: boolean;
 }) => {
   const [retryState, retryAction, retryPending] = useActionState(retryNarrationAction, initialRetryState);
+  const [attemptState, attemptAction, attemptPending] = useActionState(attemptNarrationAction, initialRetryState);
   const isAiNarration = hasAiNarration(report);
   const reportLabel = isAiNarration ? "AI 분석 리포트" : "분석 리포트";
+  const canAttemptNarration = attemptAvailable && narration === null && report.status === "template-fallback";
+  const retryNarrationId = narration?.retryAvailable
+    ? narration.id
+    : attemptState.status === "fallback"
+      ? attemptState.narrationId
+      : undefined;
 
   return (
     <section aria-labelledby="analysis-report-title" className={styles.reportSection}>
@@ -40,11 +49,38 @@ export const AnalysisReport = ({
       {isAiNarration ? <span className={styles.reportAiSource}>AI 서술</span> : null}
       <span aria-hidden="true" className={styles.reportBasis}>계산 결과 기반</span>
       <ul>{report.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>
-      {narration?.retryAvailable ? (
-        <form action={retryAction} aria-busy={retryPending}>
-          <input name="narrationId" type="hidden" value={narration.id} />
-          <button disabled={retryPending} type="submit">{retryPending ? "다시 준비 중" : "리포트 다시 시도"}</button>
-          {retryState.status !== "idle" ? <p aria-live="polite" role={retryState.status === "error" ? "alert" : undefined}>{retryState.message}</p> : null}
+      {attemptState.status !== "idle" ? (
+        <p
+          aria-live="polite"
+          className={styles.retryMessage}
+          data-status={attemptState.status}
+          role={attemptState.status === "error" ? "alert" : undefined}
+        >
+          {attemptState.message}
+        </p>
+      ) : null}
+      {retryNarrationId ? (
+        <form action={retryAction} aria-busy={retryPending} className={styles.retryForm}>
+          <input name="narrationId" type="hidden" value={retryNarrationId} />
+          <button className={styles.retryButton} disabled={retryPending} type="submit">
+            {retryPending ? "다시 준비 중" : "리포트 다시 시도"}
+          </button>
+          {retryState.status !== "idle" ? (
+            <p
+              aria-live="polite"
+              className={styles.retryMessage}
+              data-status={retryState.status}
+              role={retryState.status === "error" ? "alert" : undefined}
+            >
+              {retryState.message}
+            </p>
+          ) : null}
+        </form>
+      ) : canAttemptNarration ? (
+        <form action={attemptAction} aria-busy={attemptPending} className={styles.retryForm}>
+          <button className={styles.retryButton} disabled={attemptPending} type="submit">
+            {attemptPending ? "AI 리포트 준비 중" : "AI 리포트 시도"}
+          </button>
         </form>
       ) : null}
       <p className={styles.disclaimer}>초기 추정 모델이며 의료 진단이 아닙니다.</p>
@@ -88,7 +124,11 @@ export const AnalyzeScreen = ({ viewModel }: { viewModel: AnalyzeViewModel }) =>
       </header>
       <div className={styles.primaryLayout}>
         <MetricGrid metrics={viewModel.metrics} variant="mobile-summary" />
-        <AnalysisReport narration={viewModel.narration} report={viewModel.report} />
+        <AnalysisReport
+          attemptAvailable={viewModel.state === "ready" && viewModel.narration === null}
+          narration={viewModel.narration}
+          report={viewModel.report}
+        />
       </div>
       <aside aria-hidden="true" className={styles.mobileExplainabilityVisual}>
         <Image alt="" height={92} src="/assets/lunar-rabbit/rabbit-face.png" width={92} />

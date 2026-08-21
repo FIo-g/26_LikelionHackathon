@@ -2,7 +2,12 @@ import { z } from "zod";
 import { Temporal } from "@js-temporal/polyfill";
 
 import type { Clock } from "@/shared/domain/contracts";
-import type { CreateRecordInput, RecordType, UpdateRecordInput } from "./types";
+import {
+  alcoholMeasurementUnits,
+  type CreateRecordInput,
+  type RecordType,
+  type UpdateRecordInput,
+} from "./types";
 
 const MAX_SESSION_MINUTES = 1_440;
 const MIN_SESSION_MINUTES = 0;
@@ -121,6 +126,7 @@ const alcoholSchema = (clock: Clock) => z.object({
   type: z.literal("alcohol"),
   alcoholType: z.string().trim().min(1).max(80),
   servings: z.number().min(0.25).max(20),
+  measurementUnit: z.enum(alcoholMeasurementUnits),
   consumedAt: dateSchema,
   timezone: timezoneSchema,
 }).strict().superRefine((value, context) => {

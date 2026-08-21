@@ -32,10 +32,40 @@
 .status_ready { color: #207657; font-size: 13px; font-weight: 700; }
 .status_stale { color: #8b6615; font-size: 13px; font-weight: 700; }
 .status_insufficient, .status_error { color: #687189; font-size: 13px; font-weight: 700; }
+.reportSection {
+  /* Narration can contain a long URL, number, or unspaced token. Let the grid
+     item shrink and wrap it instead of widening the mobile viewport. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .reportSection p { color: #59627e; line-height: 1.6; }
 .reportBasis { display: none; }
 .reportAiSource { display: inline-block; margin-right: 6px; padding: 6px 12px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 11px; font-weight: 800; }
 .reportSection li { margin: 8px 0; }
+.retryForm { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.retryButton {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border: 1px solid #653374;
+  border-radius: 12px;
+  background: #653374;
+  box-shadow: 0 4px 12px rgb(38 18 56 / 15%);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.retryButton:hover:not(:disabled) { background: #704480; }
+.retryButton:focus-visible { outline: 3px solid rgb(95 52 111 / 25%); outline-offset: 3px; }
+.retryButton:disabled { cursor: wait; opacity: .65; }
+.retryMessage { flex: 1 1 180px; margin: 0; padding: 8px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; line-height: 1.45; }
+.retryMessage[data-status="success"] { color: #39725f; background: #e3f3ed; }
+.retryMessage[data-status="fallback"] { color: #9d541d; background: #fff0dc; }
+.retryMessage[data-status="error"] { color: #9f3949; background: #fff0f2; }
 .disclaimer { margin-top: 20px; padding-top: 14px; border-top: 1px solid #e4e8f5; font-size: 13px; }
 .desktopDetails { max-width: 1080px; margin: 18px auto 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .sectionHeading { margin-bottom: 16px; }
@@ -395,12 +425,22 @@
     box-shadow: 0 8px 20px rgba(38, 18, 56, .12);
     color: #ffffff;
   }
+  .reportSection ul,
+  .reportSection form { min-width: 0; }
   .reportSection .eyebrow { margin-bottom: 12px; color: #ffffff; font-size: 11px; letter-spacing: -0.02em; }
   .reportSection h2 { color: #ffffff; font-size: 20px; line-height: 1.45; letter-spacing: -0.055em; }
   .reportSection p { color: #f0e4f5; font-size: 11px; line-height: 1.55; }
   .reportSection .reportBasis { display: inline-block; margin-top: 10px; padding: 5px 18px; border-radius: 999px; background: #f0e9f5; color: #5f346f; font-size: 11px; font-weight: 800; }
   .reportSection .reportAiSource { display: inline-block; margin-top: 10px; padding: 5px 18px; border-radius: 999px; background: rgba(255, 255, 255, .18); color: #ffffff; font-size: 11px; font-weight: 800; }
   .reportSection ul { margin: 10px 0 0; padding-left: 18px; color: #eee3f3; font-size: 11px; line-height: 1.5; }
+  .reportSection .retryForm { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 14px; }
+  .reportSection .retryButton { width: 100%; min-height: 40px; border-color: #fff1d7; background: #fff4d9; color: #5f346f; box-shadow: 0 4px 12px rgb(38 18 56 / 16%); }
+  .reportSection .retryButton:hover:not(:disabled) { background: #ffffff; }
+  .reportSection .retryButton:focus-visible { outline-color: rgb(255 244 217 / 80%); }
+  .reportSection .retryMessage { padding: 8px 10px; font-size: 11px; }
+  .reportSection .retryMessage[data-status="success"] { color: #d8f0e4; background: rgb(34 105 78 / 46%); }
+  .reportSection .retryMessage[data-status="fallback"] { color: #fff2c9; background: rgb(130 83 24 / 46%); }
+  .reportSection .retryMessage[data-status="error"] { color: #ffe4e7; background: rgb(123 44 59 / 46%); }
   .reportSection .disclaimer { color: #e8ddea; border-color: rgba(255, 255, 255, .18); }
   .mobileExplainabilityVisual {
     position: relative;

@@ -93,7 +93,7 @@ export const TodayScreen = ({ viewModel }: TodayScreenProps) => {
           <aside className={styles.mobileInputHint}>
             <strong>수면 입력은 어젯밤 기준</strong>
             <p>기상 후 직접 기록하면 오늘 분석에 반영돼요.</p>
-            <Link href="/record/sleep-phone?step=sleep">수면 기록하기</Link>
+            <Link href="/record/sleep-phone?step=sleep&focus=sleep&mode=create">수면 기록하기</Link>
           </aside>
           <RecordStatusSummary viewModel={viewModel.recordSummary} />
         </section>
