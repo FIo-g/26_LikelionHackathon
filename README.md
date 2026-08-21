@@ -1,87 +1,103 @@
-# 26_LikelionHackathon
+# Sleep Loop
 
-## Task 3 진행 상황 (Prisma + Better Auth 연동)
+Sleep Loop는 수면 기록과 생활 습관을 바탕으로 오늘 밤의 준비와 다음 수면 계획을 제안하는 Adaptive Sleep Planner입니다. 사용자가 직접 입력한 데이터를 중심으로 수면 준비도, 분석 근거, 루틴을 한 흐름에서 확인할 수 있도록 설계했습니다.
 
-- 상태: 완료 (로컬 검증 기준)
-- 작업 범위: `better-auth`, `@better-auth/prisma-adapter`, `@prisma/client`, `prisma` 및 관련 설정/어댑터를 최신 버전 기준으로 정렬
-- 적용 변경:
-  - `src/shared/db/database-provider.ts`
-  - `src/shared/db/prisma.ts`
-  - `src/shared/auth/auth-origin.ts`
-  - `src/shared/auth/auth.ts`
-  - `src/shared/auth/auth-client.ts`
-  - `src/shared/config/env.ts`
-  - `src/app/api/auth/[...all]/route.ts`
-- `prisma/schema.prisma` 및 `prisma.config.ts`
-  - `.env.example`
-- 테스트 실행:
-- `npm run test:run tests/unit/database-provider.test.ts`
-- `npm run test:run tests/unit/auth-origin.test.ts`
-- `npm run test:run tests/unit/database-provider.test.ts tests/unit/auth-origin.test.ts tests/integration/auth-handler.test.ts`
-- 비고: `db:schema`/`verify` 스크립트는 현재 저장소에 스크립트 파일이 없어 실행되지 못함(파일 미존재 상태)
+## 해결하려는 문제
 
-## 최신 의존성 반영
+수면에 영향을 주는 카페인, 음주, 식사, 운동, 휴대폰 사용과 수면 시간을 여러 곳에 따로 기록하면 오늘 무엇을 바꿔야 하는지 판단하기 어렵습니다. Sleep Loop는 기록을 사용자별로 저장하고, 시간대와 수면 목표를 기준으로 오늘의 상태를 계산해 실행 가능한 다음 행동으로 연결합니다.
 
-- `npm update` 실행 후 `npm outdated`가 빈 결과(`{}`)로 확인됨
-- `package.json` 및 `package-lock.json`에 최신 버전이 반영됨
+## 주요 사용자 흐름
 
-## Task 21 품질 게이트
+1. `/` 접속 시 세션이 없으면 로그인 화면으로 이동합니다.
+2. 새 사용자는 회원가입 후 Basic profile → Habits → Sleep goal → Connect 온보딩을 완료합니다. 각 단계의 입력은 사용자 계정에 저장되며, 완료 후 Today로 이동합니다.
+3. 기존 사용자는 로그인 후 `/today`에서 오늘의 준비도와 기록 상태를 확인합니다.
+4. `/record`에서 수면·카페인·음주·식사·운동·휴대폰 사용·주관적 컨디션을 추가·수정·삭제합니다.
+5. `/plan`에서 수면 목표와 주요 일정을 확인하고, 일정 변경에 따른 조정 제안을 반영합니다.
+6. `/analyze`에서 지표·추세·영향 요인·데이터 근거와 AI 설명 리포트를 확인합니다.
+7. `/care`에서 오늘 밤 루틴과 호흡·백색소음·수면 가이드 도구를 실행합니다.
+8. `/account`에서 프로필·수면 목표·연결 상태를 관리하고 데이터 내보내기·삭제를 요청할 수 있습니다.
 
-시각 회귀와 접근성 검증은 일반 개발 DB를 절대 사용하지 않습니다. 시각 테스트는 `ADAPTIVE_SLEEP_E2E_DATABASE_URL`에 `file:` 기반의 전용 `e2e` 또는 `playwright` SQLite URL을 설정하고, 해당 DB에 필요한 스키마를 준비한 뒤에만 실행합니다.
+## 구현 기능
 
-계획된 검증 순서:
+- 이메일·비밀번호 인증, 세션 기반 보호 라우트, 사용자별 데이터 소유권 검증
+- 중단 후에도 이어지는 4단계 온보딩과 IANA 시간대 기반 날짜·시간 처리
+- 직접 입력 기록의 생성·수정·삭제, 중복 요청 방지용 mutation receipt, 기록 변경에 따른 분석 재계산
+- Today의 Readiness, Confidence, 당일 데이터 상태, 기록 요약, 준비 타임라인
+- 2주 수면 계획, 주요 일정, What-if 미리보기, 일정 조정 제안과 반영 이력
+- 카페인 프로필·수면 추세·영향 요인·설명 가능성·데이터 기준을 포함한 Analyze 화면
+- 규칙 엔진 결과를 기준으로 하는 OpenAI 분석 내레이션
+- Care 루틴 상태 관리, 호흡 가이드·백색소음·수면 가이드 세션 기록
+- Account의 프로필·목표 수정, 데이터 export와 계정 삭제 경계
+- 데스크톱 사이드바와 모바일 하단 내비게이션을 사용하는 반응형 AppShell
+
+## 기술 스택
+
+- Next.js 16 App Router, React 19, TypeScript strict mode
+- Prisma 7, PostgreSQL runtime, SQLite local/contract test, 명시적 driver adapter
+- Better Auth 1.7, Zod, Temporal polyfill
+- Vitest, Testing Library, Playwright, axe-core
+- CSS Modules 및 공통 디자인 토큰
+- OpenAI API: 서버 전용 분석 내레이션 provider
+- 패키지 관리자: npm (`package-lock.json`을 단일 lockfile로 사용)
+
+## 아키텍처
+
+애플리케이션은 Next.js App Router 기반 모듈형 모놀리스이며, 다음 의존 방향을 유지합니다.
+
+```text
+UI → application use case → domain rule → repository interface → Prisma
+```
+
+UI는 Figma 기반 화면과 사용자 입력을 담당하고, application 계층은 세션·검증·transaction 경계를 조정합니다. domain 계층은 준비도·분석·계획·Care 계산을 순수 규칙으로 제공하며, repository 계층이 사용자 범위의 저장·조회 계약을 Prisma와 연결합니다. 인증은 Better Auth, AI 설명은 서버 전용 OpenAI provider가 담당합니다.
+
+기능 모듈은 `auth`, `onboarding`, `records`, `baseline`, `analysis`, `planner`, `narration`, `care`, `account`로 나뉘어 각 사용자 행동과 데이터 경계를 분리합니다.
+
+## 로컬 실행
+
+Node.js `>=22.13 <25`와 npm이 필요합니다.
 
 ```bash
-npm run test:visual
-npm exec -- playwright test tests/e2e/accessibility.spec.ts --project=chromium
-npm run test:run
+npm ci
+cp .env.example .env
+# .env에 아래 환경 변수의 실제 개발용 값을 입력
+npm exec -- prisma generate
+npm run dev
+```
+
+필수 runtime 환경 변수 이름은 다음과 같습니다. 실제 값과 비밀키는 저장소에 커밋하지 않습니다.
+
+```text
+DATABASE_URL
+BETTER_AUTH_SECRET
+BETTER_AUTH_URL
+AUTH_RATE_LIMIT_ENABLED
+OPENAI_API_KEY
+OPENAI_MODEL
+```
+
+## 품질 검증
+
+주요 로컬 게이트는 다음 명령으로 실행합니다.
+
+```bash
 npm run lint
 npm run typecheck
+npm run test:run
+npm run verify:auth-schema
 npm run build
 ```
 
-`test:visual`은 `VISUAL_TEST=1`과 전용 DB URL을 요구하고, 프레임마다 `.invalid` 도메인의 고유 Better Auth 사용자를 만든 뒤 그 사용자 행만 시드합니다. 시드 작업은 User, Account, Session을 삭제하지 않습니다. 외부 네트워크와 OpenAI 브라우저 요청은 차단되며, 폰트는 CDN이 아니라 설치된 `pretendard` 패키지에서 로드됩니다.
+각 명령은 저장소의 unit, component, integration, schema, build 품질 게이트를 실행합니다.
 
-GitHub Actions의 `visual-tests` environment에는 사전 마이그레이션된 전용 DB를 가리키는 `ADAPTIVE_SLEEP_E2E_DATABASE_URL` variable이 필요합니다. 이 게이트는 수동 실행에서만 활성화됩니다.
+## 저장소 구조
 
-스크린샷 기준선은 일반 CI에서 자동 생성하지 않습니다. 기준선 후보를 만들 때만 수동 `visual-tests` workflow의 `visual_mode=capture` 또는 아래 명령을 사용하고, 생성된 파일을 시각 검토 후 커밋합니다.
-
-```bash
-npm run test:visual -- --update-snapshots
-```
-
-커밋된 기준선이 존재한 뒤에는 수동 workflow의 `visual_mode=compare`가 `npm run test:visual`로 엄격 비교합니다.
-
-## Task 22 deployment readiness
-
-The canonical Prisma schema targets PostgreSQL. The archived SQLite history is retained under `prisma/migrations-sqlite/` only for local parity work; production uses the clean PostgreSQL history in `prisma/migrations/`. Runtime `DATABASE_URL` must be the provider's pooled serverless endpoint.
-
-Deployment monitoring uses `GET /api/health` only for liveness and `GET /api/ready` for bounded PostgreSQL readiness. The readiness response is deliberately generic and non-cacheable; details are documented in `docs/operations.md` and are never exposed by the endpoint.
-
-`scripts/verify-migrations.ts` refuses every target except `postgresql://...@(127.0.0.1|localhost)/planner_test?schema=migration_verification`. It verifies the PostgreSQL lock, migration safety, and all release CHECK constraints before applying anything. The CI matrix uses disposable SQLite and PostgreSQL contract databases and an isolated PostgreSQL `e2e_browser` schema for browser tests.
-
-Required deployment environment values, to be supplied only during external setup:
-
-```bash
-DATABASE_URL=postgresql://...pooled-serverless-endpoint...
-BETTER_AUTH_SECRET=<at-least-32-random-bytes>
-BETTER_AUTH_URL=https://<exact-preview-or-production-origin>
-AUTH_RATE_LIMIT_ENABLED=true
-OPENAI_API_KEY=<server-only-key>
-OPENAI_MODEL=gpt-5.6-luna
-```
-
-Do not run migrations from a Vercel request, Vercel build, or runtime environment. Keep `MIGRATION_DATABASE_URL` only in the separately approved `guarded database migration` workflow/secret context (see `.env.migration.example` and `docs/operations.md`), then run `prisma migrate deploy` there before release promotion. The `preview release` workflow validates runtime values without logging them, builds, deploys, and passes the exact HTTPS `.vercel.app` URL returned by Vercel to the remote-only production smoke project. Before production, verify the database provider snapshot, deploy compatible application code, and use forward corrective migrations rather than destructive rollback.
-
-Planned validation, deliberately not run in this task:
-
-```bash
-npm run db:schema -- --provider sqlite
-DATABASE_URL=file:./prisma/contract.db npm exec -- prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL=file:./prisma/contract.db npm run test:run tests/integration/database-contract.test.ts
-docker compose -f docker-compose.test.yml up -d postgres
-npm run db:schema -- --provider postgresql
-DATABASE_URL=postgresql://planner:planner@127.0.0.1:5432/planner_test npm exec -- prisma generate --schema prisma/schema.active.prisma
-DATABASE_URL='postgresql://planner:planner@127.0.0.1:5432/planner_test?schema=migration_verification' npm run verify:migrations
-npm run lint && npm run typecheck && npm run test:run && npm run test:visual && npm run build
+```text
+src/app/                 App Router 페이지, Server Action, API route
+src/modules/             auth/onboarding/records/analysis/planner/care/account 모듈
+src/shared/               인증, DB, 시간, 공통 UI와 설정
+prisma/                  canonical schema와 데이터 모델
+tests/                   unit, component, integration, E2E, accessibility 테스트
+scripts/                 schema 준비, fixture와 개발·테스트 helper
+docs/                    제품 명세, 구현 계획, 운영 문서
+.github/workflows/       CI와 quality workflow
 ```
