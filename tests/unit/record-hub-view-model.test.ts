@@ -136,7 +136,7 @@ describe("getRecordHub", () => {
     );
   });
 
-  it("selects and restores an alcohol measurement unit in the edit draft", async () => {
+  it("keeps the alcohol hub compatible with records that predate measurement units", async () => {
     const prisma = emptyPrisma();
     prisma.alcoholEntry.findMany.mockResolvedValue([
       {
@@ -144,7 +144,6 @@ describe("getRecordHub", () => {
         updatedAt: new Date("2026-08-21T12:00:00.000Z"),
         alcoholType: "맥주",
         servings: 2,
-        measurementUnit: "can",
         consumedAt: new Date("2026-08-21T20:00:00.000Z"),
         dailyLog: { localDate: "2026-08-21" },
       },
@@ -171,14 +170,17 @@ describe("getRecordHub", () => {
             },
           },
         },
-        select: expect.objectContaining({ measurementUnit: true }),
+        select: expect.not.objectContaining({ measurementUnit: true }),
       }),
     );
     expect(alcohol?.editDraft?.values).toMatchObject({
       recordId: "alcohol-1",
       alcoholType: "맥주",
       servings: "2",
-      measurementUnit: "can",
+      // The amount step requires the person to select a unit before an edit
+      // can be saved, which also handles a database that has not yet received
+      // the additive measurementUnit migration.
+      measurementUnit: "",
     });
   });
 

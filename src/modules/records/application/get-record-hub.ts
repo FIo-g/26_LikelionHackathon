@@ -265,7 +265,6 @@ const loadCategories = async (
       selectCurrentRecords(client.alcoholEntry, dailyLogWhere, {
         alcoholType: true,
         servings: true,
-        measurementUnit: true,
         consumedAt: true,
         dailyLog: { select: { localDate: true } },
       }),
