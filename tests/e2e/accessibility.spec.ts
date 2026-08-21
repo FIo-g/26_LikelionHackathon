@@ -53,7 +53,7 @@ for (const width of [641, 767, 768]) {
     await setupE2eUser(page.request, testInfo, { seedPlan: true });
     await page.goto("/plan");
 
-    for (const label of ["Today", "Record", "Plan", "Analyze", "Care", "프로필 및 수면 목표"]) {
+    for (const label of ["Today", "Record", "Plan", "Analyze", "Care"]) {
       await expect(page.getByRole("link", { name: label }).filter({ visible: true })).toHaveCount(1);
     }
     await expect(page.getByRole("button", { name: "주요 일정 추가" })).toBeVisible();

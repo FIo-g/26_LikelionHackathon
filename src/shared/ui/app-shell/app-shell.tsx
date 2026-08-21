@@ -48,16 +48,16 @@ export const AppShell = ({ children, profileName = "내 프로필" }: Readonly<{
           width={240}
         />
       </div>
-      <Link aria-label="프로필 및 수면 목표" className={styles.lunarProfileLink} href="/account">
+      <div className={styles.lunarProfileLink}>
         <span aria-hidden="true" className={styles.lunarProfileMark}>토</span>
         <span>
           <strong>{profileName}</strong>
           <small>프로필 · 수면 목표</small>
         </span>
-      </Link>
+      </div>
     </aside>
     <div className={styles.content}>{children}</div>
-    <Link aria-label="프로필 및 수면 목표" className={styles.mobileProfileLink} href="/account">프로필</Link>
+    <span className={styles.mobileProfileLink}>프로필</span>
     <nav aria-label="모바일 주요 메뉴" className={styles.mobileNavigation}><NavigationLinks /></nav>
   </div>
 );
